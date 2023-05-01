@@ -11,11 +11,9 @@ class Main {
 
 	var ROOT:String = '';
 
-	var dirCount = 0;
-	var fileCount = 0;
-
 	var fileArr:Array<String> = [];
 	var dirArr:Array<String> = [];
+	var ignoreArr:Array<String> = ['.gitkeep', '.buildignore', '.gitignore', '.DS_Store',];
 
 	var startTime:Date;
 	var endTime:Date;
@@ -36,8 +34,8 @@ class Main {
 		// setupProject();
 		recursiveLoop(ROOT);
 
-		info('dirCount: $dirCount', 1);
-		info('fileCount: $fileCount', 1);
+		info('dirArr.length: ${dirArr.length}', 1);
+		info('fileArr.length: ${fileArr.length}', 1);
 		// info('ignoreArr: $ignoreArr', 1);
 
 		// do something clever
@@ -116,14 +114,20 @@ class Main {
 				if (!sys.FileSystem.isDirectory(path)) {
 					// file
 					// log("File found: " + path);
-					fileCount++;
-					fileArr.push(path);
+					var fileName = Path.withoutDirectory(path);
+					// log(ignoreArr.contains(fileName));
+
+					if (!ignoreArr.contains(fileName)) {
+						// log(fileName);
+						fileArr.push(path);
+					} else {
+						// log(fileName);
+					}
 
 					// log(Path.withoutDirectory(path));
 					// ignoreArr.push(Path.withoutDirectory(path));
 				} else {
 					// folder
-					dirCount++;
 					dirArr.push(path);
 					var directory = haxe.io.Path.addTrailingSlash(path);
 					recursiveLoop(directory);
