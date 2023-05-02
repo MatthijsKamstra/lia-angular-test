@@ -4,11 +4,7 @@ import sys.io.Process;
 using StringTools;
 
 class Main {
-	/**
-	 * 0.0.1 	initial release
-	 */
 	var VERSION:String = '0.0.1';
-
 	var ROOT:String = '';
 
 	var fileArr:Array<String> = [];
@@ -36,7 +32,8 @@ class Main {
 
 		info('dirArr.length: ${dirArr.length}', 1);
 		info('fileArr.length: ${fileArr.length}', 1);
-		// info('ignoreArr: $ignoreArr', 1);
+		info('fileArr.length: ${fileArr.length / 4}', 1);
+		info('ignoreArr: $ignoreArr', 1);
 
 		// do something clever
 
@@ -63,7 +60,7 @@ class Main {
 					// log(args[i + 1]);
 					writeOut();
 				case '-in', '-i':
-					log('root path: "${args[i + 1]}"');
+					log('ROOT path: "${args[i + 1]}"');
 					ROOT = args[i + 1];
 				default:
 					// trace("case '" + temp + "': trace ('" + temp + "');");
@@ -73,22 +70,7 @@ class Main {
 
 	function writeOut() {
 		var str = '# README\n\n**Generated on:** ${Date.now()}\n**Target:**';
-		writeFile(Sys.getCwd(), 'TESTME.MD', str);
-	}
-
-	/**
-	 * simply write the files
-	 * @param path 		folder to write the files (current assumption is `EXPORT`)
-	 * @param filename	(with extension) the file name
-	 * @param content	what to write to the file (in our case markdown)
-	 */
-	function writeFile(path:String, filename:String, content:String) {
-		if (!sys.FileSystem.exists(path)) {
-			sys.FileSystem.createDirectory(path);
-		}
-		// write the file
-		sys.io.File.saveContent(path + '/${filename}', content);
-		trace('written file: ${path}/${filename}');
+		SaveFile.writeFile(Sys.getCwd(), 'TESTME.MD', str);
 	}
 
 	// function init() {

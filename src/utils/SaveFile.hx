@@ -5,55 +5,30 @@ import haxe.io.Path;
 using StringTools;
 
 class SaveFile {
+	/**
+	 *
+	 *
+	 * @param path
+	 * @param str
+	 */
 	static public function out(path:String, str:String) {
 		// write the file
 		sys.io.File.saveContent(path, str);
 	}
 
 	/**
-	 * [Description]
-	 * @param path
-	 * @param map
+	 * simply write the files
+	 *
+	 * @param path 		folder to write the files
+	 * @param filename	(with extension) the file name
+	 * @param content	what to write to the file (in our case markdown)
 	 */
-	static public function stringMapArray(path:String, map:Map<String, Array<String>>) {
-		var str = '# ${Path.withoutDirectory(path)}\n\n';
-		str += 'Total paths: ${Lambda.count(map)}\n';
-		str += '\n';
-		for (key in map.keys()) {
-			var arr = map[key];
-			str += '## ${Path.withoutDirectory(key)}\n\n';
-			str += 'Path: `${stripPath(key)}`\n';
-			str += 'File: "${Path.withoutDirectory(key)}"\n\n';
-			// trace('$key is $arr years old');
-			for (i in 0...arr.length) {
-				var item = arr[i];
-				str += '- `${item}`\n';
-			}
-			str += '\n\n';
+	static public function writeFile(path:String, filename:String, content:String) {
+		if (!sys.FileSystem.exists(path)) {
+			sys.FileSystem.createDirectory(path);
 		}
 		// write the file
-		sys.io.File.saveContent(path, str);
-	}
-
-	/**
-	 * [Description]
-	 * @param path
-	 * @param arr
-	 */
-	public static function writeArray(path:String, arr:Array<Dynamic>) {
-		var str = '# ${Path.withoutDirectory(path)}\n\n';
-		str += 'Total files: ${arr.length}\n';
-		str += '\n';
-		for (i in 0...arr.length) {
-			var line:String = arr[i];
-			// remove whole path to make it more readable
-			str += '- ${stripPath(line)}\n';
-		}
-		// write the file
-		sys.io.File.saveContent(path, str);
-	}
-
-	public static function stripPath(path:String):String {
-		return path.replace('/Users/matthijskamstra/Documents/workingdir/Alliander/osgp-applications/public-lighting', '/public-lighting');
+		sys.io.File.saveContent(path + '/${filename}', content);
+		trace('written file: ${path}/${filename}');
 	}
 }
