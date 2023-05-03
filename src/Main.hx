@@ -51,15 +51,16 @@ class Main {
 		for (i in 0...args.length) {
 			var temp = args[i];
 			switch (temp) {
-				case '-v', '-version':
+				case '-v', '--version':
 					Sys.println('version: ' + VERSION);
-				case '-cd', '-folder': // isFolderSet = true;
-				case '-help', '-h':
+				case '-cd', '--folder': // isFolderSet = true;
+				case '-f', '--force': // isFolderSet = true;
+				case '--help', '-h':
 					showHelp();
-				case '-out', '-o':
+				case '--out', '-o':
 					// log(args[i + 1]);
 					writeOut();
-				case '-in', '-i':
+				case '--in', '-i':
 					log('ROOT path: "${args[i + 1]}"');
 					ROOT = args[i + 1];
 				default:
@@ -133,13 +134,15 @@ class Main {
 	}
 
 	function showHelp():Void {
-		Sys.println('------------------------------------------------
+		Sys.println('
+------------------------------------------------
 Lia-angular-test ($VERSION)
 
-	-version / -v   : version number
-	-help / -h      : show this help
-	-in / -i	    : path to project folder
-	-out / -o       : write readme (WIP)
+  --version / -v	: version number
+  --help / -h	: show this help
+  --in / -i	: path to project folder
+  --out / -o	: write readme (WIP)
+  --force / -f	: force overwrite
 ------------------------------------------------
 ');
 
