@@ -1,12 +1,10 @@
+import const.Config;
 import haxe.io.Path;
 import sys.io.Process;
 
 using StringTools;
 
 class Main {
-	var VERSION:String = '0.0.1';
-	var ROOT:String = '';
-
 	var fileArr:Array<String> = [];
 	var dirArr:Array<String> = [];
 	var ignoreArr:Array<String> = ['.gitkeep', '.buildignore', '.gitignore', '.DS_Store',];
@@ -16,34 +14,75 @@ class Main {
 
 	public function new(?args:Array<String>) {
 		// Sys.command('clear'); // will produce a `TERM environment variable not set.`
-		info('Start project: "${Project.NAME}"');
+		info('Start project: "${Project.NAME}", version: ${Config.VERSION}');
 		// check time
 		startTime = Date.now();
 
 		initArgs(args);
+		checkAngular();
 
-		if (ROOT == '')
+		if (Config.PATH == '')
 			return;
 
 		// initLog();
 		// init();
 		// setupProject();
-		recursiveLoop(ROOT);
+		if (!sys.FileSystem.isDirectory(Config.PATH)) {
+			// only one file, assume its good and push
+			fileArr.push(Config.PATH);
+		} else {
+			// it's a folder!
+			recursiveLoop(Config.PATH);
+		}
 
-		info('dirArr.length: ${dirArr.length}', 1);
-		info('fileArr.length: ${fileArr.length}', 1);
-		info('fileArr.length: ${fileArr.length / 4}', 1);
-		info('ignoreArr: $ignoreArr', 1);
+		mute('dirArr.length: ${dirArr.length}', 1);
+		mute('fileArr.length: ${fileArr.length}', 1);
+		// mute('fileArr.length: ${fileArr.length / 4}', 1);
+		mute('ignoreArr: $ignoreArr', 1);
 
 		// do something clever
+		convertFiletype();
 
 		// check time again
 		endTime = Date.now();
+
+		info('End project');
 		warn('Time to complete conversion: ${((endTime.getTime() - startTime.getTime()) / 1000)} sec');
+	}
+
+	function checkAngular() {
+		info('Check for angular.json in the root of the folder');
+	}
+
+	function convertFiletype() {
+		convertServices();
+	}
+
+	function convertServices() {
+		info('Convert existing services');
+
+		var serviceArr = [];
+		/**
+		 * convert services
+		 */
+		for (i in 0...fileArr.length) {
+			var file = fileArr[i];
+
+			// do this first
+			if (file.indexOf('.service.ts') != -1) {
+				mute('Convert Service: `${file.split('/src')[1]}`', 1);
+				convert.ConvertService.init(file);
+				serviceArr.push(file);
+				Progress.update(file);
+			}
+		}
+
+		info('serviceArr.length: ${serviceArr.length}');
 	}
 
 	function initArgs(?args:Array<String>) {
 		var args:Array<String> = args;
+		info('SETTINGS');
 
 		if (args.length == 0)
 			args.push('-h');
@@ -52,34 +91,35 @@ class Main {
 			var temp = args[i];
 			switch (temp) {
 				case '-v', '--version':
-					Sys.println('version: ' + VERSION);
-				case '-cd', '--folder': // isFolderSet = true;
-				case '-f', '--force': // isFolderSet = true;
+					Sys.println('Version: ' + Config.VERSION);
+				// case '-cd', '--folder': // isFolderSet = true;
+				case '-f', '--force':
+					mute('Config.IS_OVERWRITE = true', 1);
+					Config.IS_OVERWRITE = true;
+				case '-d', '--dryrun':
+					mute('Config.IS_DRYRUN = true', 1);
+					Config.IS_DRYRUN = true;
 				case '--help', '-h':
 					showHelp();
 				case '--out', '-o':
 					// log(args[i + 1]);
-					writeOut();
+					var str = '# README\n\n**Generated on:** ${Date.now()}\n**Target:**';
+					SaveFile.writeFile(Sys.getCwd(), 'TESTME.MD', str);
 				case '--in', '-i':
-					log('ROOT path: "${args[i + 1]}"');
-					ROOT = args[i + 1];
+					mute('Config.PATH: "${args[i + 1]}"', 1);
+					Config.PATH = args[i + 1];
 				default:
 					// trace("case '" + temp + "': trace ('" + temp + "');");
 			}
 		}
 	}
 
-	function writeOut() {
-		var str = '# README\n\n**Generated on:** ${Date.now()}\n**Target:**';
-		SaveFile.writeFile(Sys.getCwd(), 'TESTME.MD', str);
-	}
-
 	// function init() {
-	// 	Folder.ROOT_FOLDER = Sys.getCwd();
+	// 	Folder.PATH_FOLDER = Sys.getCwd();
 	// 	Folder.BIN = Path.join([Sys.getCwd(), 'bin']);
 	// 	Folder.DIST = Path.join([Sys.getCwd(), 'dist']);
 	// 	Folder.ASSETS = Path.join([Sys.getCwd(), 'assets']);
-	// 	// info('Folder.ROOT_FOLDER: ${Folder.ROOT_FOLDER}');
+	// 	// info('Folder.PATH_FOLDER: ${Folder.PATH_FOLDER}');
 	// 	// info(Folder.BIN);
 	// 	// info(Folder.DIST);
 	// 	// info('Folder.ASSETS: ${Folder.ASSETS}');
@@ -135,15 +175,16 @@ class Main {
 
 	function showHelp():Void {
 		Sys.println('
-------------------------------------------------
-Lia-angular-test ($VERSION)
+----------------------------------------------------
+Lia-angular-test (${Config.VERSION})
 
   --version / -v	: version number
-  --help / -h	: show this help
-  --in / -i	: path to project folder
-  --out / -o	: write readme (WIP)
-  --force / -f	: force overwrite
-------------------------------------------------
+  --help / -h		: show this help
+  --in / -i		: path to project folder
+  --out / -o		: write readme (WIP)
+  --force / -f		: force overwrite
+  --dryrun / -d		: run without writing files
+----------------------------------------------------
 ');
 
 	}

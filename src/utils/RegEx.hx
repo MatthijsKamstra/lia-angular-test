@@ -3,6 +3,18 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// angular/js class imports
+	public static var classImports = ~/import\s*.*/g;
+
+	// angular/js class constructor
+	public static var classConstructor = ~/constructor\s*\((\t|\n|\w|\s|:|,)*/g; // not the whole constructor, only the part with params
+
+	//
+	//
+	//
+	//
+	//
+	//
 	//
 	public static var jsVars = ~/\w*\s*:\s*\{(\t|\n|\r)*[^}]*}/g;
 
@@ -30,6 +42,8 @@ class RegEx {
 	// comment
 	public static final commentHTML = ~/<!--[\S\s]*?-->/g;
 	public static final commentJS = ~/(\/\*)(.|\r|\n)*?(\*\/)/g;
+	public static final commentJSLine = ~/(\/\/)[\S\s]*?/g;
+	public static final commentJSLine2 = ~/\/\*[\s\S]*?\*\/|\/\/.*/g;
 
 	// string literals
 	public static final templateLiterals = ~/\${[\S\s]*?}/g;

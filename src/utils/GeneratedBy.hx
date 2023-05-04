@@ -1,10 +1,21 @@
 package utils;
 
+import const.Config;
+
 class GeneratedBy {
 	static public function init(type:String) {
 		var message = "Generated file: ask Matthijs";
 		if (type == 'js' || type == 'ts') {
 			return '/* ${message} */';
+		} else {
+			return '<!-- ${message} -->';
+		}
+	}
+
+	static public function message(type:String) {
+		var message = '- WARNING: this is a generated test. \n- Most likely you need to change and update this file. \n- Generated on: ${Date.now().toString()}\n- Version: ${Config.VERSION}';
+		if (type == 'js' || type == 'ts') {
+			return '/*\n${message}\n*/';
 		} else {
 			return '<!-- ${message} -->';
 		}

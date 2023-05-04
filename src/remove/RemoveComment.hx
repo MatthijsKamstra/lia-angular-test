@@ -24,6 +24,18 @@ class RemoveComment {
 		}
 		// copyright comment removed
 		// }
+
+		commentReg = RegEx.commentJSLine2;
+		var matches = RegEx.getMatches(commentReg, content);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var match = matches[i];
+				// trace(match);
+				content = content.replace(match, '');
+			}
+		}
+
 		return content;
 	}
 
