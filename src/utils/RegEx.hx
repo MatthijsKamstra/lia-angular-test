@@ -3,6 +3,9 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// find something that is called URL/url
+	public static var hasURL = ~/(url|URL)(.)*/g;
+
 	// basic test to check for function (only used to check for total)
 	// extra check
 	public static var classFunction = ~/([a-z0-9]+)\((.*)\):/g;

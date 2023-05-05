@@ -1,5 +1,7 @@
 package convert;
 
+import Extract.FuncObj;
+import Extract.ParamObj;
 import remove.RemoveComment;
 import const.Config;
 import spec.SpecService;
@@ -13,7 +15,7 @@ class ConvertService {
 		'- [x] add generated message',
 		'- [x] add new copyright',
 		'- [x] remove old block comment and line comment',
-		'- [ ] split code/extract code',
+		'- [x] split code/extract code',
 		'- [x] extract constructor',
 		'- [x] extract constructor param',
 		'- [x] extract functions',
@@ -49,13 +51,13 @@ class ConvertService {
 		// add values
 		ts.addVariable('// add vars');
 		// add functions
-		ts.addFunction('// add functions');
+		// ts.addFunction('// add functions');
 		// add imports
-		ts.addImport('// add imports');
+		// ts.addImport('// add imports');
 
 		// first try for new extract
 		Extract.runExtract(originalContentNoComment, originalFileName.replace('.service.ts', ''));
-		var obj = Extract.OBJ;
+		var OBJ = Extract.OBJ;
 		var map:Map<String, String> = Extract.importMap;
 
 		// TODO: if `HttpClient` exists in map, we should add `imports: [HttpClientTestingModule],` otherwise it might not be needed!
@@ -63,8 +65,8 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
-		for (i in 0...obj.constructor.params.length) {
-			var _obj = obj.constructor.params[i];
+		for (i in 0...OBJ.constructor.params.length) {
+			var _obj = OBJ.constructor.params[i];
 			// trace(_obj.type);
 			// trace(map.exists(_obj.type));
 			// trace(map);
@@ -78,8 +80,8 @@ class ConvertService {
 		}
 		// hmmm might be a bit much, but lets try
 		ts.addImport('// import directly from ${className}Service');
-		for (i in 0...obj.imports.length) {
-			var _val = obj.imports[i];
+		for (i in 0...OBJ.imports.length) {
+			var _val = OBJ.imports[i];
 			if (_val.indexOf('HttpClient') != -1)
 				continue;
 			if (_val.indexOf('Observable') != -1)
@@ -95,13 +97,17 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the functions
 		// -----------------------------------------------------------
-		var test = "
-	it('#getData should return value from observable', (done: DoneFn) => {
-		const url = Api.getUrl().helpApi;
+		log('title test: ${getTitle(OBJ.functions[0])}');
+		// const url = Api.getUrl().helpApi;
+		// const ihelp: IHelp = {url: ""}
+		// expect(mockReq.request.params).toEqual(ihelp);
+		var test = '
+	it(\'${getTitle(OBJ.functions[0])}\', (done: DoneFn) => {
 
-		const ihelp: IHelp = {
-			url: ''
-		}
+		const ${OBJ.URL != "" ? OBJ.URL : ""}
+
+		// FIXME: use "add missing properties"
+		const ${OBJ.functions[0].returnValue.value.toLowerCase()}: ${OBJ.functions[0].returnValue.value} = {}
 
 		service.getData().subscribe(value => {
 			expect(value).toBe(ihelp);
@@ -109,11 +115,13 @@ class ConvertService {
 		});
 
 		const mockReq = httpMock.expectOne(url);
+		expect(mockReq.request.url).toBe(url);
+		expect(mockReq.request.method).toBe("GET");
 		expect(mockReq.cancelled).toBeFalsy();
-		expect(mockReq.request.responseType).toEqual('json');
+		expect(mockReq.request.responseType).toEqual(\'json\');
 		mockReq.flush(ihelp);
 	});
-";
+';
 
 		ts.addFunction(test);
 
@@ -160,13 +168,13 @@ class ConvertService {
 
 		// default typescript template
 		var content:String = //
-			GeneratedBy.message('ts')
+			GeneratedBy.message('ts') //
 			+ '\n\n' //
-			+ Copyright.init('ts')
+			+ Copyright.init('ts') //
 			+ '\n\n' //
-			+ ts.create()
-			+ '\n\n'
-			+ '/**\n\n${originalContentNoComment}\n\n*/';
+			+ ts.create() //
+			+ '\n\n';
+		// + '/**\n\n${originalContentNoComment}\n\n*/';
 
 		// trace(originalFileName);
 		// trace(newFileName);
@@ -188,5 +196,9 @@ class ConvertService {
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
+	}
+
+	static function getTitle(obj:FuncObj) {
+		return '#${obj.name} should return ${obj.returnValue.string}';
 	}
 }

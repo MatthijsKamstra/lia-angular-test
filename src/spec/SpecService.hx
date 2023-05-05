@@ -64,7 +64,7 @@ import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.s
 
 ${imports}
 
-describe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
+fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 
 	let service: ${Strings.toUpperCamel(name)}Service;
 	let ${Strings.toLowerCamel(name)}Service: ${Strings.toUpperCamel(name)}Service;
@@ -92,39 +92,37 @@ describe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 
 	${funcs}
 
-	/*
-	it(\'#getObservableValue should return value from observable\', (done: DoneFn) => {
-		service.getObservableValue().subscribe(value => {
-			expect(value).toBe(\'observable value\');
-			done();
-		});
-	});
-	*/
-
-	/*
-	it(\'should get users\', () => {
-		const mockUsers = [
-			{ name: \'Bob\', website: \'www.yessss.com\' },
-			{ name: \'Juliette\', website: \'nope.com\' }
-		];
-
-		service.getData().subscribe((event: HttpEvent<any>) => {
-			switch (event.type) {
-				case HttpEventType.Response:
-					expect(event.body).toEqual(mockUsers);
-			}
-		});
-
-		const mockReq = httpMock.expectOne(service.url);
-		expect(mockReq.cancelled).toBeFalsy();
-		expect(mockReq.request.responseType).toEqual(\'json\');
-		mockReq.flush(mockUsers);
-	});
-	*/
-
-
 });
 ';
+
+		/*
+			it(\'#getObservableValue should return value from observable\', (done: DoneFn) => {
+				service.getObservableValue().subscribe(value => {
+					expect(value).toBe(\'observable value\');
+					done();
+				});
+			});
+		 */
+		/*
+			it(\'should get users\', () => {
+				const mockUsers = [
+					{ name: \'Bob\', website: \'www.yessss.com\' },
+					{ name: \'Juliette\', website: \'nope.com\' }
+				];
+
+				service.getData().subscribe((event: HttpEvent<any>) => {
+					switch (event.type) {
+						case HttpEventType.Response:
+							expect(event.body).toEqual(mockUsers);
+					}
+				});
+
+				const mockReq = httpMock.expectOne(service.url);
+				expect(mockReq.cancelled).toBeFalsy();
+				expect(mockReq.request.responseType).toEqual(\'json\');
+				mockReq.flush(mockUsers);
+			});
+		 */
 
 		return template;
 	}

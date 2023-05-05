@@ -6,6 +6,11 @@ import utils.RegEx;
 
 class Extract {
 	public static var OBJ = {
+		hasHttpClient: false,
+		hasUrl: false,
+		isGET: false,
+		isPOST: false,
+		URL: '',
 		constructor: {
 			params: []
 		},
@@ -20,12 +25,30 @@ class Extract {
 
 		var fileName = '${Strings.toUpperCamel(name)}Service';
 
+		// get the content of the class values
 		var str = content.split(fileName)[1].trim();
-
 		var strStart = (str.indexOf('{'));
 		var strEnd = (str.lastIndexOf('}'));
 		var cleandedStr = str.substring(strStart + 1, strEnd).replace('\n\t', '\n').trim();
 		// log(cleandedStr);
+
+		// bools
+		OBJ.hasHttpClient = (str.indexOf('HttpClient') != -1);
+		OBJ.hasUrl = (str.toLowerCase().indexOf('url') != -1); // guessing at best :(
+
+		// URL
+		var matches = RegEx.getMatches(RegEx.hasURL, cleandedStr);
+		OBJ.URL = matches[0]; // ugghhhhh, fix later
+
+		// TODO: probably better to use the constructor.param[x].type == HttpClient
+		// but not available at this point
+		// assume `http : HttpClient`
+		if (str.indexOf('http.get') != -1) {
+			OBJ.isGET = true;
+		}
+		if (str.indexOf('http.post') != -1) {
+			OBJ.isPOST = true;
+		}
 
 		// -----------------------------------------------------------------
 		// Find imports
@@ -123,7 +146,10 @@ class Extract {
 							type: 'foo'
 						}
 					],
-					returnValue: '',
+					returnValue: {
+						value: 'IHelp',
+						string: 'Observable<IHelp>',
+					},
 					string: ''
 				}
 			]
@@ -145,9 +171,9 @@ class Extract {
 				// get params (name and type)
 				var _paramArr = getParamsFromString(_str);
 
-				var _funcObj = {
+				var _funcObj:FuncObj = {
 					name: _name,
-					returnValue: _return,
+					returnValue: getReturnValues(_return),
 					params: _paramArr,
 					string: _str
 				}
@@ -156,6 +182,25 @@ class Extract {
 		}
 
 		log(OBJ);
+	}
+
+	/**
+	 * extract `Observable<IHelp>` into `Observable` and `IHelp`
+	 *
+	 * @param val
+	 */
+	static function getReturnValues(val:String) {
+		var _value = '';
+		var _value2 = '';
+		if (val.indexOf('<') != -1) {
+			_value = val.split('<')[1].split('>')[0].trim();
+			_value2 = val.split('<')[0].trim();
+		}
+		return {
+			value: _value,
+			value2: _value2,
+			string: val,
+		};
 	}
 
 	// ____________________________________ tools ____________________________________
@@ -191,8 +236,18 @@ class Extract {
 }
 
 typedef ParamObj = {
-	@:optional var _id:String;
 	@:optional var access:String;
 	var name:String;
 	var type:String;
+}
+
+typedef FuncObj = {
+	var name:String;
+	var returnValue:{
+		value:String,
+		value2:String,
+		string:String,
+	};
+	var params:Array<ParamObj>;
+	var string:String;
 }
