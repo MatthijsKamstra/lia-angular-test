@@ -3,6 +3,10 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// basic test to check for function (only used to check for total)
+	// extra check
+	public static var classFunction = ~/([a-z0-9]+)\((.*)\):/g;
+
 	// angular/js class imports
 	public static var classImports = ~/import\s*.*/g;
 

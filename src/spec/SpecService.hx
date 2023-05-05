@@ -90,6 +90,8 @@ describe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 		expect(service).toBeTruthy();
 	});
 
+	${funcs}
+
 	/*
 	it(\'#getObservableValue should return value from observable\', (done: DoneFn) => {
 		service.getObservableValue().subscribe(value => {
@@ -120,7 +122,6 @@ describe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 	});
 	*/
 
-	${funcs}
 
 });
 ';

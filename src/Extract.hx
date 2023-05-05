@@ -6,10 +6,11 @@ import utils.RegEx;
 
 class Extract {
 	public static var OBJ = {
-		'constructor': {
-			'params': []
+		constructor: {
+			params: []
 		},
-		'imports': []
+		imports: [],
+		functions: []
 	};
 
 	public static var importMap:Map<String, String> = [];
@@ -72,27 +73,30 @@ class Extract {
 		// private|public
 		// param name
 		// param type
-		var obj = {
-			'constructor': {
-				'params': [{"name": 'test', 'type': 'foo'}]
+		var constrObj = {
+			constructor: {
+				params: [
+					{
+						name: 'test',
+						type: 'foo'
+					}
+				]
 			}
 		};
-		obj.constructor.params.pop(); // remove example
+		constrObj.constructor.params.pop(); // remove example
 		for (i in 0...constructorParamArr.length) {
 			var _con = constructorParamArr[i].trim();
 			// trace(_con);
 			if (_con == '')
 				continue;
-			var _name = _con.split(':')[0].trim();
-			var _type = _con.split(':')[1].trim();
-			obj.constructor.params.push({
-				name: _name,
-				type: _type
-			});
+
+			var _obj:ParamObj = convertParams(_con);
+
+			constrObj.constructor.params.push(_obj);
 		}
 		// log(obj);
 
-		OBJ.constructor = obj.constructor;
+		OBJ.constructor = constrObj.constructor;
 		log(OBJ);
 
 		// -----------------------------------------------------------------
@@ -103,12 +107,92 @@ class Extract {
 		// log(arr);
 		// log(arr.length);
 
+		// try to check with regex
+		var matches = RegEx.getMatches(RegEx.classFunction, cleandedStr);
+		warn('is this the value simular to the other value');
+		warn('split: ${arr.length} (with constructor) vs regex: ${matches.length}');
+
+		// setting up object
+		var funcObj = {
+			functions: [
+				{
+					name: '',
+					params: [
+						{
+							name: 'test',
+							type: 'foo'
+						}
+					],
+					returnValue: '',
+					string: ''
+				}
+			]
+		};
+		funcObj.functions.pop(); // remove example
+
 		for (i in 0...arr.length) {
-			var _arr = arr[i];
-			// trace('${i}: ' + _arr.trim());
-			if (_arr.indexOf('):') != -1) {
-				log('${i}. looks like a function');
+			var _str = arr[i];
+			// trace('${i}: ' + _str.trim());
+			if (_str.indexOf('):') != -1) {
+				info('${i}. looks like a function');
+
+				// get function name
+				var _name = _str.split('(')[0].trim();
+
+				// get return value
+				var _return = _str.split(':')[1].split('{')[0].trim();
+
+				// get params (name and type)
+				var _paramArr = getParamsFromString(_str);
+
+				var _funcObj = {
+					name: _name,
+					returnValue: _return,
+					params: _paramArr,
+					string: _str
+				}
+				OBJ.functions.push(_funcObj);
 			}
 		}
+
+		log(OBJ);
 	}
+
+	// ____________________________________ tools ____________________________________
+
+	static function getParamsFromString(val:String):Array<ParamObj> {
+		var arr = [];
+		var startIndex = val.indexOf('(');
+		var endIndex = val.indexOf(')');
+		var paramString = val.substring(startIndex + 1, endIndex);
+		// warn(paramString);
+		// warn(val);
+		var _paramArr = paramString.split(',');
+		for (i in 0..._paramArr.length) {
+			var _param = _paramArr[i].trim();
+			if (_param == '')
+				continue;
+			if (val.indexOf(':') != -1) {
+				var _obj:ParamObj = convertParams(_param);
+				arr.push(_obj);
+			}
+		}
+		return arr;
+	}
+
+	static function convertParams(val:String):ParamObj {
+		var _name = val.split(':')[0].trim();
+		var _type = val.split(':')[1].trim();
+		return {
+			name: _name,
+			type: _type
+		}
+	}
+}
+
+typedef ParamObj = {
+	@:optional var _id:String;
+	@:optional var access:String;
+	var name:String;
+	var type:String;
 }
