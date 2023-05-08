@@ -37,8 +37,6 @@ class ConvertService {
 		var originalFileName = Path.withoutDirectory(path);
 		var newFileName = originalFileName.replace('.ts', '.spec.ts');
 		var className = originalFileName.replace('.service.ts', '');
-		// trace(originalFileName);
-		// trace(newFileName);
 
 		// parent dir
 		var parent = Path.directory(path);
@@ -62,20 +60,20 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
-		// this loop might not be needed, the next loop after this on might be better
-		for (i in 0...OBJ.constructor.params.length) {
-			var _obj = OBJ.constructor.params[i];
-			// trace(_obj.type);
-			// trace(map.exists(_obj.type));
-			// trace(map);
-			if (_obj.type == 'HttpClient') {
-				// probably don't need that
-				continue;
-			}
-			if (map.exists(_obj.type)) {
-				ts.addImport('${map.get(_obj.type)}');
-			}
-		}
+		// // this loop might not be needed, the next loop after this on might be better
+		// for (i in 0...OBJ.constructor.params.length) {
+		// 	var _obj = OBJ.constructor.params[i];
+		// 	// trace(_obj.type);
+		// 	// trace(map.exists(_obj.type));
+		// 	// trace(map);
+		// 	if (_obj.type == 'HttpClient') {
+		// 		// probably don't need that
+		// 		continue;
+		// 	}
+		// 	if (map.exists(_obj.type)) {
+		// 		ts.addImport('${map.get(_obj.type)}');
+		// 	}
+		// }
 		// There are some imports that are not needed, exclude them and show the rest
 		ts.addImport('// import directly from ${className}Service');
 		for (i in 0...OBJ.imports.length) {
@@ -95,44 +93,29 @@ class ConvertService {
 		for (i in 0...OBJ.functions.length) {
 			var _func:FuncObj = OBJ.functions[i];
 			// trace(_func);
-			ts.addFunction('// ${i + 1}. Generated test function of ${_func.name}');
+			ts.addFunction('// ${i + 1}. Generated test function "${_func.name}"');
 
 			log('${i}. - title test: ${getTitle(_func)}');
 
-			var varNameReturnValue = _func.returnValue.value;
-			var varName = _func.returnValue.value.toLowerCase().replace('[]', '');
-
-			var varValue = getVarValueFromReturnValue(_func.returnValue);
-
-			var funcValue = getFuncFrom(_func, varName);
-			var funcVarValue = getVarValueFrom(_func, varName);
-
-			var funcURL = 'const ${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
-			if (_func.URL != '') {
-				funcURL = 'const ${_func.URL != "" ? _func.URL : ""}';
+			// warn(_func.returnValue);
+			switch (_func.returnValue.type) {
+				case 'void':
+					mute('use test with return value "void"');
+					ts.addFunction(createTestvoid(_func));
+				case 'string':
+					mute('use test with return value "string"');
+					ts.addFunction(createTestString(_func));
+				case 'Observable':
+					mute('use test with return value "Observable"');
+					ts.addFunction(createTestObservable(_func));
+				case 'boolean':
+					mute('use test with return value "boolean"');
+					ts.addFunction(createTestboolean(_func));
+				default:
+					warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
+						+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
+					ts.addFunction(createTestUnknown(_func));
 			}
-
-			var testOut = '
-	it(\'${getTitle(_func)}\', (done: DoneFn) => {
-
-		${funcURL}
-
-		${varValue}
-
-		${funcVarValue}
-
-		${funcValue}
-
-		const mockReq = httpMock.expectOne(url);
-		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("${(_func.requestType)}");
-		expect(mockReq.cancelled).toBeFalsy();
-		expect(mockReq.request.responseType).toEqual(\'json\');
-		mockReq.flush(${varName});
-	});
-';
-
-			ts.addFunction(testOut);
 		}
 
 		// default typescript template
@@ -145,13 +128,7 @@ class ConvertService {
 			+ '\n\n';
 		// + '/**\n\n${originalContentNoComment}\n\n*/';
 
-		// trace(originalFileName);
-		// trace(newFileName);
-		// // trace(ts);
-		// // trace(content);
-		// trace(path);
-		// trace(parent);
-
+		// write file
 		var templatePath = '${parent}/${newFileName}';
 		if (!Config.IS_OVERWRITE) {
 			// create a name that is destincable from orignal file
@@ -165,6 +142,79 @@ class ConvertService {
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
+	}
+
+	// ____________________________________ create test based upon return type ____________________________________
+
+	static function createTestObservable(func:FuncObj):String {
+		var out = '// test with return type Observable\n\t';
+		// 	out += 'it(\'${getTitle(func)}\', () => {
+		// 	expect(true).toBe(true);
+		// });';
+
+		var varNameReturnValue = func.returnValue.value;
+		var varName = func.returnValue.value.toLowerCase().replace('[]', ' ');
+
+		var varValue = getVarValueFromReturnValue(func.returnValue);
+
+		var funcValue = getFuncFrom(func, varName);
+		var funcVarValue = getVarValueFrom(func, varName);
+
+		var funcURL = '// url used in class';
+		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
+
+		if (func.URL != '') {
+			funcURL = 'const ${func.URL != "" ? func.URL : ""}';
+		}
+
+		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
+
+		${funcURL}
+
+		${varValue}
+
+		${funcVarValue}
+
+		${funcValue}
+
+		const mockReq = httpMock.expectOne(url);
+		expect(mockReq.request.url).toBe(url);
+		expect(mockReq.request.method).toBe("${(func.requestType)}");
+		expect(mockReq.cancelled).toBeFalsy();
+		expect(mockReq.request.responseType).toEqual(\'json\');
+		mockReq.flush(${varName});
+	});
+';
+
+		return out;
+	}
+
+	static function createTestString(func:FuncObj):String {
+		var out = '// test with return type string\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
+		expect(true).toBe(true);
+	});
+';
+		return out;
+	}
+
+	static function createTestvoid(func:FuncObj):String {
+		var out = createTestUnknown(func);
+		return out;
+	}
+
+	static function createTestboolean(func:FuncObj):String {
+		var out = createTestUnknown(func);
+		return out;
+	}
+
+	static function createTestUnknown(func:FuncObj):String {
+		var out = '// test with return type UNKNOWN ${func.requestType}\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
+		expect(true).toBe(true);
+	});
+';
+		return out;
 	}
 
 	/**

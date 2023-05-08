@@ -205,14 +205,21 @@ class Extract {
 		warn(val);
 
 		var _value = '';
-		var _value2 = '';
+		var _type = 'void'; // use void when no return type is created
 		if (val.indexOf('<') != -1) {
 			_value = val.split('<')[1].split('>')[0].trim();
-			_value2 = val.split('<')[0].trim();
+			_type = val.split('<')[0].trim();
+		}
+		if (val.indexOf('|') != -1) {
+			_value = val.split('|')[1].trim();
+			_type = val.split('|')[0].trim();
+		}
+		if (_value == '') {
+			_type = val.trim();
 		}
 		return {
 			value: _value,
-			type: _value2,
+			type: _type,
 			access: '', // private|public|none
 			_string: val,
 		};
@@ -273,10 +280,11 @@ typedef FuncObj = {
 	var requestType:String; // POST|GET
 }
 
+//  Observable<IConfigSettings>
 typedef TypedObj = {
-	@:optional var access:String; // private|public|none
-	@:optional var name:String;
-	var value:String;
-	var type:String; // Boolean, String, whatever
-	var _string:String; // the original value
+	@:optional var access:String; // private|public|none|null (not for return types)
+	@:optional var name:String; // not sure
+	var value:String; // IConfigSettings
+	var type:String; // Observable, Boolean, String, whatever,
+	var _string:String; // the original value: Observable<IConfigSettings>
 }
