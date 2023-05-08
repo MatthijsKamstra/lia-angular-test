@@ -8,8 +8,6 @@ class Extract {
 	public static var OBJ = {
 		hasHttpClient: false,
 		hasUrl: false,
-		isGET: false,
-		isPOST: false,
 		URL: '',
 		constructor: {
 			params: []
@@ -48,12 +46,12 @@ class Extract {
 		// TODO: probably better to use the constructor.param[x].type == HttpClient
 		// but not available at this point
 		// assume `http : HttpClient`
-		if (str.indexOf('http.get') != -1) {
-			OBJ.isGET = true;
-		}
-		if (str.indexOf('http.post') != -1) {
-			OBJ.isPOST = true;
-		}
+		// if (str.indexOf('http.get') != -1) {
+		// 	OBJ.isGET = true;
+		// }
+		// if (str.indexOf('http.post') != -1) {
+		// 	OBJ.isPOST = true;
+		// }
 
 		// -----------------------------------------------------------------
 		// Find imports
@@ -118,7 +116,7 @@ class Extract {
 			if (_con == '')
 				continue;
 
-			var _obj:ParamObj = convertParams(_con);
+			var _obj:TypedObj = convertParams(_con);
 
 			constrObj.constructor.params.push(_obj);
 		}
@@ -174,19 +172,46 @@ class Extract {
 				var _name = _str.replace('public', '').replace('public', '').split('(')[0].trim();
 
 				// get return value
-				var _return = _str.split(':')[1].split('{')[0].trim();
+				var _return = _str.split('):')[1].split('{')[0].trim();
+
+				// warn(_str);
+				// warn(_return);
 
 				// get params (name and type)
 				var _paramArr = getParamsFromString(_str);
 
+				// URL
+				var matches = RegEx.getMatches(RegEx.hasURL, _str);
+				var _URL = ''; // ugghhhhh, fix later
+				if (matches[0] != null)
+					_URL = matches[0]; // ugghhhhh, fix later
+
+				var _isPOST = false;
+				var _isGET = false;
+
+				// TODO: probably better to use the constructor.param[x].type == HttpClient
+				// but not available at this point
+				// assume `http : HttpClient`
+				if (_str.indexOf('http.get') != -1) {
+					_isGET = true;
+				}
+				if (str.indexOf('http.post') != -1) {
+					_isPOST = true;
+				}
+
 				var _funcObj:FuncObj = {
+					URL: _URL,
 					access: _access,
 					name: _name,
 					returnValue: getReturnValues(_return),
 					params: _paramArr,
-					string: _str
+					_string: _str,
+					isPOST: _isPOST,
+					isGET: _isGET,
 				}
 				OBJ.functions.push(_funcObj);
+
+				trace(_funcObj);
 			}
 		}
 
@@ -199,7 +224,9 @@ class Extract {
 	 *
 	 * @param val
 	 */
-	static function getReturnValues(val:String) {
+	static function getReturnValues(val:String):TypedObj {
+		warn(val);
+
 		var _value = '';
 		var _value2 = '';
 		if (val.indexOf('<') != -1) {
@@ -208,14 +235,15 @@ class Extract {
 		}
 		return {
 			value: _value,
-			value2: _value2,
-			string: val,
+			type: _value2,
+			access: '', // private|public|none
+			_string: val,
 		};
 	}
 
 	// ____________________________________ tools ____________________________________
 
-	static function getParamsFromString(val:String):Array<ParamObj> {
+	static function getParamsFromString(val:String):Array<TypedObj> {
 		var arr = [];
 		var startIndex = val.indexOf('(');
 		var endIndex = val.indexOf(')');
@@ -228,14 +256,22 @@ class Extract {
 			if (_param == '')
 				continue;
 			if (val.indexOf(':') != -1) {
-				var _obj:ParamObj = convertParams(_param);
+				var _obj:TypedObj = convertParams(_param);
 				arr.push(_obj);
 			}
 		}
 		return arr;
 	}
 
-	static function convertParams(val:String):ParamObj {
+	/**
+	 * @example
+	 * 		sortedData: ISortedData
+	 * 		public sortedData: ISortedData
+	 *
+	 * @param val
+	 * @return TypedObj
+	 */
+	static function convertParams(val:String):TypedObj {
 		// log(val);
 		var _access = (val.indexOf('private') != -1) ? 'private' : 'public';
 		var _name = val.split(':')[0].trim();
@@ -243,25 +279,28 @@ class Extract {
 		return {
 			access: _access,
 			name: _name,
-			type: _type
+			value: _name,
+			type: _type,
+			_string: val
 		}
 	}
 }
 
-typedef ParamObj = {
-	@:optional var access:String;
+typedef FuncObj = {
+	var URL:String; // get this specific url for this function
+	var access:String; // private|public|none
 	var name:String;
-	var type:String;
+	var returnValue:TypedObj;
+	var params:Array<TypedObj>;
+	var _string:String; // the original value
+	var isGET:Bool;
+	var isPOST:Bool;
 }
 
-typedef FuncObj = {
-	var name:String;
-	var returnValue:{
-		value:String,
-		value2:String,
-		string:String,
-	};
-	var access:String; // private|public|none
-	var params:Array<ParamObj>;
-	var string:String;
+typedef TypedObj = {
+	@:optional var access:String; // private|public|none
+	@:optional var name:String;
+	var value:String;
+	var type:String; // Boolean, String, whatever
+	var _string:String; // the original value
 }
