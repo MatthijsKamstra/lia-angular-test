@@ -6,4 +6,3 @@
 -dce full
 -D analyzer-optimize
 --interp
-# --run
