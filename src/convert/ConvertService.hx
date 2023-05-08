@@ -1,7 +1,7 @@
 package convert;
 
+import Extract.TypedObj;
 import Extract.FuncObj;
-import Extract.ParamObj;
 import remove.RemoveComment;
 import const.Config;
 import spec.SpecService;
@@ -27,7 +27,6 @@ class ConvertService {
 	 *
 	 *
 	 * @param path
-	 * @param source
 	 */
 	public static function init(path:String) {
 		// read the content of the file
@@ -98,28 +97,35 @@ class ConvertService {
 			// trace(_func);
 			ts.addFunction('// ${i + 1}. Generated test function of ${_func.name}');
 
-			log('title test: ${getTitle(OBJ.functions[0])}');
+			log('${i}. - title test: ${getTitle(_func)}');
 
-			var varNameReturnValue = OBJ.functions[i].returnValue.value;
-			var varName = OBJ.functions[i].returnValue.value.toLowerCase().replace('[]', '');
+			var varNameReturnValue = _func.returnValue.value;
+			var varName = _func.returnValue.value.toLowerCase().replace('[]', '');
 
-			var varValue = getValueFrom(OBJ.functions[i]);
+			var varValue = getVarValueFromReturnValue(_func.returnValue);
+
+			var funcValue = getFuncFrom(_func, varName);
+			var funcVarValue = getVarValueFrom(_func, varName);
+
+			var funcURL = 'const ${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
+			if (_func.URL != '') {
+				funcURL = 'const ${_func.URL != "" ? _func.URL : ""}';
+			}
 
 			var testOut = '
-	it(\'${getTitle(OBJ.functions[i])}\', (done: DoneFn) => {
+	it(\'${getTitle(_func)}\', (done: DoneFn) => {
 
-		const ${OBJ.URL != "" ? OBJ.URL : ""}
+		${funcURL}
 
 		${varValue}
 
-		service.getData().subscribe(value => {
-			expect(value).toBe(${varName});
-			done();
-		});
+		${funcVarValue}
+
+		${funcValue}
 
 		const mockReq = httpMock.expectOne(url);
 		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("GET");
+		expect(mockReq.request.method).toBe("${(_func.isGET) ? "GET" : "POST"}");
 		expect(mockReq.cancelled).toBeFalsy();
 		expect(mockReq.request.responseType).toEqual(\'json\');
 		mockReq.flush(${varName});
@@ -161,12 +167,76 @@ class ConvertService {
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
 	}
 
-	static function getValueFrom(funcObj:FuncObj) {
+	/**
+	 * [Description]
+	 * @param funcObj
+	 * @param varName
+	 */
+	static function getVarValueFrom(funcObj:FuncObj, varName:String) {
+		// warn(funcObj);
+
+		if (funcObj.params[0] == null)
+			return '';
+
 		var gen = '{}'; // start as an object
+		var varNameReturnValue = funcObj.name;
+		var varName = funcObj.name.toLowerCase().replace('[]', '');
+
+		var isArray = funcObj.name.indexOf('[]') != -1;
+		if (isArray)
+			gen = '[]'; // ha! it doesn't seem to be and object
+
+		// var params = '';
+		// if (funcObj.params[0] != null)
+		// 	params = '${funcObj.params[0].name.toLowerCase()}';
+
+		var out = '// FIXME: use "add missing properties"\n';
+		out += '\t\t';
+		out += 'const ${funcObj.params[0].name.toLowerCase()}: ${funcObj.params[0].type} = ${gen};';
+		return out;
+	}
+
+	/**
+	 *
+	 *
+	 * @param arg0
+	 */
+	static function getFuncFrom(funcObj:FuncObj, varName:String) {
+		// warn(funcObj);
+
 		var varNameReturnValue = funcObj.returnValue.value;
 		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', '');
 
-		var isArray = funcObj.returnValue.value.indexOf('[]') != -1;
+		var params = '';
+		if (funcObj.params[0] != null)
+			params = '${funcObj.params[0].name.toLowerCase()}';
+
+		var out = '// generate the service call\n';
+		out += '\t\t';
+		out += 'service.${funcObj.name}(${params}).subscribe(value => {
+			expect(value).toBe(${varName});
+			done();
+		});';
+		return out;
+	}
+
+	/**
+	 * create a const value to use in the tests
+	 *
+	 * @example
+	 * 			`Observable<IHelp>` --> `const ihelp: IHelp = {};`
+	 * 			`Observable<LightMeasurementDevice[]>` --> `const ischedules: ISchedules = {};`
+	 *
+	 * @param TypedObj
+	 */
+	static function getVarValueFromReturnValue(obj:TypedObj) {
+		// warn(obj);
+
+		var gen = '{}'; // start as an object
+		var varNameReturnValue = obj.value;
+		var varName = obj.value.toLowerCase().replace('[]', '');
+
+		var isArray = obj.value.indexOf('[]') != -1;
 		if (isArray)
 			gen = '[]'; // ha! it doesn't seem to be and object
 
@@ -178,7 +248,12 @@ class ConvertService {
 		return out;
 	}
 
+	/**
+	 * create a readable description of the test (?)
+	 *
+	 * @param obj
+	 */
 	static function getTitle(obj:FuncObj) {
-		return '#${obj.name} should return ${obj.returnValue.string}';
+		return '#${obj.name} should return ${obj.returnValue._string}';
 	}
 }
