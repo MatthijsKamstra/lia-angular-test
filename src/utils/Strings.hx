@@ -35,6 +35,6 @@ class Strings {
 	 */
 	static public function toLowerCamel(val:String):String {
 		var out = toUpperCamel(val);
-		return out.charAt(0).toLowerCase() + val.substr(1);
+		return out.charAt(0).toLowerCase() + out.substr(1);
 	}
 }
