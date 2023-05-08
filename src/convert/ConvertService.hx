@@ -36,17 +36,15 @@ class ConvertService {
 
 		// filename
 		var originalFileName = Path.withoutDirectory(path);
-		// remove service (don't need `groups-service.service.ts` as filesnames)
-		// var fileName = FileName.convert(Path.withoutDirectory(path).replace('.html', '').replace('.js', '').replace('service', '').replace('Service', ''));
 		var newFileName = originalFileName.replace('.ts', '.spec.ts');
 		var className = originalFileName.replace('.service.ts', '');
+		// trace(originalFileName);
+		// trace(newFileName);
 
 		// parent dir
 		var parent = Path.directory(path);
 
-		// trace(originalFileName);
-		// trace(newFileName);
-
+		// start creating the spec of this file/service
 		var ts = new SpecService(className);
 		// add values
 		ts.addVariable('// add vars');
@@ -65,6 +63,7 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
+		// this loop might not be needed, the next loop after this on might be better
 		for (i in 0...OBJ.constructor.params.length) {
 			var _obj = OBJ.constructor.params[i];
 			// trace(_obj.type);
@@ -78,7 +77,7 @@ class ConvertService {
 				ts.addImport('${map.get(_obj.type)}');
 			}
 		}
-		// hmmm might be a bit much, but lets try
+		// There are some imports that are not needed, exclude them and show the rest
 		ts.addImport('// import directly from ${className}Service');
 		for (i in 0...OBJ.imports.length) {
 			var _val = OBJ.imports[i];
@@ -91,16 +90,13 @@ class ConvertService {
 			ts.addImport('${_val}');
 		}
 
-		// ts.addImport("import { Api } from '../config/api';");
-		// ts.addImport("import { IHelp } from '../shared/interfaces/i-help';");
-
 		// -----------------------------------------------------------
 		// update the functions
 		// -----------------------------------------------------------
 		for (i in 0...OBJ.functions.length) {
 			var _func:FuncObj = OBJ.functions[i];
-			trace(_func);
-			ts.addFunction('// Generated test function (${i + 1}) of ${_func.name}');
+			// trace(_func);
+			ts.addFunction('// ${i + 1}. Generated test function of ${_func.name}');
 
 			log('title test: ${getTitle(OBJ.functions[0])}');
 
