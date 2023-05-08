@@ -97,20 +97,27 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the functions
 		// -----------------------------------------------------------
-		log('title test: ${getTitle(OBJ.functions[0])}');
-		// const url = Api.getUrl().helpApi;
-		// const ihelp: IHelp = {url: ""}
-		// expect(mockReq.request.params).toEqual(ihelp);
-		var test = '
-	it(\'${getTitle(OBJ.functions[0])}\', (done: DoneFn) => {
+		for (i in 0...OBJ.functions.length) {
+			var _func:FuncObj = OBJ.functions[i];
+			trace(_func);
+			ts.addFunction('// Generated test function (${i + 1}) of ${_func.name}');
+
+			log('title test: ${getTitle(OBJ.functions[0])}');
+
+			var varNameReturnValue = OBJ.functions[i].returnValue.value;
+			var varName = OBJ.functions[i].returnValue.value.toLowerCase().replace('[]', '');
+
+			var varValue = getValueFrom(OBJ.functions[i]);
+
+			var testOut = '
+	it(\'${getTitle(OBJ.functions[i])}\', (done: DoneFn) => {
 
 		const ${OBJ.URL != "" ? OBJ.URL : ""}
 
-		// FIXME: use "add missing properties"
-		const ${OBJ.functions[0].returnValue.value.toLowerCase()}: ${OBJ.functions[0].returnValue.value} = {}
+		${varValue}
 
 		service.getData().subscribe(value => {
-			expect(value).toBe(ihelp);
+			expect(value).toBe(${varName});
 			done();
 		});
 
@@ -119,51 +126,11 @@ class ConvertService {
 		expect(mockReq.request.method).toBe("GET");
 		expect(mockReq.cancelled).toBeFalsy();
 		expect(mockReq.request.responseType).toEqual(\'json\');
-		mockReq.flush(ihelp);
+		mockReq.flush(${varName});
 	});
 ';
 
-		ts.addFunction(test);
-
-		// TODO: crude methode of catching data... I could not find the correct regex to catch all data
-		var fArr = [];
-		var vArr = [];
-		// var fArr = Extract.fromServiceFunctions(originalContent);
-		// var vArr = Extract.fromServiceVars(originalContent);
-
-		// info('----> ' + fArr);
-		for (j in 0...vArr.length) {
-			var item = vArr[j];
-			// warn(item);
-			ts.addVariable('/**\n ${Json.parse(Json.stringify(item, null, ''))}; \n*/\n\n');
-		}
-
-		// info('----> ' + fArr);
-		for (j in 0...fArr.length) {
-			var item = fArr[j];
-			// warn(item);
-			// convert string?
-			// item = item.replace('"', '');
-			// [mck] hacky, hacky, hacky
-			item = item.replace(':', '');
-			item = item.replace('function', '');
-			item = item.replace(',', ':any,');
-			item = item.replace(')', ':any)');
-			item = item.replace('(:any)', '()');
-
-			var name = item.split('(')[0].trim();
-
-			// ugh...
-			// var reg = ~/\((.*)\)/g;
-			// var matches = RegEx.getMatches(reg, item);
-
-			// if (matches.length > 0) {
-			// 	warn(matches, 2);
-			// }
-
-			// ts.addFunction('${item}');
-
-			// // ts.addFunction('public ${item}: any { \r\t\tconsole.log("${name}"); \r\t\treturn true; \r\t}\r\r');
+			ts.addFunction(testOut);
 		}
 
 		// default typescript template
@@ -196,6 +163,23 @@ class ConvertService {
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
+	}
+
+	static function getValueFrom(funcObj:FuncObj) {
+		var gen = '{}'; // start as an object
+		var varNameReturnValue = funcObj.returnValue.value;
+		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', '');
+
+		var isArray = funcObj.returnValue.value.indexOf('[]') != -1;
+		if (isArray)
+			gen = '[]'; // ha! it doesn't seem to be and object
+
+		var out = '';
+		if (!isArray)
+			out += '// FIXME: use "add missing properties"\n\t\t';
+
+		out += 'const ${varName}: ${varNameReturnValue} = ${gen};';
+		return out;
 	}
 
 	static function getTitle(obj:FuncObj) {
