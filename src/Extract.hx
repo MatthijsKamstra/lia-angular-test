@@ -23,14 +23,19 @@ class Extract {
 	public static function runExtract(content:String, name:String) {
 		// log(content);
 
+		// create filename/class name
 		var fileName = '${Strings.toUpperCamel(name)}Service';
 
 		// get the content of the class values
-		var str = content.split(fileName)[1].trim();
+		var startIndex = content.indexOf(fileName);
+		// trace(startIndex);
+		var str = content.substring(startIndex).trim();
 		var strStart = (str.indexOf('{'));
 		var strEnd = (str.lastIndexOf('}'));
 		var cleandedStr = str.substring(strStart + 1, strEnd).replace('\n\t', '\n').trim();
-		// log(cleandedStr);
+		// trace(content);
+		// trace(str);
+		// trace(cleandedStr);
 
 		// bools
 		OBJ.hasHttpClient = (str.indexOf('HttpClient') != -1);
@@ -62,17 +67,17 @@ class Extract {
 				// trace(match);
 				OBJ.imports.push(match);
 
-				var startNr = match.indexOf('{');
-				var endNr = match.indexOf('}');
+				var startIndex = match.indexOf('{');
+				var endIndex = match.indexOf('}');
 
 				//  TODO: what to do with `import { One, Two} from ....`
-				var name = match.substring(startNr + 1, endNr).trim();
+				var name = match.substring(startIndex + 1, endIndex).trim();
 				// warn(name);
 				importMap.set('${name}', match);
 			}
 		}
-		log(OBJ);
-		info('importMap: ' + importMap);
+		// log(OBJ);
+		// info('importMap: ' + importMap);
 
 		// -----------------------------------------------------------------
 		// Find constructor
@@ -120,20 +125,20 @@ class Extract {
 		// log(obj);
 
 		OBJ.constructor = constrObj.constructor;
-		log(OBJ);
+		// log(OBJ);
 
 		// -----------------------------------------------------------------
 		// Find functions
 		// -----------------------------------------------------------------
 		// TODO: this is probably a bad idea, to use `\n\n` to split files into an array
 		var arr = cleandedStr.split('\n\n');
-		// log(arr);
-		// log(arr.length);
+		// trace(arr);
+		// trace(arr.length);
 
 		// try to check with regex
 		var matches = RegEx.getMatches(RegEx.classFunction, cleandedStr);
-		warn('is this the value simular to the other value');
-		warn('split: ${arr.length} (with constructor) vs regex: ${matches.length}');
+		warn('is this the value similar to the other value');
+		warn('split: ${arr.length} (with constructor and vars) vs regex: ${matches.length}');
 
 		// setting up object
 		var funcObj = {
@@ -162,8 +167,11 @@ class Extract {
 			if (_str.indexOf('):') != -1) {
 				info('${i}. looks like a function');
 
+				// private|public
+				var _access = (_str.indexOf('private') != -1) ? 'private' : 'public';
+
 				// get function name
-				var _name = _str.split('(')[0].trim();
+				var _name = _str.replace('public', '').replace('public', '').split('(')[0].trim();
 
 				// get return value
 				var _return = _str.split(':')[1].split('{')[0].trim();
@@ -172,6 +180,7 @@ class Extract {
 				var _paramArr = getParamsFromString(_str);
 
 				var _funcObj:FuncObj = {
+					access: _access,
 					name: _name,
 					returnValue: getReturnValues(_return),
 					params: _paramArr,
@@ -181,6 +190,7 @@ class Extract {
 			}
 		}
 
+		info('end extract');
 		log(OBJ);
 	}
 
@@ -226,9 +236,12 @@ class Extract {
 	}
 
 	static function convertParams(val:String):ParamObj {
+		// log(val);
+		var _access = (val.indexOf('private') != -1) ? 'private' : 'public';
 		var _name = val.split(':')[0].trim();
 		var _type = val.split(':')[1].trim();
 		return {
+			access: _access,
 			name: _name,
 			type: _type
 		}
@@ -248,6 +261,7 @@ typedef FuncObj = {
 		value2:String,
 		string:String,
 	};
+	var access:String; // private|public|none
 	var params:Array<ParamObj>;
 	var string:String;
 }
