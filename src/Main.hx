@@ -24,6 +24,7 @@ class Main {
 		if (Config.PATH == '')
 			return;
 
+		info('Use file or folder, collect files/folders');
 		// initLog();
 		// init();
 		// setupProject();
@@ -40,6 +41,7 @@ class Main {
 		// mute('fileArr.length: ${fileArr.length / 4}', 1);
 		mute('ignoreArr: $ignoreArr', 1);
 
+		info('Collect data');
 		// do something clever
 		convertFiletype();
 
@@ -51,7 +53,7 @@ class Main {
 	}
 
 	function checkAngular() {
-		info('Check for angular.json in the root of the folder');
+		info('[WIP] Check for angular.json in the root of the folder');
 	}
 
 	function convertFiletype() {
