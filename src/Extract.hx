@@ -138,27 +138,6 @@ class Extract {
 		warn('is this the value similar to the other value');
 		warn('split: ${arr.length} (with constructor and vars) vs regex: ${matches.length}');
 
-		// setting up object
-		var funcObj = {
-			functions: [
-				{
-					name: '',
-					params: [
-						{
-							name: 'test',
-							type: 'foo'
-						}
-					],
-					returnValue: {
-						value: 'IHelp',
-						string: 'Observable<IHelp>',
-					},
-					string: ''
-				}
-			]
-		};
-		funcObj.functions.pop(); // remove example
-
 		for (i in 0...arr.length) {
 			var _str = arr[i];
 			// trace('${i}: ' + _str.trim());
@@ -186,28 +165,26 @@ class Extract {
 				if (matches[0] != null)
 					_URL = matches[0]; // ugghhhhh, fix later
 
-				var _isPOST = false;
-				var _isGET = false;
+				var _requestType = 'GET';
 
 				// TODO: probably better to use the constructor.param[x].type == HttpClient
 				// but not available at this point
 				// assume `http : HttpClient`
 				if (_str.indexOf('http.get') != -1) {
-					_isGET = true;
+					_requestType = 'GET';
 				}
-				if (str.indexOf('http.post') != -1) {
-					_isPOST = true;
+				if (_str.indexOf('http.post') != -1) {
+					_requestType = 'POST';
 				}
 
 				var _funcObj:FuncObj = {
 					URL: _URL,
+					requestType: _requestType,
 					access: _access,
 					name: _name,
 					returnValue: getReturnValues(_return),
 					params: _paramArr,
 					_string: _str,
-					isPOST: _isPOST,
-					isGET: _isGET,
 				}
 				OBJ.functions.push(_funcObj);
 
@@ -293,8 +270,7 @@ typedef FuncObj = {
 	var returnValue:TypedObj;
 	var params:Array<TypedObj>;
 	var _string:String; // the original value
-	var isGET:Bool;
-	var isPOST:Bool;
+	var requestType:String; // POST|GET
 }
 
 typedef TypedObj = {

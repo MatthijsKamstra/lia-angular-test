@@ -125,7 +125,7 @@ class ConvertService {
 
 		const mockReq = httpMock.expectOne(url);
 		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("${(_func.isGET) ? "GET" : "POST"}");
+		expect(mockReq.request.method).toBe("${(_func.requestType)}");
 		expect(mockReq.cancelled).toBeFalsy();
 		expect(mockReq.request.responseType).toEqual(\'json\');
 		mockReq.flush(${varName});
