@@ -6,7 +6,7 @@ Probably good to know
 
 - Angular 15.2.4
 - files generate with Angular CLI (aka `ng g service foobar`)
-- VSCODE formatting and prettier is active on save
+- VSCODE [prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [formatting](https://marketplace.visualstudio.com/items?itemName=tombonnike.vscode-status-bar-format-toggle) is active on save
 
 ## how it works
 
