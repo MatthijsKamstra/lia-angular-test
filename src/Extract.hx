@@ -5,6 +5,17 @@ import haxe.Json;
 import utils.RegEx;
 
 class Extract {
+	public static final OBJ_DEFAULT = {
+		hasHttpClient: false,
+		hasUrl: false,
+		URL: '',
+		constructor: {
+			params: []
+		},
+		imports: [],
+		functions: []
+	};
+
 	public static var OBJ = {
 		hasHttpClient: false,
 		hasUrl: false,
@@ -16,10 +27,13 @@ class Extract {
 		functions: []
 	};
 
-	public static var importMap:Map<String, String> = [];
+	// public static var importMap:Map<String, String> = [];
 
 	public static function runExtract(content:String, name:String) {
 		// log(content);
+
+		// restart OBJ every time it runs
+		OBJ = Json.parse(Json.stringify(OBJ_DEFAULT));
 
 		// create filename/class name
 		var fileName = '${Strings.toUpperCamel(name)}Service';
@@ -71,7 +85,7 @@ class Extract {
 				//  TODO: what to do with `import { One, Two} from ....`
 				var name = match.substring(startIndex + 1, endIndex).trim();
 				// warn(name);
-				importMap.set('${name}', match);
+				// importMap.set('${name}', match);
 			}
 		}
 		// log(OBJ);
@@ -188,12 +202,12 @@ class Extract {
 				}
 				OBJ.functions.push(_funcObj);
 
-				trace(_funcObj);
+				// trace(_funcObj);
 			}
 		}
 
 		info('end extract');
-		log(OBJ);
+		// log(OBJ);
 	}
 
 	/**
@@ -202,7 +216,7 @@ class Extract {
 	 * @param val
 	 */
 	static function getReturnValues(val:String):TypedObj {
-		warn(val);
+		// warn(val);
 
 		var _value = '';
 		var _type = 'void'; // use void when no return type is created
