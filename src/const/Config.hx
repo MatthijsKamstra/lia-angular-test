@@ -8,9 +8,10 @@ class Config {
 	 * 0.0.4 - services update
 	 * 0.0.5 - service typedef update, POST and GET, multiple functions, data in test needed
 	 * 0.0.6 - test based upon return types (bool, string, etc)
+	 * 0.0.7 - fix bug from bigger classes
 	 *
 	 */
-	public static final VERSION:String = '0.0.6';
+	public static final VERSION:String = '0.0.7';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

@@ -11,11 +11,10 @@ import utils.Copyright;
 
 class ConvertService {
 	/**
-	 *
-	 *
+	 * constructor
 	 * @param path
 	 */
-	public static function init(path:String) {
+	public function new(path:String) {
 		// read the content of the file
 		var originalContent = sys.io.File.getContent(path);
 		var originalContentNoComment = RemoveComment.all(originalContent, 'ts');
@@ -40,7 +39,7 @@ class ConvertService {
 		// first try for new extract
 		Extract.runExtract(originalContentNoComment, originalFileName.replace('.service.ts', ''));
 		var OBJ = Extract.OBJ;
-		var map:Map<String, String> = Extract.importMap;
+		// var map:Map<String, String> = Extract.importMap;
 
 		// TODO: if `HttpClient` exists in map, we should add `imports: [HttpClientTestingModule],` otherwise it might not be needed!
 
@@ -121,6 +120,8 @@ class ConvertService {
 		if (Config.IS_DRYRUN) {
 			info('DRYRUN: write ${templatePath.split('/src')[1]}', 2);
 		} else {
+			info('Open original file: ${path}', 2);
+			info('Open generated test file: ${templatePath}', 2);
 			sys.io.File.saveContent(templatePath, content);
 		}
 
@@ -129,7 +130,7 @@ class ConvertService {
 
 	// ____________________________________ create test based upon return type ____________________________________
 
-	static function createTestObservable(func:FuncObj):String {
+	function createTestObservable(func:FuncObj):String {
 		var out = '// test with return type Observable\n\t';
 		// 	out += 'it(\'${getTitle(func)}\', () => {
 		// 	expect(true).toBe(true);
@@ -143,11 +144,11 @@ class ConvertService {
 		var funcValue = getFuncFrom(func, varName);
 		var funcVarValue = getVarValueFrom(func, varName);
 
-		var funcURL = '// url used in class';
+		var funcURL = '// URL used in class\n\t\t';
 		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
 
 		if (func.URL != '') {
-			funcURL = 'const ${func.URL != "" ? func.URL : ""}';
+			funcURL += 'const ${func.URL != "" ? func.URL : ""}';
 		}
 
 		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
@@ -172,7 +173,7 @@ class ConvertService {
 		return out;
 	}
 
-	static function createTestString(func:FuncObj):String {
+	function createTestString(func:FuncObj):String {
 		var out = '// test with return type string\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		expect(true).toBe(true);
@@ -181,17 +182,17 @@ class ConvertService {
 		return out;
 	}
 
-	static function createTestvoid(func:FuncObj):String {
+	function createTestvoid(func:FuncObj):String {
 		var out = createTestUnknown(func);
 		return out;
 	}
 
-	static function createTestboolean(func:FuncObj):String {
+	function createTestboolean(func:FuncObj):String {
 		var out = createTestUnknown(func);
 		return out;
 	}
 
-	static function createTestUnknown(func:FuncObj):String {
+	function createTestUnknown(func:FuncObj):String {
 		var out = '// test with return type UNKNOWN ${func.requestType}\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		expect(true).toBe(true);
@@ -201,11 +202,12 @@ class ConvertService {
 	}
 
 	/**
+	 * use the return value of the function to create mock data
 	 *
-	 *
-	 * @param arg0
+	 * @param funcObj
+	 * @param varName
 	 */
-	static function getFuncFrom(funcObj:FuncObj, varName:String) {
+	function getFuncFrom(funcObj:FuncObj, varName:String) {
 		// warn(funcObj);
 
 		var varNameReturnValue = funcObj.returnValue.value;
@@ -213,7 +215,7 @@ class ConvertService {
 
 		var params = '';
 		if (funcObj.params[0] != null)
-			params = '${funcObj.params[0].name.toLowerCase()}';
+			params = '${funcObj.params[0].name}';
 
 		var out = '// create the service call\n';
 		out += '\t\t';
@@ -225,31 +227,45 @@ class ConvertService {
 	}
 
 	/**
-	 * [Description]
+	 * get the values used in the functions (param)
+	 *
 	 * @param funcObj
 	 * @param varName
 	 */
-	static function getVarValueFrom(funcObj:FuncObj, varName:String) {
+	function getVarValueFrom(funcObj:FuncObj, varName:String) {
 		// warn(funcObj);
+
+		var out = '// FIXME: use "add (all) missing properties" (vars)\n';
 
 		if (funcObj.params[0] == null)
 			return '';
 
 		var gen = '{}'; // start as an object
-		var varNameReturnValue = funcObj.name;
-		var varName = funcObj.name.toLowerCase().replace('[]', '');
+		// var varNameReturnValue = funcObj.name;
+		// var varName = funcObj.name.toLowerCase().replace('[]', '');
 
-		var isArray = funcObj.name.indexOf('[]') != -1;
-		if (isArray)
-			gen = '[]'; // ha! it doesn't seem to be and object
+		// var isArray = funcObj.name.indexOf('[]') != -1;
+		// if (isArray)
+		// 	gen = '[]'; // ha! it doesn't seem to be and object
 
+		for (i in 0...funcObj.params.length) {
+			var _params = funcObj.params[i];
+			switch (_params.type) {
+				case 'string':
+					// sure what the type is
+					gen = '""';
+					out = '// (vars)\n';
+				default:
+					gen = '{}';
+					// trace("case '" + _params.type + "': trace ('" + _params.type + "');");
+			}
+			out += '\t\t';
+			out += 'const ${_params.name}: ${_params.type} = ${gen};';
+		}
 		// var params = '';
 		// if (funcObj.params[0] != null)
 		// 	params = '${funcObj.params[0].name.toLowerCase()}';
 
-		var out = '// FIXME: use "add missing properties"\n';
-		out += '\t\t';
-		out += 'const ${funcObj.params[0].name.toLowerCase()}: ${funcObj.params[0].type} = ${gen};';
 		return out;
 	}
 
@@ -262,7 +278,7 @@ class ConvertService {
 	 *
 	 * @param TypedObj
 	 */
-	static function getVarValueFromReturnValue(obj:TypedObj) {
+	function getVarValueFromReturnValue(obj:TypedObj) {
 		// warn(obj);
 
 		var gen = '{}'; // start as an object
@@ -275,7 +291,7 @@ class ConvertService {
 
 		var out = '';
 		if (!isArray)
-			out += '// FIXME: use "add missing properties"\n\t\t';
+			out += '// FIXME: use "add (all) missing properties" (return value)\n\t\t';
 
 		out += 'const ${varName}: ${varNameReturnValue} = ${gen};';
 		return out;
@@ -286,7 +302,7 @@ class ConvertService {
 	 *
 	 * @param obj
 	 */
-	static function getTitle(obj:FuncObj) {
+	function getTitle(obj:FuncObj) {
 		return '#${obj.name} should return ${obj.returnValue._string}';
 	}
 }

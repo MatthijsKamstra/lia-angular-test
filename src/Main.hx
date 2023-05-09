@@ -1,3 +1,4 @@
+import convert.ConvertService;
 import const.Config;
 import haxe.io.Path;
 import sys.io.Process;
@@ -73,7 +74,7 @@ class Main {
 			// do this first
 			if (file.indexOf('.service.ts') != -1) {
 				mute('Convert Service: `${file.split('/src')[1]}`', 1);
-				convert.ConvertService.init(file);
+				new ConvertService(file);
 				serviceArr.push(file);
 				Progress.update(file);
 			}

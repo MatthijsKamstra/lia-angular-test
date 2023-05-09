@@ -67,7 +67,7 @@ ${imports}
 fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 
 	let service: ${Strings.toUpperCamel(name)}Service;
-	let ${Strings.toLowerCamel(name)}Service: ${Strings.toUpperCamel(name)}Service;
+	let ${Strings.toLowerCamel(name)}Service: ${Strings.toUpperCamel(name)}Service; // [mck] might be removed in the future
 	let httpMock: HttpTestingController;
 
 	${vars}
@@ -78,7 +78,7 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 			providers: [${Strings.toUpperCamel(name)}Service]
 		});
 		service = TestBed.inject(${Strings.toUpperCamel(name)}Service);
-		${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service);
+		${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service); // [mck] might be removed in the future
 		httpMock = TestBed.inject(HttpTestingController);
 	});
 
