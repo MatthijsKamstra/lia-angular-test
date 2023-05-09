@@ -10,19 +10,6 @@ import utils.GeneratedBy;
 import utils.Copyright;
 
 class ConvertService {
-	public static var todo = [
-		//
-		'- [x] add generated message',
-		'- [x] add new copyright',
-		'- [x] remove old block comment and line comment',
-		'- [x] split code/extract code',
-		'- [x] extract constructor',
-		'- [x] extract constructor param',
-		'- [x] extract functions',
-		'- [x] extract functions params and types',
-		'- [x] extract functions return value',
-	];
-
 	/**
 	 *
 	 *
@@ -44,7 +31,7 @@ class ConvertService {
 		// start creating the spec of this file/service
 		var ts = new SpecService(className);
 		// add values
-		ts.addVariable('// add vars');
+		// ts.addVariable('// add vars');
 		// add functions
 		// ts.addFunction('// add functions');
 		// add imports
@@ -60,30 +47,22 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
-		// // this loop might not be needed, the next loop after this on might be better
-		// for (i in 0...OBJ.constructor.params.length) {
-		// 	var _obj = OBJ.constructor.params[i];
-		// 	// trace(_obj.type);
-		// 	// trace(map.exists(_obj.type));
-		// 	// trace(map);
-		// 	if (_obj.type == 'HttpClient') {
-		// 		// probably don't need that
-		// 		continue;
-		// 	}
-		// 	if (map.exists(_obj.type)) {
-		// 		ts.addImport('${map.get(_obj.type)}');
-		// 	}
-		// }
 		// There are some imports that are not needed, exclude them and show the rest
 		ts.addImport('// import directly from ${className}Service');
 		for (i in 0...OBJ.imports.length) {
 			var _val = OBJ.imports[i];
-			if (_val.indexOf('HttpClient') != -1)
+			if (_val.indexOf('HttpClient') != -1) {
+				// ignore
 				continue;
-			if (_val.indexOf('Observable') != -1)
+			}
+			if (_val.indexOf('Observable') != -1) {
+				// ignore
 				continue;
-			if (_val.indexOf('Injectable') != -1)
+			}
+			if (_val.indexOf('Injectable') != -1) {
+				// ignore
 				continue;
+			}
 			ts.addImport('${_val}');
 		}
 
@@ -118,6 +97,10 @@ class ConvertService {
 			}
 		}
 
+		// -----------------------------------------------------------
+		// create and save file
+		// -----------------------------------------------------------
+
 		// default typescript template
 		var content:String = //
 			GeneratedBy.message('ts') //
@@ -128,7 +111,7 @@ class ConvertService {
 			+ '\n\n';
 		// + '/**\n\n${originalContentNoComment}\n\n*/';
 
-		// write file
+		// correct filename
 		var templatePath = '${parent}/${newFileName}';
 		if (!Config.IS_OVERWRITE) {
 			// create a name that is destincable from orignal file
@@ -169,11 +152,11 @@ class ConvertService {
 
 		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
 
-		${funcURL}
-
 		${varValue}
 
 		${funcVarValue}
+
+		${funcURL}
 
 		${funcValue}
 
@@ -218,6 +201,30 @@ class ConvertService {
 	}
 
 	/**
+	 *
+	 *
+	 * @param arg0
+	 */
+	static function getFuncFrom(funcObj:FuncObj, varName:String) {
+		// warn(funcObj);
+
+		var varNameReturnValue = funcObj.returnValue.value;
+		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', '');
+
+		var params = '';
+		if (funcObj.params[0] != null)
+			params = '${funcObj.params[0].name.toLowerCase()}';
+
+		var out = '// create the service call\n';
+		out += '\t\t';
+		out += 'service.${funcObj.name}(${params}).subscribe(value => {
+			expect(value).toBe(${varName});
+			done();
+		});';
+		return out;
+	}
+
+	/**
 	 * [Description]
 	 * @param funcObj
 	 * @param varName
@@ -243,30 +250,6 @@ class ConvertService {
 		var out = '// FIXME: use "add missing properties"\n';
 		out += '\t\t';
 		out += 'const ${funcObj.params[0].name.toLowerCase()}: ${funcObj.params[0].type} = ${gen};';
-		return out;
-	}
-
-	/**
-	 *
-	 *
-	 * @param arg0
-	 */
-	static function getFuncFrom(funcObj:FuncObj, varName:String) {
-		// warn(funcObj);
-
-		var varNameReturnValue = funcObj.returnValue.value;
-		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', '');
-
-		var params = '';
-		if (funcObj.params[0] != null)
-			params = '${funcObj.params[0].name.toLowerCase()}';
-
-		var out = '// generate the service call\n';
-		out += '\t\t';
-		out += 'service.${funcObj.name}(${params}).subscribe(value => {
-			expect(value).toBe(${varName});
-			done();
-		});';
 		return out;
 	}
 
