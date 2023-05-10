@@ -81,11 +81,12 @@ class ConvertService {
 
 			var isGetter:Bool = (_func.name.indexOf('get') != -1) ? true : false;
 			var isSetter:Bool = (_func.name.indexOf('set') != -1) ? true : false;
-
+			var isObservable:Bool = (_func._content.indexOf('Observable') != -1) ? true : false;
 			// warn('is this func a getter: ' + isGetter);
 			// warn('is this func a setter: ' + isSetter);
+			// warn('is this func a isObservable: ' + isObservable);
 
-			if (isGetter || isSetter) {
+			if ((isGetter || isSetter) && !isObservable) {
 				// warn('getter/setter');
 				if (isGetter) {
 					mute('use getter test with return value "${_func.returnValue.type}"');
@@ -163,10 +164,20 @@ class ConvertService {
 		var varNameReturnValue = func.returnValue.value;
 		var varName = func.returnValue.value.toLowerCase().replace('[]', ' ');
 
-		var varValue = getVarValueFromReturnValue(func.returnValue);
+		// var varValue = getVarValueFromReturnValue(func.returnValue);
+
+		// TODO: maybe the return value of a function needs to better defined
+		// for now an quick and dirty fix
+		var __temp:Array<TypedObj> = [
+			{
+				name: '${func.returnValue.value.toLowerCase()}',
+				value: '',
+				type: '${func.returnValue.value}',
+				_content: ''
+			}
+		];
 
 		var funcValue = getFuncFrom(func, varName);
-		var funcVarValue = getVarValueFrom(func, varName);
 
 		var funcURL = '// URL used in class\n\t\t';
 		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
@@ -177,14 +188,17 @@ class ConvertService {
 
 		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
 
-		${varValue}
+		// Arrange
+		${createVarFromFunctionParam(func.params)}
 
-		${funcVarValue}
+		${createVarFromFunctionParam(__temp)}
 
 		${funcURL}
 
+		// Act
 		${funcValue}
 
+		// Assert
 		const mockReq = httpMock.expectOne(url);
 		expect(mockReq.request.url).toBe(url);
 		expect(mockReq.request.method).toBe("${(func.requestType)}");
@@ -230,7 +244,11 @@ class ConvertService {
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
 		if (matches[0] != null) {
-			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
 		}
 
 		var out = '';
@@ -252,7 +270,11 @@ class ConvertService {
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
 		if (matches[0] != null) {
-			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
 		}
 
 		var out = '';
@@ -334,7 +356,7 @@ class ConvertService {
 
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
-		${createVarFromFunctionParam(func)}
+		${createVarFromFunctionParam(func.params)}
 
 		// Act
 		service.${func.name}(${_param});
@@ -351,28 +373,35 @@ class ConvertService {
 	/**
 	 * [WARNING] very specific for project
 	 *
-	 * @param func
+	 * @param params
 	 * @return String
 	 */
-	function createVarFromFunctionParam(func:FuncObj):String {
+	function createVarFromFunctionParam(params:Array<TypedObj>):String {
 		var out = '';
-		for (i in 0...func.params.length) {
-			var _p = func.params[i];
+		for (i in 0...params.length) {
+			var _p = params[i];
 
 			switch (_p.type) {
-				// case 'string':
-				// 	trace('string');
+				case 'string':
+					out += 'const ${_p.name}: ${_p.type} = "";';
 				case 'ISort':
 					// make sure we don't have to do this over and over
-					out += 'const sort: ISort = {
+					out += 'const ${_p.name}: ISort = {
 			sortDir: SortDirectionEnum.ASC,
 			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
 		};';
 				case 'IPagination':
-					out += 'const pagination: IPagination = {
+					out += 'const ${_p.name}: IPagination = {
 			totalItems: 0,
 			pageNumber: 0,
 			pageSize: 0
+		};';
+				case 'IBanner':
+					out += 'const ${_p.name}: ${_p.type} = {
+			startDate: \'\',
+			endDate: \'\',
+			url: \'\',
+			message: \'\',
 		};';
 				default:
 					// TODO check array, object, etc
@@ -427,76 +456,65 @@ class ConvertService {
 		return out;
 	}
 
-	/**
-	 * get the values used in the functions (param)
-	 *
-	 * @param funcObj
-	 * @param varName
-	 */
-	function getVarValueFrom(funcObj:FuncObj, varName:String) {
-		// warn(funcObj);
-
-		var out = '// FIXME: use "add (all) missing properties" (vars)\n';
-
-		if (funcObj.params[0] == null)
-			return '';
-
-		var gen = '{}'; // start as an object
-		// var varNameReturnValue = funcObj.name;
-		// var varName = funcObj.name.toLowerCase().replace('[]', '');
-
-		// var isArray = funcObj.name.indexOf('[]') != -1;
-		// if (isArray)
-		// 	gen = '[]'; // ha! it doesn't seem to be and object
-
-		for (i in 0...funcObj.params.length) {
-			var _params = funcObj.params[i];
-			switch (_params.type) {
-				case 'string':
-					// sure what the type is
-					gen = '""';
-					out = '// (vars)\n';
-				default:
-					gen = '{}';
-					// trace("case '" + _params.type + "': trace ('" + _params.type + "');");
-			}
-			out += '\t\t';
-			out += 'const ${_params.name}: ${_params.type} = ${gen};';
-		}
-		// var params = '';
-		// if (funcObj.params[0] != null)
-		// 	params = '${funcObj.params[0].name.toLowerCase()}';
-
-		return out;
-	}
-
-	/**
-	 * create a const value to use in the tests
-	 *
-	 * @example
-	 * 			`Observable<IHelp>` --> `const ihelp: IHelp = {};`
-	 * 			`Observable<LightMeasurementDevice[]>` --> `const ischedules: ISchedules = {};`
-	 *
-	 * @param TypedObj
-	 */
-	function getVarValueFromReturnValue(obj:TypedObj) {
-		// warn(obj);
-
-		var gen = '{}'; // start as an object
-		var varNameReturnValue = obj.value;
-		var varName = obj.value.toLowerCase().replace('[]', '');
-
-		var isArray = obj.value.indexOf('[]') != -1;
-		if (isArray)
-			gen = '[]'; // ha! it doesn't seem to be and object
-
-		var out = '';
-		if (!isArray)
-			out += '// FIXME: use "add (all) missing properties" (return value)\n\t\t';
-
-		out += 'const ${varName}: ${varNameReturnValue} = ${gen};';
-		return out;
-	}
+	// /**
+	//  * get the values used in the functions (param)
+	//  *
+	//  * @param funcObj
+	//  * @param varName
+	//  */
+	// function getVarValueFrom(funcObj:FuncObj, varName:String) {
+	// 	// warn(funcObj);
+	// 	var out = '// FIXME: use "add (all) missing properties" (vars)\n';
+	// 	if (funcObj.params[0] == null)
+	// 		return '';
+	// 	var gen = '{}'; // start as an object
+	// 	// var varNameReturnValue = funcObj.name;
+	// 	// var varName = funcObj.name.toLowerCase().replace('[]', '');
+	// 	// var isArray = funcObj.name.indexOf('[]') != -1;
+	// 	// if (isArray)
+	// 	// 	gen = '[]'; // ha! it doesn't seem to be and object
+	// 	for (i in 0...funcObj.params.length) {
+	// 		var _params = funcObj.params[i];
+	// 		switch (_params.type) {
+	// 			case 'string':
+	// 				// sure what the type is
+	// 				gen = '""';
+	// 				out = '// (vars)\n';
+	// 			default:
+	// 				gen = '{}';
+	// 				// trace("case '" + _params.type + "': trace ('" + _params.type + "');");
+	// 		}
+	// 		out += '\t\t';
+	// 		out += 'const ${_params.name}: ${_params.type} = ${gen};';
+	// 	}
+	// 	// var params = '';
+	// 	// if (funcObj.params[0] != null)
+	// 	// 	params = '${funcObj.params[0].name.toLowerCase()}';
+	// 	return out;
+	// }
+	// /**
+	//  * create a const value to use in the tests
+	//  *
+	//  * @example
+	//  * 			`Observable<IHelp>` --> `const ihelp: IHelp = {};`
+	//  * 			`Observable<LightMeasurementDevice[]>` --> `const ischedules: ISchedules = {};`
+	//  *
+	//  * @param TypedObj
+	//  */
+	// function getVarValueFromReturnValue(obj:TypedObj) {
+	// 	// warn(obj);
+	// 	var gen = '{}'; // start as an object
+	// 	var varNameReturnValue = obj.value;
+	// 	var varName = obj.value.toLowerCase().replace('[]', '');
+	// 	var isArray = obj.value.indexOf('[]') != -1;
+	// 	if (isArray)
+	// 		gen = '[]'; // ha! it doesn't seem to be and object
+	// 	var out = '';
+	// 	if (!isArray)
+	// 		out += '// FIXME: use "add (all) missing properties" (return value)\n\t\t';
+	// 	out += 'const ${varName}: ${varNameReturnValue} = ${gen};';
+	// 	return out;
+	// }
 
 	/**
 	 * create a readable description of the test (?)
