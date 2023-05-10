@@ -208,7 +208,7 @@ class Extract {
 	 * @param val
 	 */
 	static function getReturnValues(val:String):TypedObj {
-		// warn(val);
+		// warn('getReturnValues: ' + val);
 
 		var _value = '';
 		var _type = 'void'; // use void when no return type is created
@@ -216,10 +216,11 @@ class Extract {
 			_value = val.split('<')[1].split('>')[0].trim();
 			_type = val.split('<')[0].trim();
 		}
-		if (val.indexOf('|') != -1) {
-			_value = val.split('|')[1].trim();
-			_type = val.split('|')[0].trim();
-		}
+		// TODO: what to do with or types????
+		// if (val.indexOf('|') != -1) {
+		// 	_value = val.split('|')[1].trim();
+		// 	_type = val.split('|')[0].trim();
+		// }
 		if (_value == '') {
 			_type = val.trim();
 		}

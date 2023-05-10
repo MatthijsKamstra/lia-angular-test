@@ -1,5 +1,6 @@
 package convert;
 
+import haxe.macro.Expr.ExprOf;
 import utils.RegEx;
 import AST;
 import const.Config;
@@ -43,6 +44,10 @@ class ConvertService {
 		// TODO: if `HttpClient` exists in map, we should add `imports: [HttpClientTestingModule],` otherwise it might not be needed!
 
 		// -----------------------------------------------------------
+		// update class vars
+		// -----------------------------------------------------------
+
+		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
 		ts.addImport('// import directly from ${className}Service');
@@ -74,24 +79,43 @@ class ConvertService {
 
 			log('${i}. - title test: ${getTitle(_func)}');
 
-			// warn(_func.returnValue);
-			switch (_func.returnValue.type) {
-				case 'void':
-					mute('use test with return value "void"');
-					ts.addFunction(createTestvoid(_func));
-				case 'string':
-					mute('use test with return value "string"');
-					ts.addFunction(createTestString(_func));
-				case 'Observable':
-					mute('use test with return value "Observable"');
-					ts.addFunction(createTestObservable(_func));
-				case 'boolean':
-					mute('use test with return value "boolean"');
-					ts.addFunction(createTestboolean(_func));
-				default:
-					warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
-						+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
-					ts.addFunction(createTestUnknown(_func));
+			var isGetter:Bool = (_func.name.indexOf('get') != -1) ? true : false;
+			var isSetter:Bool = (_func.name.indexOf('set') != -1) ? true : false;
+
+			// warn('is this func a getter: ' + isGetter);
+			// warn('is this func a setter: ' + isSetter);
+
+			if (isGetter || isSetter) {
+				// warn('getter/setter');
+				if (isGetter) {
+					mute('use getter test with return value "${_func.returnValue.type}"');
+					ts.addFunction(createTestGetter(_func));
+				}
+				if (isSetter) {
+					mute('use setter test with return value "${_func.returnValue.type}"');
+					ts.addFunction(createTestSetter(_func));
+				}
+			} else {
+				// warn('return type');
+				switch (_func.returnValue.type) {
+					case 'void':
+						mute('use test with return value "void"');
+						ts.addFunction(createTestvoid(_func));
+					case 'string':
+					case 'string | undefined':
+						mute('use test with return value "string"');
+						ts.addFunction(createTestString(_func));
+					case 'Observable':
+						mute('use test with return value "Observable"');
+						ts.addFunction(createTestObservable(_func));
+					case 'boolean':
+						mute('use test with return value "boolean"');
+						ts.addFunction(createTestboolean(_func));
+					default:
+						warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
+							+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
+						ts.addFunction(createTestUnknown(_func));
+				}
 			}
 		}
 
@@ -174,13 +198,30 @@ class ConvertService {
 	}
 
 	function createTestString(func:FuncObj):String {
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
+		}
+
 		var out = '';
-		out += createTestDisabled(func);
+		out += '// Test with return type `${func.returnValue.type}`\n\t';
+		out += '// [WIP] test is default disabled (`xit`) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'xit(\'${getTitle(func)}\', () => {
+		const result: ${func.returnValue.type} = service.${func.name}();
+		expect(result).toBe(${_return});
+		// expect(result).toBe(true);
+	});
+';
 		return out;
 	}
 
 	function createTestvoid(func:FuncObj):String {
-		var out = createTestUnknown(func);
+		var out = '';
+		var out = createTestDisabled(func);
 		return out;
 	}
 
@@ -189,7 +230,7 @@ class ConvertService {
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
 		if (matches[0] != null) {
-			_return = matches[0].replace('return', '').replace(';', '').trim();
+			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
 		}
 
 		var out = '';
@@ -211,7 +252,7 @@ class ConvertService {
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
 		if (matches[0] != null) {
-			_return = matches[0].replace('return', '').replace(';', '').trim();
+			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
 		}
 
 		var out = '';
@@ -229,6 +270,121 @@ class ConvertService {
 	}
 
 	/**
+	 * [Description]
+	 * @param func
+	 * @return String
+	 */
+	function createTestGetter(func:FuncObj):String {
+		// get return .... test!
+		var _return = '';
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		if (matches[0] != null) {
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
+		}
+
+		var out = '';
+		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
+		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'it(\'${getTitle(func)}\', () => {
+		const result: ${func.returnValue.type} = service.${func.name}();
+		expect(result).toBe(${_return});
+	});
+';
+		return out;
+	}
+
+	/**
+	 *
+	 *
+	 * @param func
+	 * @return String
+	 */
+	function createTestSetter(func:FuncObj):String {
+		// get return .... test!
+		var _return = '';
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		if (matches[0] != null) {
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
+		}
+
+		var _param = '';
+		for (i in 0...func.params.length) {
+			var _p = func.params[i];
+			// trace(_p);
+			_param += '${_p.name}';
+		}
+
+		var out = '';
+
+		// out += '// ${haxe.Json.stringify(func)}';
+
+		out += '// Test SETTER with return type `${func.returnValue.type}`\n\t';
+		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
+		${createVarFromFunctionParam(func)}
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
+		const result: ${func.params[0].type} = service.${func.name.replace('set', 'get')}();
+		expect(result).toBe(${func.params[0].name});
+	});
+';
+
+		return out;
+	}
+
+	/**
+	 * [WARNING] very specific for project
+	 *
+	 * @param func
+	 * @return String
+	 */
+	function createVarFromFunctionParam(func:FuncObj):String {
+		var out = '';
+		for (i in 0...func.params.length) {
+			var _p = func.params[i];
+
+			switch (_p.type) {
+				// case 'string':
+				// 	trace('string');
+				case 'ISort':
+					// make sure we don't have to do this over and over
+					out += 'const sort: ISort = {
+			sortDir: SortDirectionEnum.ASC,
+			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+		};';
+				case 'IPagination':
+					out += 'const pagination: IPagination = {
+			totalItems: 0,
+			pageNumber: 0,
+			pageSize: 0
+		};';
+				default:
+					// TODO check array, object, etc
+					out += 'const ${_p.name}: ${_p.type} = {};';
+					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
+			}
+		}
+
+		return out;
+	}
+
+	/**
 	 * disabled test, without guessing
 	 *
 	 * @param func
@@ -237,9 +393,8 @@ class ConvertService {
 	function createTestDisabled(func:FuncObj):String {
 		var out = '';
 		out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '// this test is default disabled (`xit`) \n\t';
+		out += '// [WIP] test is default disabled (`xit`) \n\t';
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-
 		out += 'xit(\'${getTitle(func)}\', () => {
 		// expect(result).toBe(true);
 	});

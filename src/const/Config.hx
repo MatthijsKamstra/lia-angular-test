@@ -9,7 +9,7 @@ class Config {
 	 * 0.0.5 - service typedef update, POST and GET, multiple functions, data in test needed
 	 * 0.0.6 - test based upon return types (bool, string, etc)
 	 * 0.0.7 - fix bug from bigger classes
-	 * 0.0.8 - remove time from generation, getter setter tests
+	 * 0.0.8 - remove time from generation, getter setter tests, default var values added
 	 *
 	 */
 	public static final VERSION:String = '0.0.8';

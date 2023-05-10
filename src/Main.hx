@@ -42,7 +42,7 @@ class Main {
 		// mute('fileArr.length: ${fileArr.length / 4}', 1);
 		mute('ignoreArr: $ignoreArr', 1);
 
-		info('Collect data');
+		info('DATA');
 		// do something clever
 		convertFiletype();
 
