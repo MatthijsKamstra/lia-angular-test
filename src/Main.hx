@@ -74,7 +74,7 @@ class Main {
 			// do this first
 			if (file.indexOf('.service.ts') != -1) {
 				mute('Convert Service: `${file.split('/src')[1]}`', 1);
-				new ConvertService(file);
+				var convertService = new ConvertService(file);
 				serviceArr.push(file);
 				Progress.update(file);
 			}

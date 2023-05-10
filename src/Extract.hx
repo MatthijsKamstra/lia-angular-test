@@ -187,7 +187,7 @@ class Extract {
 					name: _name,
 					returnValue: getReturnValues(_return),
 					params: _paramArr,
-					_string: _str,
+					_content: _str,
 				}
 				OBJ.functions.push(_funcObj);
 
@@ -227,7 +227,7 @@ class Extract {
 			value: _value,
 			type: _type,
 			access: '', // private|public|none
-			_string: val,
+			_content: val,
 		};
 	}
 
@@ -271,7 +271,7 @@ class Extract {
 			name: _name,
 			value: _name,
 			type: _type,
-			_string: val
+			_content: val
 		}
 	}
 }

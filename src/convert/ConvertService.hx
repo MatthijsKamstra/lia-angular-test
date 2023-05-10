@@ -1,17 +1,16 @@
 package convert;
 
-import remove.RemoveComment;
-import const.Config;
-import spec.SpecService;
-import haxe.Json;
-import utils.GeneratedBy;
-import utils.Copyright;
 import AST;
+import const.Config;
+import remove.RemoveComment;
+import spec.SpecService;
+import utils.Copyright;
+import utils.GeneratedBy;
 
 class ConvertService {
 	/**
 	 * constructor
-	 * @param path
+	 * @param path to original file (at this moment probably a service)
 	 */
 	public function new(path:String) {
 		// read the content of the file
@@ -45,23 +44,23 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
-		// There are some imports that are not needed, exclude them and show the rest
 		ts.addImport('// import directly from ${className}Service');
 		for (i in 0...OBJ.imports.length) {
-			var _val = OBJ.imports[i];
-			if (_val.indexOf('HttpClient') != -1) {
+			var _import = OBJ.imports[i];
+			// There are some imports that are not needed, exclude them and show the rest
+			if (_import.indexOf('HttpClient') != -1) {
 				// ignore
 				continue;
 			}
-			if (_val.indexOf('Observable') != -1) {
+			if (_import.indexOf('Observable') != -1) {
 				// ignore
 				continue;
 			}
-			if (_val.indexOf('Injectable') != -1) {
+			if (_import.indexOf('Injectable') != -1) {
 				// ignore
 				continue;
 			}
-			ts.addImport('${_val}');
+			ts.addImport('${_import}');
 		}
 
 		// -----------------------------------------------------------
@@ -302,6 +301,6 @@ class ConvertService {
 	 * @param obj
 	 */
 	function getTitle(obj:FuncObj) {
-		return '#${obj.name} should return ${obj.returnValue._string}';
+		return '#${obj.name} should return ${obj.returnValue._content}';
 	}
 }
