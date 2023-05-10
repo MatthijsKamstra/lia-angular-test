@@ -1,5 +1,6 @@
 package convert;
 
+import utils.RegEx;
 import AST;
 import const.Config;
 import remove.RemoveComment;
@@ -129,7 +130,8 @@ class ConvertService {
 	// ____________________________________ create test based upon return type ____________________________________
 
 	function createTestObservable(func:FuncObj):String {
-		var out = '// test with return type Observable\n\t';
+		var out = '';
+		out += '// Test with return type `Observable`\n\t';
 		// 	out += 'it(\'${getTitle(func)}\', () => {
 		// 	expect(true).toBe(true);
 		// });';
@@ -172,11 +174,8 @@ class ConvertService {
 	}
 
 	function createTestString(func:FuncObj):String {
-		var out = '// test with return type string\n\t';
-		out += 'it(\'${getTitle(func)}\', () => {
-		// expect(true).toBe(true);
-	});
-';
+		var out = '';
+		out += createTestDisabled(func);
 		return out;
 	}
 
@@ -186,14 +185,63 @@ class ConvertService {
 	}
 
 	function createTestboolean(func:FuncObj):String {
-		var out = createTestUnknown(func);
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0].replace('return', '').replace(';', '').trim();
+		}
+
+		var out = '';
+		// out += '// Test with return type `${func.returnValue.type}`\n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'it(\'${getTitle(func)}\', () => {
+		const result: ${func.returnValue.type} = service.${func.name}();
+		expect(result).toBe(${_return});
+		// expect(result).toBe(true);
+	});
+';
+
 		return out;
 	}
 
 	function createTestUnknown(func:FuncObj):String {
-		var out = '// test with return type UNKNOWN ${func.requestType}\n\t';
-		out += 'it(\'${getTitle(func)}\', () => {
-		// expect(true).toBe(true);
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0].replace('return', '').replace(';', '').trim();
+		}
+
+		var out = '';
+		out += '// Test with return type `${func.returnValue.type}` (UNKNOWN)\n\t';
+		out += '// [WIP] test is default disabled (`xit`) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'xit(\'${getTitle(func)}\', () => {
+		const result: ${func.returnValue.type} = service.${func.name}();
+		expect(result).toBe(${_return});
+		// expect(result).toBe(true);
+	});
+';
+		return out;
+	}
+
+	/**
+	 * disabled test, without guessing
+	 *
+	 * @param func
+	 * @return String
+	 */
+	function createTestDisabled(func:FuncObj):String {
+		var out = '';
+		out += '// Test with return type `${func.returnValue.type}`\n\t';
+		out += '// this test is default disabled (`xit`) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+
+		out += 'xit(\'${getTitle(func)}\', () => {
+		// expect(result).toBe(true);
 	});
 ';
 		return out;

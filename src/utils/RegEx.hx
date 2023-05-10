@@ -3,6 +3,9 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// for example: `return environment.apiEnabled;`
+	public static var getReturn = ~/(return)(.)*;/g;
+
 	// find something that is called URL/url
 	public static var hasURL = ~/(url|URL)(.)*/g;
 
