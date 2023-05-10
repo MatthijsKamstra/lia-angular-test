@@ -1,13 +1,12 @@
 package convert;
 
-import Extract.TypedObj;
-import Extract.FuncObj;
 import remove.RemoveComment;
 import const.Config;
 import spec.SpecService;
 import haxe.Json;
 import utils.GeneratedBy;
 import utils.Copyright;
+import AST;
 
 class ConvertService {
 	/**
@@ -176,7 +175,7 @@ class ConvertService {
 	function createTestString(func:FuncObj):String {
 		var out = '// test with return type string\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
-		expect(true).toBe(true);
+		// expect(true).toBe(true);
 	});
 ';
 		return out;
@@ -195,7 +194,7 @@ class ConvertService {
 	function createTestUnknown(func:FuncObj):String {
 		var out = '// test with return type UNKNOWN ${func.requestType}\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
-		expect(true).toBe(true);
+		// expect(true).toBe(true);
 	});
 ';
 		return out;

@@ -3,6 +3,7 @@ package;
 import sys.FileSystem;
 import haxe.Json;
 import utils.RegEx;
+import AST;
 
 class Extract {
 	public static final OBJ_DEFAULT = {
@@ -57,20 +58,9 @@ class Extract {
 		var matches = RegEx.getMatches(RegEx.hasURL, cleandedStr);
 		OBJ.URL = matches[0]; // ugghhhhh, fix later
 
-		// TODO: probably better to use the constructor.param[x].type == HttpClient
-		// but not available at this point
-		// assume `http : HttpClient`
-		// if (str.indexOf('http.get') != -1) {
-		// 	OBJ.isGET = true;
-		// }
-		// if (str.indexOf('http.post') != -1) {
-		// 	OBJ.isPOST = true;
-		// }
-
 		// -----------------------------------------------------------------
 		// Find imports
 		// -----------------------------------------------------------------
-
 		var matches = RegEx.getMatches(RegEx.classImports, content);
 		if (matches.length > 0) {
 			// log(matches);
@@ -87,57 +77,56 @@ class Extract {
 				// warn(name);
 				// importMap.set('${name}', match);
 			}
+			// log(OBJ);
+			// info('importMap: ' + importMap);
 		}
-		// log(OBJ);
-		// info('importMap: ' + importMap);
 
 		// -----------------------------------------------------------------
 		// Find constructor
 		// -----------------------------------------------------------------
-
-		// log('"constructor(" :: ' + str.indexOf('constructor('));
-		// log('") { }" :: ' + str.indexOf(') { }'));
-
 		var matches = RegEx.getMatches(RegEx.classConstructor, str);
-		var constructorParamString = (matches[0]) //
-			.replace('constructor', '') // remove 'constructor' word
-			.replace('(', '') // remove '('
-			.replace('private', '') // FIXME remove 'private' (not sure, might need this in the future)
-			.replace('public', '') // FIXME remove 'public' (not sure, might need this in the future)
-			.replace('\t', '') // remove tab
-			.replace('\n', ''); // remove enter/return
-		// log(constructorParamString);
-		var constructorParamArr = constructorParamString.split(',');
-		// log(constructorParamArr);
+		// not all classes have a constructor, check for it
+		if (matches.length > 0) {
+			var constructorParamString = (matches[0]) //
+				.replace('constructor', '') // remove 'constructor' word
+				.replace('(', '') // remove '('
+				.replace('private', '') // FIXME remove 'private' (not sure, might need this in the future)
+				.replace('public', '') // FIXME remove 'public' (not sure, might need this in the future)
+				.replace('\t', '') // remove tab
+				.replace('\n', ''); // remove enter/return
+			// log(constructorParamString);
+			var constructorParamArr = constructorParamString.split(',');
+			// log(constructorParamArr);
 
-		// private|public
-		// param name
-		// param type
-		var constrObj = {
-			constructor: {
-				params: [
-					{
-						name: 'test',
-						type: 'foo'
-					}
-				]
+			// private|public
+			// param name
+			// param type
+			var constrObj = {
+				constructor: {
+					params: [
+						{
+							name: 'test',
+							type: 'foo'
+						}
+					]
+				}
+			};
+			constrObj.constructor.params.pop(); // remove example
+			for (i in 0...constructorParamArr.length) {
+				var _con = constructorParamArr[i].trim();
+				// trace(_con);
+				if (_con == '')
+					continue;
+
+				var _obj:TypedObj = convertParams(_con);
+
+				constrObj.constructor.params.push(_obj);
 			}
-		};
-		constrObj.constructor.params.pop(); // remove example
-		for (i in 0...constructorParamArr.length) {
-			var _con = constructorParamArr[i].trim();
-			// trace(_con);
-			if (_con == '')
-				continue;
+			// log(obj);
 
-			var _obj:TypedObj = convertParams(_con);
-
-			constrObj.constructor.params.push(_obj);
+			OBJ.constructor = constrObj.constructor;
+			// log(OBJ);
 		}
-		// log(obj);
-
-		OBJ.constructor = constrObj.constructor;
-		// log(OBJ);
 
 		// -----------------------------------------------------------------
 		// Find functions
@@ -156,7 +145,7 @@ class Extract {
 			var _str = arr[i];
 			// trace('${i}: ' + _str.trim());
 			if (_str.indexOf('):') != -1) {
-				info('${i}. looks like a function');
+				// info('${i}. looks like a function');
 
 				// private|public
 				var _access = (_str.indexOf('private') != -1) ? 'private' : 'public';
@@ -211,7 +200,10 @@ class Extract {
 	}
 
 	/**
-	 * extract `Observable<IHelp>` into `Observable` and `IHelp`
+	 * extract `: Observable<IHelp>` into `Observable` and `IHelp`
+	 * extract `: Foobar` into `Foobar`
+	 * extract `: Foobar | string` into `Foobar` and `string`
+	 * extract `: Foobar[]` into `Foobar` and `[]`
 	 *
 	 * @param val
 	 */
@@ -282,23 +274,4 @@ class Extract {
 			_string: val
 		}
 	}
-}
-
-typedef FuncObj = {
-	var URL:String; // get this specific url for this function
-	var access:String; // private|public|none
-	var name:String;
-	var returnValue:TypedObj;
-	var params:Array<TypedObj>;
-	var _string:String; // the original value
-	var requestType:String; // POST|GET
-}
-
-//  Observable<IConfigSettings>
-typedef TypedObj = {
-	@:optional var access:String; // private|public|none|null (not for return types)
-	@:optional var name:String; // not sure
-	var value:String; // IConfigSettings
-	var type:String; // Observable, Boolean, String, whatever,
-	var _string:String; // the original value: Observable<IConfigSettings>
 }
