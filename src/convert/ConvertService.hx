@@ -401,15 +401,42 @@ class ConvertService {
 
 			switch (_p.type) {
 				case 'string':
-					out += 'const ${_p.name}: ${_p.type} = "";';
+					out += 'const ${_p.name}: ${_p.type} = "";\n';
+				case 'IUser':
+					// make sure we don't have to do this over and over
+					out += 'const ${_p.name}: ${_p.type} = {
+			username: \'\',
+			roles: {
+				ROLE_ADMIN: true,
+				ROLE_MANAGER: true,
+				ROLE_READONLY: true,
+			},
+			token: \'\',
+			organisation: \'\',
+			domains: {
+				TARIFF_SWITCHING: true,
+				COMMON: true,
+				PUBLIC_LIGHTING: true,
+			},
+			substationManagement: false
+		};';
+				case 'ISettings':
+					// make sure we don't have to do this over and over
+					out += 'const ${_p.name}: ${_p.type} = {
+			organisationLocationLatitude: 0,
+			organisationLocationLongitude: 0,
+			organisationPrefix: \'\',
+			privacyStatementFile: \'\',
+			scheduleCodeSeed: 0
+		};';
 				case 'ISort':
 					// make sure we don't have to do this over and over
-					out += 'const ${_p.name}: ISort = {
+					out += 'const ${_p.name}: ${_p.type} = {
 			sortDir: SortDirectionEnum.ASC,
 			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
 		};';
 				case 'IPagination':
-					out += 'const ${_p.name}: IPagination = {
+					out += 'const ${_p.name}: ${_p.type} = {
 			totalItems: 0,
 			pageNumber: 0,
 			pageSize: 0
@@ -459,13 +486,14 @@ class ConvertService {
 		// warn(funcObj);
 
 		var varNameReturnValue = funcObj.returnValue.value;
-		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', '');
+		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', ' ');
 
 		var params = '';
 		if (funcObj.params[0] != null)
 			params = '${funcObj.params[0].name}';
 
 		var out = '// create the service call\n';
+		// out += '${createVarFromFunctionParam(funcObj.params)}';
 		out += '\t\t';
 		out += 'service.${funcObj.name}(${params}).subscribe(value => {
 			expect(value).toBe(${varName});
