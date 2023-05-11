@@ -107,9 +107,9 @@ class ConvertService {
 					ts.addFunction(createTestSetter(_func));
 				}
 			} else {
-				warn('return type');
-				warn(_func.returnValue);
-				trace(_func.returnValue.type, _func.name);
+				// warn('return type');
+				// warn(_func.returnValue);
+				// trace(_func.returnValue.type, _func.name);
 				switch (_func.returnValue.type) {
 					case 'void':
 						mute('use test with return value "void"');
@@ -490,8 +490,14 @@ class ConvertService {
 		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', ' ');
 
 		var params = '';
-		if (funcObj.params[0] != null)
-			params = '${funcObj.params[0].name}';
+		// loop
+		for (i in 0...funcObj.params.length) {
+			var _p = funcObj.params[i];
+			params += '${_p.name}';
+			if ((i + 1) < funcObj.params.length) {
+				params += ', ';
+			}
+		}
 
 		var out = '// create the service call\n';
 		// out += '${createVarFromFunctionParam(funcObj.params)}';
