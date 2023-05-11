@@ -48,24 +48,34 @@ class ConvertService {
 		// -----------------------------------------------------------
 
 		// -----------------------------------------------------------
+		// update constructor
+		// -----------------------------------------------------------
+		log(OBJ.constructor);
+		// ts.addConstructor('// constructor');
+		for (i in 0...OBJ.constructor.params.length) {
+			var _constructor = OBJ.constructor.params[i];
+			// trace(_constructor);
+			if (_constructor.type.indexOf('HttpClient') != -1)
+				continue;
+			ts.addConstructor('\tlet ${_constructor.name}: ${_constructor.type};');
+			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
+		}
+
+		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
 		ts.addImport('// import directly from ${className}Service');
 		for (i in 0...OBJ.imports.length) {
 			var _import = OBJ.imports[i];
 			// There are some imports that are not needed, exclude them and show the rest
-			if (_import.indexOf('HttpClient') != -1) {
-				// ignore
+			// ignore
+			if (_import.indexOf('HttpClient') != -1)
 				continue;
-			}
-			if (_import.indexOf('Observable') != -1) {
-				// ignore
+			if (_import.indexOf('Observable') != -1)
 				continue;
-			}
-			if (_import.indexOf('Injectable') != -1) {
-				// ignore
+			if (_import.indexOf('Injectable') != -1)
 				continue;
-			}
+			// not ignored
 			ts.addImport('${_import}');
 		}
 
@@ -131,7 +141,8 @@ class ConvertService {
 			+ Copyright.init('ts') //
 			+ '\n\n' //
 			+ ts.create() //
-			+ '\n\n';
+			+ '';
+
 		// + '/**\n\n${originalContentNoComment}\n\n*/';
 
 		// correct filename
@@ -146,7 +157,7 @@ class ConvertService {
 		} else {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
-			sys.io.File.saveContent(templatePath, content);
+			sys.io.File.saveContent(templatePath, content.replace('\n\t\n', '\n'));
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
@@ -308,13 +319,20 @@ class ConvertService {
 				.trim();
 		}
 
+		// warn(createVarFromFunctionParam(func.params));
+		var _param = '';
+		for (i in 0...func.params.length) {
+			var _p = func.params[i];
+			_param = '${func.params[0].name}';
+		}
+
 		var out = '';
 		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
 		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-
 		out += 'it(\'${getTitle(func)}\', () => {
-		const result: ${func.returnValue.type} = service.${func.name}();
+		${createVarFromFunctionParam(func.params)}
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		expect(result).toBe(${_return});
 	});
 ';

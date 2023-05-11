@@ -7,7 +7,8 @@ class SpecService {
 	@:isVar public var functionsArray(get, set):Array<String> = [];
 	@:isVar public var servicesArray(get, set):Array<String> = [];
 	@:isVar public var importArray(get, set):Array<String> = [];
-	@:isVar public var onInitArray(get, set):Array<String> = [];
+	@:isVar public var constructorArray(get, set):Array<String> = [];
+	@:isVar public var testBedArray(get, set):Array<String> = [];
 
 	public function new(type:String) {
 		this.type = type;
@@ -42,7 +43,25 @@ class SpecService {
 			}
 		}
 
-		return typescript(this.type, vars, funcs, '', imp);
+		var _constructor = '';
+		for (i in 0...constructorArray.length) {
+			var _constructorArray = constructorArray[i];
+			_constructor += _constructorArray;
+			if (i < constructorArray.length - 1) {
+				_constructor += '\n';
+			}
+		}
+
+		var _testBed = '';
+		for (i in 0...testBedArray.length) {
+			var _testBedArray = testBedArray[i];
+			_testBed += _testBedArray;
+			if (i < testBedArray.length - 1) {
+				_testBed += '\n';
+			}
+		}
+
+		return typescript(this.type, vars, funcs, imp, _constructor, _testBed);
 	}
 
 	/**
@@ -50,12 +69,13 @@ class SpecService {
 	 * @param name
 	 * @param vars
 	 * @param funcs
-	 * @param injects
 	 * @param imports
-	 * @param onInit
+	 * @param constructor
+	 * @param testBed
 	 * @return String
 	 */
-	static public function typescript(name:String, vars:String = '', funcs:String = '', injects:String = '', imports:String = '', onInit:String = ''):String {
+	static public function typescript(name:String, vars:String = '', funcs:String = '', imports:String = '', constructor:String = '',
+			testBed:String = ''):String {
 		var template = '
 import { TestBed } from \'@angular/core/testing\';
 import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';
@@ -68,6 +88,8 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 
 	let service: ${Strings.toUpperCamel(name)}Service;
 	let ${Strings.toLowerCamel(name)}Service: ${Strings.toUpperCamel(name)}Service; // [mck] might be removed in the future
+${constructor}
+
 	let httpMock: HttpTestingController;
 
 	${vars}
@@ -79,6 +101,7 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 		});
 		service = TestBed.inject(${Strings.toUpperCamel(name)}Service);
 		${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service); // [mck] might be removed in the future
+${testBed}
 		httpMock = TestBed.inject(HttpTestingController);
 	});
 
@@ -91,7 +114,6 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 	});
 
 	${funcs}
-
 });
 ';
 
@@ -125,6 +147,16 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 		 */
 
 		return template;
+	}
+
+	// ____________________________________ add ____________________________________
+
+	public function addConstructor(arg0:String) {
+		this.constructorArray.push(arg0);
+	}
+
+	public function addTestbed(arg0:String) {
+		this.testBedArray.push(arg0);
 	}
 
 	public function addVariable(arg0:String) {
@@ -173,11 +205,19 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 		return importArray = value;
 	}
 
-	function get_onInitArray():Array<String> {
-		return onInitArray;
+	function get_constructorArray():Array<String> {
+		return constructorArray;
 	}
 
-	function set_onInitArray(value:Array<String>):Array<String> {
-		return onInitArray = value;
+	function set_constructorArray(value:Array<String>):Array<String> {
+		return constructorArray = value;
+	}
+
+	function get_testBedArray():Array<String> {
+		return testBedArray;
+	}
+
+	function set_testBedArray(value:Array<String>):Array<String> {
+		return testBedArray = value;
 	}
 }
