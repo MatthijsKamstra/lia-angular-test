@@ -144,7 +144,15 @@ class Extract {
 		for (i in 0...arr.length) {
 			var _str = arr[i];
 			// trace('${i}: ' + _str.trim());
-			if (_str.indexOf('):') != -1) {
+
+			// ignore contstructor for now
+			if (_str.indexOf('constructor') != -1)
+				continue;
+
+			if (_str.indexOf(') {') != -1) {
+				trace('might be a function without a return type or void');
+			}
+			if (_str.indexOf('):') != -1 || _str.indexOf(') {') != -1) {
 				// info('${i}. looks like a function');
 
 				// private|public
@@ -154,7 +162,11 @@ class Extract {
 				var _name = _str.replace('public', '').replace('public', '').split('(')[0].trim();
 
 				// get return value
-				var _return = _str.split('):')[1].split('{')[0].trim();
+				// check for sort return type
+				var _return = 'void';
+				if (_str.indexOf('):') != -1) {
+					_return = _str.split('):')[1].split('{')[0].trim();
+				}
 
 				// warn(_str);
 				// warn(_return);
@@ -194,7 +206,6 @@ class Extract {
 				// trace(_funcObj);
 			}
 		}
-
 		info('end extract');
 		// log(OBJ);
 	}
