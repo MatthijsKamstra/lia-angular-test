@@ -109,12 +109,12 @@ class ConvertService {
 			} else {
 				warn('return type');
 				warn(_func.returnValue);
+				trace(_func.returnValue.type, _func.name);
 				switch (_func.returnValue.type) {
 					case 'void':
 						mute('use test with return value "void"');
 						ts.addFunction(createTestvoid(_func));
-					case 'string':
-					case 'string | undefined':
+					case 'string', 'string | undefined':
 						mute('use test with return value "string"');
 						ts.addFunction(createTestString(_func));
 					case 'Observable':
