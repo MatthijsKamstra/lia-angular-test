@@ -221,13 +221,16 @@ class Extract {
 		// 	_value = val.split('|')[1].trim();
 		// 	_type = val.split('|')[0].trim();
 		// }
+
+		// make sure that return type '' is void
 		if (_value == '') {
-			_type = val.trim();
+			_type = (val.trim() == '') ? 'void' : val.trim();
 		}
 		return {
+			name: '_${_type.toLowerCase()}', // to make sure we can use it when generating test... but not correclty in use
 			value: _value,
 			type: _type,
-			access: '', // private|public|none
+			access: 'none', // private|public|none
 			_content: val,
 		};
 	}

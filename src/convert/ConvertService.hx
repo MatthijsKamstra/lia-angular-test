@@ -50,7 +50,7 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// update constructor
 		// -----------------------------------------------------------
-		log(OBJ.constructor);
+		// log(OBJ.constructor);
 		// ts.addConstructor('// constructor');
 		for (i in 0...OBJ.constructor.params.length) {
 			var _constructor = OBJ.constructor.params[i];
@@ -107,7 +107,8 @@ class ConvertService {
 					ts.addFunction(createTestSetter(_func));
 				}
 			} else {
-				// warn('return type');
+				warn('return type');
+				warn(_func.returnValue);
 				switch (_func.returnValue.type) {
 					case 'void':
 						mute('use test with return value "void"');
