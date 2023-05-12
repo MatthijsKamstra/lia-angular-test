@@ -337,12 +337,16 @@ class ConvertService {
 				.trim();
 		}
 
-		warn(func);
+		// warn(func);
 		// warn(createVarFromFunctionParam(func.params));
-		var _param = '';
+		var params = '';
+		// loop
 		for (i in 0...func.params.length) {
 			var _p = func.params[i];
-			_param = '${_p.name}';
+			params += '${_p.name}';
+			if ((i + 1) < func.params.length) {
+				params += ', ';
+			}
 		}
 
 		var out = '';
@@ -351,7 +355,7 @@ class ConvertService {
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		const result: ${func.returnValue.type} = service.${func.name}(${params});
 		expect(result).toBe(${_return});
 	});
 ';
@@ -554,6 +558,52 @@ class ConvertService {
 			pageSize: 0,
 			totalItems: 0,
 			totalPages: 0
+		};';
+				case 'ISortedData':
+					out += 'const ${_p.name}: ${_p.type} = {
+			currentPage: 0,
+			pageSize: 0,
+			sortDir: SortDirectionEnum.ASC,
+			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+		};';
+				case 'IPage':
+					out += 'const ${_p.name}: ${_p.type} = {
+			contents: [],
+			totalItems: 0,
+			totalPages: 0,
+			pageSize: 0
+		};';
+				case 'IGroup':
+					out += 'const ${_p.name}: ${_p.type} =  {
+			id: 0,
+			organisationIdentification: \'\',
+			groupIdentification: \'\',
+			description: \'\',
+			deviceIdentifications: [],
+			lightSchedule: null,
+			tariffSchedule: null,
+			lightMeasurementDevice: null,
+			groupType: 0,
+			deviceFilter: null
+		};';
+				case 'ISchedulesContent':
+					out += 'const ${_p.name}: ${_p.type} =  {
+			astronomicalSunriseOffset: 0,
+			astronomicalSunsetOffset: 0,
+			defaultSchedule: false,
+			description: \'\',
+			id: 0,
+			relayFunctions: [],
+			scheduleEntries: [],
+			success: false,
+			superUser: false,
+			template: false,
+			usedByDevice: false,
+			usedByGroup: false,
+			usedBySubstation: false,
+			code: \'\',
+			color: \'\',
+			name: \'\'
 		};';
 				default:
 					// TODO check array, object, etc
