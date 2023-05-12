@@ -283,10 +283,15 @@ class Extract {
 	 */
 	static function convertParams(val:String):TypedObj {
 		// log(val);
-		var _access = (val.indexOf('private') != -1) ? 'private' : 'public';
+		var _name = '';
+		var _type = '';
+		var _access = '';
+		_access = (val.indexOf('private') != -1) ? 'private' : 'public';
 		_access = (val.indexOf('protected') != -1) ? 'protected' : 'public';
-		var _name = val.split(':')[0].trim();
-		var _type = val.split(':')[1].trim();
+		if (val.indexOf(':') != -1) {
+			_name = val.split(':')[0].trim();
+			_type = val.split(':')[1].trim();
+		}
 		return {
 			access: _access,
 			name: _name,

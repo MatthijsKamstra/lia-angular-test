@@ -607,7 +607,8 @@ class ConvertService {
 		};';
 				default:
 					// TODO check array, object, etc
-					out += '// const ${_p.name}: ${_p.type} = {};\n\t\t';
+					out += '// FIXME: add (all) missing properties \n\t\t';
+					out += 'const ${_p.name}: ${_p.type} = {};\n\t\t';
 					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
 			}
 		}
