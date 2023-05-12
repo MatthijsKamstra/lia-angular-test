@@ -249,7 +249,10 @@ class ConvertService {
 		var _param = '';
 		for (i in 0...func.params.length) {
 			var _p = func.params[i];
-			_param = '${func.params[0].name}';
+			_param += '${_p.name}';
+			if ((i + 1) < func.params.length) {
+				_param += ', ';
+			}
 		}
 
 		var out = '';
