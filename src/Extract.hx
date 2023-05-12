@@ -56,6 +56,7 @@ class Extract {
 
 		// URL
 		var matches = RegEx.getMatches(RegEx.hasURL, cleandedStr);
+		// warn(matches);
 		OBJ.URL = matches[0]; // ugghhhhh, fix later
 
 		// -----------------------------------------------------------------
@@ -177,6 +178,7 @@ class Extract {
 				// URL
 				var matches = RegEx.getMatches(RegEx.hasURL, _str);
 				var _URL = ''; // ugghhhhh, fix later
+				// warn(matches);
 				if (matches[0] != null)
 					_URL = matches[0]; // ugghhhhh, fix later
 

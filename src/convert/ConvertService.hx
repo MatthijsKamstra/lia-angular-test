@@ -246,8 +246,22 @@ class ConvertService {
 	}
 
 	function createTestvoid(func:FuncObj):String {
+		var _param = '';
+		for (i in 0...func.params.length) {
+			var _p = func.params[i];
+			_param = '${func.params[0].name}';
+		}
+
 		var out = '';
-		var out = createTestDisabled(func);
+		out += '// Test with return type `${func.returnValue.type}`\n\t';
+		out += '// [WIP] test is default disabled (`xit`) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'xit(\'${getTitle(func)}\', () => {
+		${createVarFromFunctionParam(func.params)}
+		service.${func.name}(${_param});
+		// expect(result).toBe(true);
+	});
+';
 		return out;
 	}
 
@@ -320,11 +334,12 @@ class ConvertService {
 				.trim();
 		}
 
+		warn(func);
 		// warn(createVarFromFunctionParam(func.params));
 		var _param = '';
 		for (i in 0...func.params.length) {
 			var _p = func.params[i];
-			_param = '${func.params[0].name}';
+			_param = '${_p.name}';
 		}
 
 		var out = '';
@@ -359,10 +374,14 @@ class ConvertService {
 		}
 
 		var _param = '';
+		// var _param2 = '';
 		for (i in 0...func.params.length) {
 			var _p = func.params[i];
 			// trace(_p);
 			_param += '${_p.name}';
+			if ((i + 1) < func.params.length) {
+				_param += ', ';
+			}
 		}
 
 		var out = '';
@@ -397,12 +416,89 @@ class ConvertService {
 	 */
 	function createVarFromFunctionParam(params:Array<TypedObj>):String {
 		var out = '';
+		var isArray = false;
+		var gen = '[]';
 		for (i in 0...params.length) {
 			var _p = params[i];
+			log(_p);
+			if (_p.type.indexOf('[]') != -1)
+				isArray = true;
 
 			switch (_p.type) {
+				case '{ id': // FIXME bug
+					out += 'const id = 0;\n\t\t';
+				case 'number':
+					out += 'const ${_p.name}: ${_p.type} = 0;\n\t\t';
 				case 'string':
-					out += 'const ${_p.name}: ${_p.type} = "";\n';
+					out += 'const ${_p.name}: ${_p.type} = "";\n\t\t';
+				case 'any', 'object':
+					out += 'const ${_p.name}: ${_p.type} = {};\n\t\t';
+				case 'ILightSchedule':
+					out += 'const ${_p.name}: ${_p.type} = {
+			astronomicalSunriseOffset: 0,
+			astronomicalSunsetOffset: 0,
+			code: \'\',
+			color: \'\',
+			defaultSchedule: false,
+			description: \'\',
+			id: 0,
+			name: \'\',
+			relayFunctions: [],
+			scheduleEntries: [],
+			success: false,
+			superUser: false,
+			template: false,
+			usedByDevice: false,
+			usedByGroup: false,
+			usedBySubstation: false
+		};\n\t\t';
+				case 'IValidate':
+					out += 'const ${_p.name}: ${_p.type} = {
+			success: false,
+			description: \'\',
+			savable: false
+		};\n\t\t';
+
+				case 'ISchedulesDetail[]':
+					out += 'const ${_p.name.replace('[]', '')}: ${_p.type} = [{
+			id: 0,
+			name: \'\',
+			description: \'\',
+			color: \'\',
+			code: \'\',
+			usedByDevice: false,
+			usedByGroup: false,
+			usedBySubstation: false,
+			defaultSchedule: false,
+			success: false,
+			template: false,
+			superUser: false,
+			astronomicalSunriseOffset: 0,
+			astronomicalSunsetOffset: 0,
+			scheduleEntries: [],
+			relayFunctions: []
+		}];\n';
+
+				case 'ISchedulesDetail':
+					out += 'const ${_p.name}: ${_p.type} = {
+			id: 0,
+			name: \'\',
+			description: \'\',
+			color: \'\',
+			code: \'\',
+			usedByDevice: false,
+			usedByGroup: false,
+			usedBySubstation: false,
+			defaultSchedule: false,
+			success: false,
+			template: false,
+			superUser: false,
+			astronomicalSunriseOffset: 0,
+			astronomicalSunsetOffset: 0,
+			scheduleEntries: [],
+			relayFunctions: []
+		};\n';
+
 				case 'IUser':
 					// make sure we don't have to do this over and over
 					out += 'const ${_p.name}: ${_p.type} = {
@@ -449,9 +545,16 @@ class ConvertService {
 			url: \'\',
 			message: \'\',
 		};';
+				case 'ISchedules':
+					out += 'const ${_p.name}: ${_p.type} = {
+			contents: [],
+			pageSize: 0,
+			totalItems: 0,
+			totalPages: 0
+		};';
 				default:
 					// TODO check array, object, etc
-					out += 'const ${_p.name}: ${_p.type} = {};';
+					out += '// const ${_p.name}: ${_p.type} = {};\n\t\t';
 					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
 			}
 		}
