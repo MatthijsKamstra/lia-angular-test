@@ -193,6 +193,9 @@ class Extract {
 				if (_str.indexOf('http.post') != -1) {
 					_requestType = 'POST';
 				}
+				if (_str.indexOf('http.delete') != -1) {
+					_requestType = 'DELETE';
+				}
 
 				var _funcObj:FuncObj = {
 					URL: _URL,
@@ -243,7 +246,7 @@ class Extract {
 			name: '_${_type.toLowerCase()}', // to make sure we can use it when generating test... but not correclty in use
 			value: _value,
 			type: _type,
-			access: 'none', // private|public|none
+			access: 'none', // protected|private|public|none
 			_content: val,
 		};
 	}
@@ -281,6 +284,7 @@ class Extract {
 	static function convertParams(val:String):TypedObj {
 		// log(val);
 		var _access = (val.indexOf('private') != -1) ? 'private' : 'public';
+		_access = (val.indexOf('protected') != -1) ? 'protected' : 'public';
 		var _name = val.split(':')[0].trim();
 		var _type = val.split(':')[1].trim();
 		return {
