@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { IPagination } from '../shared/interfaces/i-pagination';
+import { SortedByEnum } from '../shared/enums/sortedby.enum';
+import { ISort } from '../shared/interfaces/i-sort';
+import { SortDirectionEnum } from '../shared/enums/sortdirection.enum';
 
 @Injectable({
 	providedIn: 'root'
@@ -11,6 +14,11 @@ export class GetterSetterService {
 		pageNumber: 1,
 		pageSize: 15
 	};
+
+	sort: ISort = {
+		sortDir: SortDirectionEnum.ASC,
+		sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+	}
 
 	constructor() { }
 
@@ -28,5 +36,19 @@ export class GetterSetterService {
 
 	public set pagination(pagination: IPagination) {
 		this._pagination = pagination;
+	}
+
+	/**
+	 * no public, return value Isort
+	 */
+	getSort(sortedBy: SortedByEnum = SortedByEnum.CODE): ISort {
+		return this.sort;
+	}
+
+	/**
+	 * no public, no return value
+	 */
+	setSort(sort: ISort) {
+		this.sort = sort;
 	}
 }
