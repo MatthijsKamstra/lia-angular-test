@@ -17,7 +17,7 @@ export class GetterSetterService {
 
 	sort: ISort = {
 		sortDir: SortDirectionEnum.ASC,
-		sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+		sortedBy: SortedByEnum.CODE
 	}
 
 	constructor() { }

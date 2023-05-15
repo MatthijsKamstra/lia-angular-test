@@ -15,6 +15,25 @@ export class FunctionsService {
 
 	}
 
+	// ____________________________________ params ____________________________________
+
+	funcOneParam(test: string) {
+
+	}
+
+	funcTwoParam(test: string, param: boolean) {
+
+	}
+
+	funcThreeParam(test: string, param: boolean, foo: number) {
+
+	}
+
+	funcFourParam(test: string, param: boolean, foo: number, array: string[]) {
+
+	}
+	// ____________________________________ basics ____________________________________
+
 	funcOneStringParam(test: string) {
 
 	}
@@ -24,6 +43,34 @@ export class FunctionsService {
 	}
 
 	funcOneNumberParam(test: number) {
+
+	}
+
+	funcOneAnyParam(test: any) {
+
+	}
+
+	// ____________________________________ interface ____________________________________
+
+	funcOneIHelpParam(test: IHelp) {
+
+	}
+
+	// ____________________________________ array ____________________________________
+
+	funcOneArrayStringParam(test: string[]) {
+
+	}
+
+	funcOneArrayBooleanParam(test: boolean[]) {
+
+	}
+
+	funcOneArrayNumberParam(test: number[]) {
+
+	}
+
+	funcOneArrayIHelpParam(test: IHelp[]) {
 
 	}
 }
