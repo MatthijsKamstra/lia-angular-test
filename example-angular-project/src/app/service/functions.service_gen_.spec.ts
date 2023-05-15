@@ -47,34 +47,56 @@ fdescribe('FunctionsService (Generated)', () => {
 		expect(service).toBeTruthy();
 	});
 
-	// 1. Generated test function "getData"
-	// Test with return type `Observable`
-	it('#getData should return Observable<IHelp>', (done: DoneFn) => {
-
-		// Arrange
+	// 1. Generated test function "funcNoParam"
+	// Test with return type `void`
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	funcNoParam() {
+	 */
+	xit('#funcNoParam should return void', () => {
 		
+		service.funcNoParam();
+		// expect(result).toBe(true);
+	});
 
+	// 2. Generated test function "funcOneStringParam"
+	// Test with return type `void`
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	funcOneStringParam(test: string) {
+	 */
+	xit('#funcOneStringParam should return void', () => {
+		const test: string = "";
+		
+		service.funcOneStringParam(test);
+		// expect(result).toBe(true);
+	});
+
+	// 3. Generated test function "funcOneBooleanParam"
+	// Test with return type `void`
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	funcOneBooleanParam(test: boolean) {
+	 */
+	xit('#funcOneBooleanParam should return void', () => {
 		// FIXME: add (all) missing properties 
-		const ihelp: IHelp = {};
+		const test: boolean = {};
 		
+		service.funcOneBooleanParam(test);
+		// expect(result).toBe(true);
+	});
 
-		// URL used in class
-		const url = Api.getUrl().helpApi;
-
-		// Act
-		// create the service call
-		service.getData().subscribe(value => {
-			expect(value).toBe(ihelp);
-			done();
-		});
-
-		// Assert
-		const mockReq = httpMock.expectOne(url);
-		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("GET");
-		expect(mockReq.cancelled).toBeFalsy();
-		expect(mockReq.request.responseType).toEqual('json');
-		mockReq.flush(ihelp);
+	// 4. Generated test function "funcOneNumberParam"
+	// Test with return type `void`
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	funcOneNumberParam(test: number) {
+	 */
+	xit('#funcOneNumberParam should return void', () => {
+		const test: number = 0;
+		
+		service.funcOneNumberParam(test);
+		// expect(result).toBe(true);
 	});
 
 });

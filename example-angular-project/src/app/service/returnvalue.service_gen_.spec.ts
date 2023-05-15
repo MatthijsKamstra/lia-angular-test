@@ -115,7 +115,21 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(result).toBe(true);
 	});
 
-	// 6. Generated test function "returnIHelp"
+	// 6. Generated test function "returnAny"
+	// Test with return type `any` (UNKNOWN)
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	returnAny(): any {
+	 *		return 1;
+	 *	}
+	 */
+	xit('#returnAny should return any', () => {
+		const result: any = service.returnAny();
+		expect(result).toBe(1);
+		// expect(result).toBe(true);
+	});
+
+	// 7. Generated test function "returnIHelp"
 	// Test with return type `IHelp` (UNKNOWN)
 	// [WIP] test is default disabled (`xit`) 
 	/**
@@ -132,7 +146,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(result).toBe(true);
 	});
 
-	// 7. Generated test function "returnArrayString"
+	// 8. Generated test function "returnArrayString"
 	// Test with return type `string[]` (UNKNOWN)
 	// [WIP] test is default disabled (`xit`) 
 	/**
@@ -146,7 +160,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(result).toBe(true);
 	});
 
-	// 8. Generated test function "returnArrayBoolean"
+	// 9. Generated test function "returnArrayBoolean"
 	// Test with return type `boolean[]` (UNKNOWN)
 	// [WIP] test is default disabled (`xit`) 
 	/**
@@ -160,7 +174,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(result).toBe(true);
 	});
 
-	// 9. Generated test function "returnArrayNumber"
+	// 10. Generated test function "returnArrayNumber"
 	// Test with return type `number[]` (UNKNOWN)
 	// [WIP] test is default disabled (`xit`) 
 	/**
@@ -179,7 +193,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(result).toBe(true);
 	});
 
-	// 10. Generated test function "returnBooleanNull"
+	// 11. Generated test function "returnBooleanNull"
 	// Test with return type `boolean | null` (UNKNOWN)
 	// [WIP] test is default disabled (`xit`) 
 	/**
@@ -190,6 +204,20 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	xit('#returnBooleanNull should return boolean | null', () => {
 		const result: boolean | null = service.returnBooleanNull();
 		expect(result).toBe(true);
+		// expect(result).toBe(true);
+	});
+
+	// 12. Generated test function "returnStringNumber"
+	// Test with return type `string | number` (UNKNOWN)
+	// [WIP] test is default disabled (`xit`) 
+	/**
+	 *	returnStringNumber(): string | number {
+	 *		return 1;
+	 *	}
+	 */
+	xit('#returnStringNumber should return string | number', () => {
+		const result: string | number = service.returnStringNumber();
+		expect(result).toBe(1);
 		// expect(result).toBe(true);
 	});
 

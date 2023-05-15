@@ -11,8 +11,19 @@ export class FunctionsService {
 
 	constructor(private http: HttpClient) { }
 
-	getData(): Observable<IHelp> {
-		const url = Api.getUrl().helpApi;
-		return this.http.get<IHelp>(url);
+	funcNoParam() {
+
+	}
+
+	funcOneStringParam(test: string) {
+
+	}
+
+	funcOneBooleanParam(test: boolean) {
+
+	}
+
+	funcOneNumberParam(test: number) {
+
 	}
 }

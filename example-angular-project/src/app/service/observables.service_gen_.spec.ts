@@ -16,6 +16,8 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { ObservablesService } from './observables.service';
 
 // import directly from observablesService
+import { IHelp } from '../shared/interfaces/i-help';
+import { Api } from '../shared/config/api';
 
 fdescribe('ObservablesService (Generated)', () => {
 
@@ -43,6 +45,36 @@ fdescribe('ObservablesService (Generated)', () => {
 
 	it('should be created', () => {
 		expect(service).toBeTruthy();
+	});
+
+	// 1. Generated test function "getData"
+	// Test with return type `Observable`
+	it('#getData should return Observable<IHelp>', (done: DoneFn) => {
+
+		// Arrange
+		
+
+		// FIXME: add (all) missing properties 
+		const ihelp: IHelp = {};
+		
+
+		// URL used in class
+		const url = Api.getUrl().helpApi;
+
+		// Act
+		// create the service call
+		service.getData().subscribe(value => {
+			expect(value).toBe(ihelp);
+			done();
+		});
+
+		// Assert
+		const mockReq = httpMock.expectOne(url);
+		expect(mockReq.request.url).toBe(url);
+		expect(mockReq.request.method).toBe("GET");
+		expect(mockReq.cancelled).toBeFalsy();
+		expect(mockReq.request.responseType).toEqual('json');
+		mockReq.flush(ihelp);
 	});
 
 });
