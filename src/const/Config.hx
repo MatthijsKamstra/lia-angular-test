@@ -12,10 +12,12 @@ class Config {
 	 * 0.0.8 - remove time from generation, getter setter tests, default var values added
 	 * 0.0.9 - add extra constructor values as variables and TestBed
 	 * 0.1.0 - fix bug in getter tests to add params
+	 * 0.1.1 - add basic tests, add Agular test project
 	 */
-	public static final VERSION:String = '0.1.0';
+	public static final VERSION:String = '0.1.1';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;
 	public static var IS_DRYRUN = false;
+	public static var IS_BASIC = false;
 }

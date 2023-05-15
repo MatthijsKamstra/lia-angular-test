@@ -102,6 +102,9 @@ class Main {
 				case '-d', '--dryrun':
 					mute('Config.IS_DRYRUN = true', 1);
 					Config.IS_DRYRUN = true;
+				case '-b', '--basic':
+					mute('Config.IS_BASIC = true', 1);
+					Config.IS_BASIC = true;
 				case '--help', '-h':
 					showHelp();
 				case '--out', '-o':
@@ -187,6 +190,7 @@ Lia-angular-test (${Config.VERSION})
   --out / -o		: write readme (WIP)
   --force / -f		: force overwrite
   --dryrun / -d		: run without writing files
+  --basic / -b		: test without content
 ----------------------------------------------------
 ');
 
