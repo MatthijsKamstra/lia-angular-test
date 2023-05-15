@@ -32,6 +32,7 @@ export class FunctionsService {
 	funcFourParam(test: string, param: boolean, foo: number, array: string[]) {
 
 	}
+
 	// ____________________________________ basics ____________________________________
 
 	funcOneStringParam(test: string) {

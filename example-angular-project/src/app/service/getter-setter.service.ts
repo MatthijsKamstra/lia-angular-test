@@ -30,13 +30,13 @@ export class GetterSetterService {
 		this._pagination = pagination;
 	}
 
-	public get pagination(): IPagination {
-		return this._pagination;
-	}
+	// public get pagination(): IPagination {
+	// 	return this._pagination;
+	// }
 
-	public set pagination(pagination: IPagination) {
-		this._pagination = pagination;
-	}
+	// public set pagination(pagination: IPagination) {
+	// 	this._pagination = pagination;
+	// }
 
 	/**
 	 * no public, return value Isort

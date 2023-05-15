@@ -12,24 +12,44 @@ export class ReturnvalueService {
 	// ____________________________________ void ____________________________________
 
 	returnVoid(): void {
-		console.log('void');
+		// console.log('void');
 	}
 
 	returnNoVoid() {
-		console.log('no void');
+		// console.log('no void');
 	}
 
 	// ____________________________________ bool, string, array, number ____________________________________
 
 	returnBoolean(): boolean {
+		console.warn('set boolean true');
+		return true;
+	}
+
+	returnBooleanParam(value: boolean): boolean {
+		console.warn('set boolean true');
 		return true;
 	}
 
 	returnString(): string {
-		return "string";
+		return 'foo';
+	}
+
+	_string = 'foo2';
+
+	returnString2(): string {
+		return this._string;
+	}
+
+	returnStringParam(value: string): string {
+		return "foobar";
 	}
 
 	returnNumber(): number {
+		return 1;
+	}
+
+	returnNumberParam(value: number): number {
 		return 1;
 	}
 
@@ -37,9 +57,20 @@ export class ReturnvalueService {
 		return 1;
 	}
 
+	returnAnyParam(value: any): any {
+		return 1;
+	}
+
 	// ____________________________________ interface ____________________________________
 
 	returnIHelp(): IHelp {
+		const iHelp: IHelp = {
+			url: 'x'
+		}
+		return iHelp;
+	}
+
+	returnIHelpParam(value: IHelp): IHelp {
 		const iHelp: IHelp = {
 			url: 'x'
 		}
@@ -59,11 +90,12 @@ export class ReturnvalueService {
 	returnArrayNumber(): number[] {
 		return [1, 2];
 	}
-	returnArrayIhelp(): IHelp[] {
-		const ihelp0: IHelp = { url: '' }
-		const ihelp1: IHelp = { url: '' }
-		return [ihelp0, ihelp1];
-	}
+
+	// returnArrayIhelp(): IHelp[] {
+	// 	const ihelp0: IHelp = { url: '' }
+	// 	const ihelp1: IHelp = { url: '' }
+	// 	return [ihelp0, ihelp1];
+	// }
 
 	// ____________________________________ union types ____________________________________
 
@@ -74,8 +106,5 @@ export class ReturnvalueService {
 	returnStringNumber(): string | number {
 		return 1;
 	}
-
-
-
 
 }

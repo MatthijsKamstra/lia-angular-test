@@ -85,7 +85,7 @@ class ConvertService {
 		for (i in 0...OBJ.functions.length) {
 			var _func:FuncObj = OBJ.functions[i];
 			// trace(_func);
-			ts.addFunction('// ${i + 1}. Generated test function "${_func.name}"');
+			ts.addFunction('// ${i + 1}. Generated test for "${_func.name}"');
 
 			log('${i}. - title test: ${getTitle(_func)}');
 
@@ -120,9 +120,12 @@ class ConvertService {
 					case 'Observable':
 						mute('use test with return value "Observable"');
 						ts.addFunction(createTestObservable(_func));
-					case 'boolean':
+					case 'boolean', 'Boolean':
 						mute('use test with return value "boolean"');
 						ts.addFunction(createTestboolean(_func));
+					case 'number':
+						mute('use test with return value "number"');
+						ts.addFunction(createTestNumber(_func));
 					default:
 						warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
 							+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
@@ -165,6 +168,25 @@ class ConvertService {
 	}
 
 	// ____________________________________ create test based upon return type ____________________________________
+
+	/**
+	 * disabled test, without guessing
+	 *
+	 * @param func
+	 * @return String
+	 */
+	function createTestDisabled(func:FuncObj):String {
+		var out = '';
+		out += '// Test with return type `${func.returnValue.type}`\n\t';
+		out += '// [WIP] test is default disabled (`xit`) \n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'xit(\'${getTitle(func)}\', () => {
+		// expect(result).toBe(true);
+		expect(service.${func.name}).toBeDefined();
+	});
+';
+		return out;
+	}
 
 	function createTestObservable(func:FuncObj):String {
 		var out = '';
@@ -223,52 +245,29 @@ class ConvertService {
 		return out;
 	}
 
-	function createTestString(func:FuncObj):String {
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
-		if (matches[0] != null) {
-			_return = matches[0].replace('return', '').replace(';', '').replace('this', 'service').trim();
-		}
-
-		var out = '';
-		out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '// [WIP] test is default disabled (`xit`) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-
-		out += 'xit(\'${getTitle(func)}\', () => {
-		const result: ${func.returnValue.type} = service.${func.name}();
-		expect(result).toBe(${_return});
-		// expect(result).toBe(true);
-	});
-';
-		return out;
-	}
-
 	function createTestvoid(func:FuncObj):String {
-		var _param = '';
-		for (i in 0...func.params.length) {
-			var _p = func.params[i];
-			_param += '${_p.name}';
-			if ((i + 1) < func.params.length) {
-				_param += ', ';
-			}
-		}
+		var _param = convertFuncObjParam2String(func);
 
 		var out = '';
-		out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '// [WIP] test is default disabled (`xit`) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		out += 'xit(\'${getTitle(func)}\', () => {
+		// out += '// Test with return type `${func.returnValue.type}`\n\t';
+		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
-		service.${func.name}(${_param});
-		// expect(result).toBe(true);
+		const spy = spyOn(service, \'${func.name}\');
+		const result = service.${func.name}(${_param});
+		expect(result).toBeUndefined();
+		expect(result).toBeFalsy();
+		expect(spy).toHaveBeenCalled();
+		expect(service.${func.name}).toBeDefined();
 	});
 ';
+
 		return out;
 	}
 
-	function createTestboolean(func:FuncObj):String {
+	function createTestString(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
@@ -282,12 +281,91 @@ class ConvertService {
 
 		var out = '';
 		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-
+		// out += '// [WIP] test is default disabled (`xit`) \n\t';
+		// out += '// [mck] weird stuff here, this should work\n\t';
+		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
-		const result: ${func.returnValue.type} = service.${func.name}();
+		${createVarFromFunctionParam(func.params)}
+		const str = ${_return};
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		expect(result).toBe(${_return});
-		// expect(result).toBe(true);
+		expect(spy).toHaveBeenCalled();
+		expect(service.${func.name}(${_param})).toBe(${_return});
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(service.${func.name}(${_param})).toContain(${_return});
+		expect(spy).toHaveBeenCalledTimes(3);
+		expect(service.${func.name}(${_param})).toBe(str);
+		expect(spy).toHaveBeenCalledTimes(4);
+		expect(service.${func.name}).toBeDefined();
+	});
+';
+		return out;
+	}
+
+	function createTestboolean(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
+		}
+
+		var out = '';
+		// out += '// Test with return type `${func.returnValue.type}`\n\t';
+		// out += '// [mck] weird stuff here, this should work\n\t';
+		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
+		${createVarFromFunctionParam(func.params)}
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		expect(result).toBe(${_return});
+		expect(result).toBeTruthy();
+		expect(spy).toHaveBeenCalled();
+		expect(service.${func.name}(${_param})).toBeTruthy();
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(service.${func.name}(${_param})).toBeTrue();
+		expect(spy).toHaveBeenCalledTimes(3);
+		expect(service.${func.name}).toBeDefined();
+	});
+';
+
+		return out;
+	}
+
+	function createTestNumber(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
+		}
+
+		var out = '';
+		// out += '// Test with return type `${func.returnValue.type}`\n\t';
+		// out += '// [mck] weird stuff here, this should work\n\t';
+		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
+		${createVarFromFunctionParam(func.params)}
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		expect(result).toBe(${_return});
+		expect(spy).toHaveBeenCalled();
+		expect(service.${func.name}(${_param})).toBeTruthy();
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(service.${func.name}).toBeDefined();
 	});
 ';
 
@@ -295,6 +373,8 @@ class ConvertService {
 	}
 
 	function createTestUnknown(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
@@ -312,9 +392,11 @@ class ConvertService {
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 
 		out += 'xit(\'${getTitle(func)}\', () => {
-		const result: ${func.returnValue.type} = service.${func.name}();
-		expect(result).toBe(${_return});
+		${createVarFromFunctionParam(func.params)}
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		// expect(result).toBe(${_return});
 		// expect(result).toBe(true);
+		expect(service.${func.name}).toBeDefined();
 	});
 ';
 		return out;
@@ -326,6 +408,8 @@ class ConvertService {
 	 * @return String
 	 */
 	function createTestGetter(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
 		// get return .... test!
 		var _return = '';
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
@@ -339,15 +423,6 @@ class ConvertService {
 
 		// warn(func);
 		// warn(createVarFromFunctionParam(func.params));
-		var params = '';
-		// loop
-		for (i in 0...func.params.length) {
-			var _p = func.params[i];
-			params += '${_p.name}';
-			if ((i + 1) < func.params.length) {
-				params += ', ';
-			}
-		}
 
 		var out = '';
 		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
@@ -355,8 +430,9 @@ class ConvertService {
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
-		const result: ${func.returnValue.type} = service.${func.name}(${params});
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		expect(result).toBe(${_return});
+		expect(service.${func.name}).toBeDefined();
 	});
 ';
 		return out;
@@ -369,6 +445,8 @@ class ConvertService {
 	 * @return String
 	 */
 	function createTestSetter(func:FuncObj):String {
+		var _param = convertFuncObjParam2String(func);
+
 		// get return .... test!
 		var _return = '';
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
@@ -380,21 +458,8 @@ class ConvertService {
 				.trim();
 		}
 
-		var _param = '';
-		// var _param2 = '';
-		for (i in 0...func.params.length) {
-			var _p = func.params[i];
-			// trace(_p);
-			_param += '${_p.name}';
-			if ((i + 1) < func.params.length) {
-				_param += ', ';
-			}
-		}
-
 		var out = '';
-
 		// out += '// ${haxe.Json.stringify(func)}';
-
 		out += '// Test SETTER with return type `${func.returnValue.type}`\n\t';
 		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
@@ -409,10 +474,32 @@ class ConvertService {
 		// Assert
 		const result: ${func.params[0].type} = service.${func.name.replace('set', 'get')}();
 		expect(result).toBe(${func.params[0].name});
+		expect(service.${func.name}).toBeDefined();
 	});
 ';
 
 		return out;
+	}
+
+	/**
+	 * convert params to string to use in call function
+	 * ```ts
+	 * service.func(param);
+	 * ```
+	 *
+	 * @param func
+	 * @return String
+	 */
+	function convertFuncObjParam2String(func:FuncObj):String {
+		var _param = '';
+		for (i in 0...func.params.length) {
+			var _p = func.params[i];
+			_param += '${_p.name}';
+			if ((i + 1) < func.params.length) {
+				_param += ', ';
+			}
+		}
+		return _param;
 	}
 
 	/**
@@ -433,13 +520,15 @@ class ConvertService {
 
 			switch (_p.type) {
 				case '{ id': // FIXME bug
-					out += 'const id = 0;\n\t\t';
+					out += 'const id = 0;';
+				case 'bool', 'boolean', 'Boolean':
+					out += 'const ${_p.name}: ${_p.type} = true;';
 				case 'number':
-					out += 'const ${_p.name}: ${_p.type} = 0;\n\t\t';
+					out += 'const ${_p.name}: ${_p.type} = 0;';
 				case 'string':
-					out += 'const ${_p.name}: ${_p.type} = "";\n\t\t';
+					out += 'const ${_p.name}: ${_p.type} = "";';
 				case 'any', 'object':
-					out += 'const ${_p.name}: ${_p.type} = {};\n\t\t';
+					out += 'const ${_p.name}: ${_p.type} = {};';
 				case 'ILightSchedule':
 					out += 'const ${_p.name}: ${_p.type} = {
 			astronomicalSunriseOffset: 0,
@@ -458,13 +547,13 @@ class ConvertService {
 			usedByDevice: false,
 			usedByGroup: false,
 			usedBySubstation: false
-		};\n\t\t';
+		};';
 				case 'IValidate':
 					out += 'const ${_p.name}: ${_p.type} = {
 			success: false,
 			description: \'\',
 			savable: false
-		};\n\t\t';
+		};';
 
 				case 'ISchedulesDetail[]':
 					out += 'const ${_p.name.replace('[]', '')}: ${_p.type} = [{
@@ -484,7 +573,7 @@ class ConvertService {
 			astronomicalSunsetOffset: 0,
 			scheduleEntries: [],
 			relayFunctions: []
-		}];\n';
+		}];';
 
 				case 'ISchedulesDetail':
 					out += 'const ${_p.name}: ${_p.type} = {
@@ -504,7 +593,7 @@ class ConvertService {
 			astronomicalSunsetOffset: 0,
 			scheduleEntries: [],
 			relayFunctions: []
-		};\n';
+		};';
 
 				case 'IUser':
 					// make sure we don't have to do this over and over
@@ -537,7 +626,7 @@ class ConvertService {
 					// make sure we don't have to do this over and over
 					out += 'const ${_p.name}: ${_p.type} = {
 			sortDir: SortDirectionEnum.ASC,
-			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+			sortedBy: SortedByEnum.CODE
 		};';
 				case 'IPagination':
 					out += 'const ${_p.name}: ${_p.type} = {
@@ -564,7 +653,7 @@ class ConvertService {
 			currentPage: 0,
 			pageSize: 0,
 			sortDir: SortDirectionEnum.ASC,
-			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+			sortedBy: SortedByEnum.CODE
 		};';
 				case 'IPage':
 					out += 'const ${_p.name}: ${_p.type} = {
@@ -572,6 +661,10 @@ class ConvertService {
 			totalItems: 0,
 			totalPages: 0,
 			pageSize: 0
+		};';
+				case 'IHelp':
+					out += 'const ${_p.name}: ${_p.type} = {
+			url: \'\'
 		};';
 				case 'IGroup':
 					out += 'const ${_p.name}: ${_p.type} =  {
@@ -613,24 +706,6 @@ class ConvertService {
 			}
 		}
 
-		return out;
-	}
-
-	/**
-	 * disabled test, without guessing
-	 *
-	 * @param func
-	 * @return String
-	 */
-	function createTestDisabled(func:FuncObj):String {
-		var out = '';
-		out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '// [WIP] test is default disabled (`xit`) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		out += 'xit(\'${getTitle(func)}\', () => {
-		// expect(result).toBe(true);
-	});
-';
 		return out;
 	}
 
