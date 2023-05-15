@@ -17,6 +17,9 @@ import { GetterSetterService } from './getter-setter.service';
 
 // import directly from getter-setterService
 import { IPagination } from '../shared/interfaces/i-pagination';
+import { SortedByEnum } from '../shared/enums/sortedby.enum';
+import { ISort } from '../shared/interfaces/i-sort';
+import { SortDirectionEnum } from '../shared/enums/sortdirection.enum';
 
 fdescribe('GetterSetterService (Generated)', () => {
 
@@ -116,6 +119,45 @@ fdescribe('GetterSetterService (Generated)', () => {
 		// Assert
 		const result: IPagination = service.get pagination();
 		expect(result).toBe(pagination);
+	});
+
+	// 5. Generated test function "getSort"
+	// Test GETTER with return type `ISort`
+	/**
+	 *	
+	 *	getSort(sortedBy: SortedByEnum = SortedByEnum.CODE): ISort {
+	 *		return this.sort;
+	 *	}
+	 */
+	it('#getSort should return ISort', () => {
+		// FIXME: add (all) missing properties 
+		const sortedBy: SortedByEnum = SortedByEnum.CODE = {};
+		
+		const result: ISort = service.getSort(sortedBy);
+		expect(result).toBe(service.sort);
+	});
+
+	// 6. Generated test function "setSort"
+	// Test SETTER with return type `void`
+	/**
+	 *	
+	 *	setSort(sort: ISort) {
+	 *		this.sort = sort;
+	 *	}
+	 */
+	it('#setSort should return void', () => {
+		// Arrange
+		const sort: ISort = {
+			sortDir: SortDirectionEnum.ASC,
+			sortedBy: SortedByEnum.GROUP_IDENTIFICATION
+		};
+
+		// Act
+		service.setSort(sort);
+
+		// Assert
+		const result: ISort = service.getSort();
+		expect(result).toBe(sort);
 	});
 
 });
