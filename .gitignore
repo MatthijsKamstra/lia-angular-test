@@ -4,3 +4,4 @@ build1.sh
 build2.sh
 build_interp_2.hxml
 build_interp_3.hxml
+build_example.hxml
