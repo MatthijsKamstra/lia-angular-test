@@ -33,6 +33,10 @@ export class ReturnvalueService {
 		return 1;
 	}
 
+	returnAny(): any {
+		return 1;
+	}
+
 	// ____________________________________ interface ____________________________________
 
 	returnIHelp(): IHelp {
@@ -61,10 +65,14 @@ export class ReturnvalueService {
 		return [ihelp0, ihelp1];
 	}
 
-	// ____________________________________ double ____________________________________
+	// ____________________________________ union types ____________________________________
 
 	returnBooleanNull(): boolean | null {
 		return true;
+	}
+
+	returnStringNumber(): string | number {
+		return 1;
 	}
 
 
