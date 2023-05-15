@@ -388,15 +388,15 @@ class ConvertService {
 
 		var out = '';
 		out += '// Test with return type `${func.returnValue.type}` (UNKNOWN)\n\t';
-		out += '// [WIP] test is default disabled (`xit`) \n\t';
+		// out += '// [WIP] test is default disabled (`xit`) \n\t';
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 
-		out += 'xit(\'${getTitle(func)}\', () => {
+		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
+		// const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		// expect(result).toBe(${_return});
-		// expect(result).toBe(true);
 		expect(service.${func.name}).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 ';
 		return out;

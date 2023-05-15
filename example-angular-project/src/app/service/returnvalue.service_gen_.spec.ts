@@ -176,39 +176,36 @@ fdescribe('ReturnvalueService (Generated)', () => {
 
 	// 10. Generated test for "returnAny"
 	// Test with return type `any` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnAny(): any {
 	 *		return 1;
 	 *	}
 	 */
-	xit('#returnAny should return any', () => {
+	it('#returnAny should return any', () => {
 		
+		// const spy = spyOn(service, 'returnAny').and.returnValue(1);
 		const result: any = service.returnAny();
-		// expect(result).toBe(1);
-		// expect(result).toBe(true);
 		expect(service.returnAny).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 11. Generated test for "returnAnyParam"
 	// Test with return type `any` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnAnyParam(value: any): any {
 	 *		return 1;
 	 *	}
 	 */
-	xit('#returnAnyParam should return any', () => {
+	it('#returnAnyParam should return any', () => {
 		const value: any = {};
+		// const spy = spyOn(service, 'returnAnyParam').and.returnValue(1);
 		const result: any = service.returnAnyParam(value);
-		// expect(result).toBe(1);
-		// expect(result).toBe(true);
 		expect(service.returnAnyParam).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 12. Generated test for "returnIHelp"
 	// Test with return type `IHelp` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnIHelp(): IHelp {
 	 *		const iHelp: IHelp = {
@@ -217,17 +214,16 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	 *		return iHelp;
 	 *	}
 	 */
-	xit('#returnIHelp should return IHelp', () => {
+	it('#returnIHelp should return IHelp', () => {
 		
+		// const spy = spyOn(service, 'returnIHelp').and.returnValue(iHelp);
 		const result: IHelp = service.returnIHelp();
-		// expect(result).toBe(iHelp);
-		// expect(result).toBe(true);
 		expect(service.returnIHelp).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 13. Generated test for "returnIHelpParam"
 	// Test with return type `IHelp` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnIHelpParam(value: IHelp): IHelp {
 	 *		const iHelp: IHelp = {
@@ -236,94 +232,89 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	 *		return iHelp;
 	 *	}
 	 */
-	xit('#returnIHelpParam should return IHelp', () => {
+	it('#returnIHelpParam should return IHelp', () => {
 		const value: IHelp = {
 			url: ''
 		};
+		// const spy = spyOn(service, 'returnIHelpParam').and.returnValue(iHelp);
 		const result: IHelp = service.returnIHelpParam(value);
-		// expect(result).toBe(iHelp);
-		// expect(result).toBe(true);
 		expect(service.returnIHelpParam).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 14. Generated test for "returnArrayString"
 	// Test with return type `string[]` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnArrayString(): string[] {
 	 *		return ["string", "string"];
 	 *	}
 	 */
-	xit('#returnArrayString should return string[]', () => {
+	it('#returnArrayString should return string[]', () => {
 		
+		// const spy = spyOn(service, 'returnArrayString').and.returnValue(["string", "string"]);
 		const result: string[] = service.returnArrayString();
-		// expect(result).toBe(["string", "string"]);
-		// expect(result).toBe(true);
 		expect(service.returnArrayString).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 15. Generated test for "returnArrayBoolean"
 	// Test with return type `boolean[]` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnArrayBoolean(): boolean[] {
 	 *		return [true, false];
 	 *	}
 	 */
-	xit('#returnArrayBoolean should return boolean[]', () => {
+	it('#returnArrayBoolean should return boolean[]', () => {
 		
+		// const spy = spyOn(service, 'returnArrayBoolean').and.returnValue([true, false]);
 		const result: boolean[] = service.returnArrayBoolean();
-		// expect(result).toBe([true, false]);
-		// expect(result).toBe(true);
 		expect(service.returnArrayBoolean).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 16. Generated test for "returnArrayNumber"
 	// Test with return type `number[]` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnArrayNumber(): number[] {
 	 *		return [1, 2];
 	 *	}
 	 */
-	xit('#returnArrayNumber should return number[]', () => {
+	it('#returnArrayNumber should return number[]', () => {
 		
+		// const spy = spyOn(service, 'returnArrayNumber').and.returnValue([1, 2]);
 		const result: number[] = service.returnArrayNumber();
-		// expect(result).toBe([1, 2]);
-		// expect(result).toBe(true);
 		expect(service.returnArrayNumber).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 17. Generated test for "returnBooleanNull"
 	// Test with return type `boolean | null` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnBooleanNull(): boolean | null {
 	 *		return true;
 	 *	}
 	 */
-	xit('#returnBooleanNull should return boolean | null', () => {
+	it('#returnBooleanNull should return boolean | null', () => {
 		
+		// const spy = spyOn(service, 'returnBooleanNull').and.returnValue(true);
 		const result: boolean | null = service.returnBooleanNull();
-		// expect(result).toBe(true);
-		// expect(result).toBe(true);
 		expect(service.returnBooleanNull).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 	// 18. Generated test for "returnStringNumber"
 	// Test with return type `string | number` (UNKNOWN)
-	// [WIP] test is default disabled (`xit`) 
 	/**
 	 *	returnStringNumber(): string | number {
 	 *		return 1;
 	 *	}
 	 */
-	xit('#returnStringNumber should return string | number', () => {
+	it('#returnStringNumber should return string | number', () => {
 		
+		// const spy = spyOn(service, 'returnStringNumber').and.returnValue(1);
 		const result: string | number = service.returnStringNumber();
-		// expect(result).toBe(1);
-		// expect(result).toBe(true);
 		expect(service.returnStringNumber).toBeDefined();
+		// expect(spy).toHaveBeenCalled();
 	});
 
 });
