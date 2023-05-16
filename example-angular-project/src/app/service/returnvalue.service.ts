@@ -77,11 +77,11 @@ export class ReturnvalueService {
 		return [1, 2];
 	}
 
-	// returnArrayIhelp(): IHelp[] {
-	// 	const ihelp0: IHelp = { url: '' }
-	// 	const ihelp1: IHelp = { url: '' }
-	// 	return [ihelp0, ihelp1];
-	// }
+	returnArrayIhelp(): IHelp[] {
+		const ihelp0: IHelp = { url: '' }
+		const ihelp1: IHelp = { url: '' }
+		return [ihelp0, ihelp1];
+	}
 
 	// ____________________________________ interface ____________________________________
 

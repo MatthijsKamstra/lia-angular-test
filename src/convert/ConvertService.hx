@@ -275,12 +275,6 @@ class ConvertService {
 	function createTestArray(func:FuncObj) {
 		var _param = convertFuncObjParam2String(func);
 
-		// check for what array is used
-		var _arrayReturnType = '';
-		_arrayReturnType = func.returnValue.type.replace('[]', '');
-
-		// warn(_arrayReturnType);
-
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
 		var _return = '';
@@ -291,17 +285,33 @@ class ConvertService {
 				.replace('this', 'service') //
 				.trim();
 		}
+		// check for what array is used
+		var _arrayReturnType = '';
+		_arrayReturnType = func.returnValue.type.replace('[]', '');
+
+		var isCustomType = true;
+		switch (_arrayReturnType) {
+			case 'string', 'boolean', 'number':
+				isCustomType = false;
+			default:
+				trace("case '" + _arrayReturnType + "': trace ('" + _arrayReturnType + "');");
+		}
+
+		if (isCustomType) {
+			_return = '[]; // ${_return} // TODO add vars';
+		}
 
 		var out = '';
 		// out += '// Test with return type `${func.returnValue.type}`\n\t';
 		// out += '// [WIP] test is default disabled (`xit`) \n\t';
+		// out += '// ${isCustomType} \n\t';
 		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
 		const arr: ${_arrayReturnType}[] = ${_return};
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(arr);
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toEqual(${_return});
+		expect(result).toEqual(arr);
 		expect(service.${func.name}).toBeDefined();
 		expect(spy).toHaveBeenCalled();
 	});
