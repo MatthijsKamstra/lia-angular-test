@@ -92,9 +92,13 @@ class ConvertService {
 			var isGetter:Bool = (_func.name.indexOf('get') != -1) ? true : false;
 			var isSetter:Bool = (_func.name.indexOf('set') != -1) ? true : false;
 			var isObservable:Bool = (_func._content.indexOf('Observable') != -1) ? true : false;
-			// warn('is this func a getter: ' + isGetter);
-			// warn('is this func a setter: ' + isSetter);
-			// warn('is this func a isObservable: ' + isObservable);
+			var isArray:Bool = (_func.returnValue.type.indexOf('[]') != -1) ? true : false;
+			// warn('is this a getter: ' + isGetter);
+			// warn('is this a setter: ' + isSetter);
+			// warn('is this a isObservable: ' + isObservable);
+			warn('is this a isArray: ' + isArray);
+
+			log(_func);
 
 			if ((isGetter || isSetter) && !isObservable) {
 				// warn('getter/setter');
@@ -106,6 +110,9 @@ class ConvertService {
 					mute('use setter test with return value "${_func.returnValue.type}"');
 					ts.addFunction(createTestSetter(_func));
 				}
+			} else if (isArray) {
+				mute('use test with return value "${_func.returnValue.type}"');
+				ts.addFunction(createTestArray(_func));
 			} else {
 				// warn('return type');
 				// warn(_func.returnValue);
@@ -262,6 +269,43 @@ class ConvertService {
 	});
 ';
 
+		return out;
+	}
+
+	function createTestArray(func:FuncObj) {
+		var _param = convertFuncObjParam2String(func);
+
+		// check for what array is used
+		var _arrayReturnType = '';
+		_arrayReturnType = func.returnValue.type.replace('[]', '');
+
+		// warn(_arrayReturnType);
+
+		// get return .... test!
+		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+		var _return = '';
+		if (matches[0] != null) {
+			_return = matches[0] //
+				.replace('return', '') //
+				.replace(';', '') //
+				.replace('this', 'service') //
+				.trim();
+		}
+
+		var out = '';
+		// out += '// Test with return type `${func.returnValue.type}`\n\t';
+		// out += '// [WIP] test is default disabled (`xit`) \n\t';
+		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += 'it(\'${getTitle(func)}\', () => {
+		${createVarFromFunctionParam(func.params)}
+		const arr: ${_arrayReturnType}[] = ${_return};
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		expect(result).toEqual(${_return});
+		expect(service.${func.name}).toBeDefined();
+		expect(spy).toHaveBeenCalled();
+	});
+';
 		return out;
 	}
 
@@ -704,6 +748,8 @@ class ConvertService {
 					out += 'const ${_p.name}: ${_p.type} = {};\n\t\t';
 					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
 			}
+
+			out += '\n\t\t';
 		}
 
 		return out;

@@ -61,21 +61,7 @@ export class ReturnvalueService {
 		return 1;
 	}
 
-	// ____________________________________ interface ____________________________________
 
-	returnIHelp(): IHelp {
-		const iHelp: IHelp = {
-			url: 'x'
-		}
-		return iHelp;
-	}
-
-	returnIHelpParam(value: IHelp): IHelp {
-		const iHelp: IHelp = {
-			url: 'x'
-		}
-		return iHelp;
-	}
 
 	// ____________________________________ array ____________________________________
 
@@ -96,6 +82,22 @@ export class ReturnvalueService {
 	// 	const ihelp1: IHelp = { url: '' }
 	// 	return [ihelp0, ihelp1];
 	// }
+
+	// ____________________________________ interface ____________________________________
+
+	returnIHelp(): IHelp {
+		const iHelp: IHelp = {
+			url: 'x'
+		}
+		return iHelp;
+	}
+
+	returnIHelpParam(value: IHelp): IHelp {
+		const iHelp: IHelp = {
+			url: 'x'
+		}
+		return iHelp;
+	}
 
 	// ____________________________________ union types ____________________________________
 

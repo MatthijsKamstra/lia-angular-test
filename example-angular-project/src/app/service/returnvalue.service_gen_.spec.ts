@@ -1,7 +1,7 @@
 /*
 - WARNING: this is a generated test. 
 - Most likely you need to change and update this file. 
-- Generated on: 2023-05-15
+- Generated on: 2023-05-16
 - Version: 0.1.1
 */
 
@@ -87,6 +87,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	// 4. Generated test for "returnBooleanParam"
 	it('#returnBooleanParam should return boolean', () => {
 		const value: boolean = true;
+		
 		const spy = spyOn(service, 'returnBooleanParam').and.returnValue(true);
 		const result: boolean = service.returnBooleanParam(value);
 		expect(result).toBe(true);
@@ -136,6 +137,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	// 7. Generated test for "returnStringParam"
 	it('#returnStringParam should return string', () => {
 		const value: string = "";
+		
 		const str = "foobar";
 		const spy = spyOn(service, 'returnStringParam').and.returnValue("foobar");
 		const result: string = service.returnStringParam(value);
@@ -165,6 +167,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	// 9. Generated test for "returnNumberParam"
 	it('#returnNumberParam should return number', () => {
 		const value: number = 0;
+		
 		const spy = spyOn(service, 'returnNumberParam').and.returnValue(1);
 		const result: number = service.returnNumberParam(value);
 		expect(result).toBe(1);
@@ -198,13 +201,47 @@ fdescribe('ReturnvalueService (Generated)', () => {
 	 */
 	it('#returnAnyParam should return any', () => {
 		const value: any = {};
+		
 		// const spy = spyOn(service, 'returnAnyParam').and.returnValue(1);
 		const result: any = service.returnAnyParam(value);
 		expect(service.returnAnyParam).toBeDefined();
 		// expect(spy).toHaveBeenCalled();
 	});
 
-	// 12. Generated test for "returnIHelp"
+	// 12. Generated test for "returnArrayString"
+	it('#returnArrayString should return string[]', () => {
+		
+		const arr: string[] = ["string", "string"];
+		const spy = spyOn(service, 'returnArrayString').and.returnValue(["string", "string"]);
+		const result: string[] = service.returnArrayString();
+		expect(result).toEqual(["string", "string"]);
+		expect(service.returnArrayString).toBeDefined();
+		expect(spy).toHaveBeenCalled();
+	});
+
+	// 13. Generated test for "returnArrayBoolean"
+	it('#returnArrayBoolean should return boolean[]', () => {
+		
+		const arr: boolean[] = [true, false];
+		const spy = spyOn(service, 'returnArrayBoolean').and.returnValue([true, false]);
+		const result: boolean[] = service.returnArrayBoolean();
+		expect(result).toEqual([true, false]);
+		expect(service.returnArrayBoolean).toBeDefined();
+		expect(spy).toHaveBeenCalled();
+	});
+
+	// 14. Generated test for "returnArrayNumber"
+	it('#returnArrayNumber should return number[]', () => {
+		
+		const arr: number[] = [1, 2];
+		const spy = spyOn(service, 'returnArrayNumber').and.returnValue([1, 2]);
+		const result: number[] = service.returnArrayNumber();
+		expect(result).toEqual([1, 2]);
+		expect(service.returnArrayNumber).toBeDefined();
+		expect(spy).toHaveBeenCalled();
+	});
+
+	// 15. Generated test for "returnIHelp"
 	// Test with return type `IHelp` (UNKNOWN)
 	/**
 	 *	returnIHelp(): IHelp {
@@ -222,7 +259,7 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		// expect(spy).toHaveBeenCalled();
 	});
 
-	// 13. Generated test for "returnIHelpParam"
+	// 16. Generated test for "returnIHelpParam"
 	// Test with return type `IHelp` (UNKNOWN)
 	/**
 	 *	returnIHelpParam(value: IHelp): IHelp {
@@ -236,54 +273,10 @@ fdescribe('ReturnvalueService (Generated)', () => {
 		const value: IHelp = {
 			url: ''
 		};
+		
 		// const spy = spyOn(service, 'returnIHelpParam').and.returnValue(iHelp);
 		const result: IHelp = service.returnIHelpParam(value);
 		expect(service.returnIHelpParam).toBeDefined();
-		// expect(spy).toHaveBeenCalled();
-	});
-
-	// 14. Generated test for "returnArrayString"
-	// Test with return type `string[]` (UNKNOWN)
-	/**
-	 *	returnArrayString(): string[] {
-	 *		return ["string", "string"];
-	 *	}
-	 */
-	it('#returnArrayString should return string[]', () => {
-		
-		// const spy = spyOn(service, 'returnArrayString').and.returnValue(["string", "string"]);
-		const result: string[] = service.returnArrayString();
-		expect(service.returnArrayString).toBeDefined();
-		// expect(spy).toHaveBeenCalled();
-	});
-
-	// 15. Generated test for "returnArrayBoolean"
-	// Test with return type `boolean[]` (UNKNOWN)
-	/**
-	 *	returnArrayBoolean(): boolean[] {
-	 *		return [true, false];
-	 *	}
-	 */
-	it('#returnArrayBoolean should return boolean[]', () => {
-		
-		// const spy = spyOn(service, 'returnArrayBoolean').and.returnValue([true, false]);
-		const result: boolean[] = service.returnArrayBoolean();
-		expect(service.returnArrayBoolean).toBeDefined();
-		// expect(spy).toHaveBeenCalled();
-	});
-
-	// 16. Generated test for "returnArrayNumber"
-	// Test with return type `number[]` (UNKNOWN)
-	/**
-	 *	returnArrayNumber(): number[] {
-	 *		return [1, 2];
-	 *	}
-	 */
-	it('#returnArrayNumber should return number[]', () => {
-		
-		// const spy = spyOn(service, 'returnArrayNumber').and.returnValue([1, 2]);
-		const result: number[] = service.returnArrayNumber();
-		expect(service.returnArrayNumber).toBeDefined();
 		// expect(spy).toHaveBeenCalled();
 	});
 
