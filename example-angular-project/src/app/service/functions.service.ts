@@ -17,61 +17,61 @@ export class FunctionsService {
 
 	// ____________________________________ params ____________________________________
 
-	funcOneParam(test: string) {
+	funcOneParam(pTest: string) {
 
 	}
 
-	funcTwoParam(test: string, param: boolean) {
+	funcTwoParam(pTest: string, pIsVisible: boolean) {
 
 	}
 
-	funcThreeParam(test: string, param: boolean, foo: number) {
+	funcThreeParam(pTest: string, pIsVisible: boolean, pCount: number) {
 
 	}
 
-	funcFourParam(test: string, param: boolean, foo: number, array: string[]) {
+	funcFourParam(pTest: string, pIsVisible: boolean, pCount: number, pArray: string[]) {
 
 	}
 
 	// ____________________________________ basics ____________________________________
 
-	funcOneStringParam(test: string) {
+	funcOneStringParam(pTest: string) {
 
 	}
 
-	funcOneBooleanParam(test: boolean) {
+	funcOneBooleanParam(pTest: boolean) {
 
 	}
 
-	funcOneNumberParam(test: number) {
+	funcOneNumberParam(pTest: number) {
 
 	}
 
-	funcOneAnyParam(test: any) {
+	funcOneAnyParam(pTest: any) {
 
 	}
 
 	// ____________________________________ interface ____________________________________
 
-	funcOneIHelpParam(test: IHelp) {
+	funcOneIHelpParam(pTest: IHelp) {
 
 	}
 
 	// ____________________________________ array ____________________________________
 
-	funcOneArrayStringParam(test: string[]) {
+	funcOneArrayStringParam(pTest: string[]) {
 
 	}
 
-	funcOneArrayBooleanParam(test: boolean[]) {
+	funcOneArrayBooleanParam(pTest: boolean[]) {
 
 	}
 
-	funcOneArrayNumberParam(test: number[]) {
+	funcOneArrayNumberParam(pTest: number[]) {
 
 	}
 
-	funcOneArrayIHelpParam(test: IHelp[]) {
+	funcOneArrayIHelpParam(pTest: IHelp[]) {
 
 	}
 }

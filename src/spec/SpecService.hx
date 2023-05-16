@@ -80,6 +80,8 @@ class SpecService {
 import { TestBed } from \'@angular/core/testing\';
 import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';
 
+import { SPEC_CONST } from \'../shared/spec-helpers/constants.spec-helper\';
+
 import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.service\';
 
 ${imports}

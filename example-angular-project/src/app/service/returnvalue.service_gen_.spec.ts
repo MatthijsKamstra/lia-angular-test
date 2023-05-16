@@ -13,6 +13,8 @@ Copyright 2014-2023 Smart Society Services B.V.
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
+import { SPEC_CONST } from '../shared/spec-helpers/constants.spec-helper';
+
 import { ReturnvalueService } from './returnvalue.service';
 
 // import directly from returnvalueService

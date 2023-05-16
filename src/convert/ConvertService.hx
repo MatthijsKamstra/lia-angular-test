@@ -92,11 +92,12 @@ class ConvertService {
 			var isGetter:Bool = (_func.name.indexOf('get') != -1) ? true : false;
 			var isSetter:Bool = (_func.name.indexOf('set') != -1) ? true : false;
 			var isObservable:Bool = (_func._content.indexOf('Observable') != -1) ? true : false;
-			var isArray:Bool = (_func.returnValue.type.indexOf('[]') != -1) ? true : false;
+			var isReturnArray:Bool = (_func.returnValue.type.indexOf('[]') != -1) ? true : false;
+			var isReturnUnion:Bool = (_func.returnValue.type.indexOf('|') != -1) ? true : false;
 			// warn('is this a getter: ' + isGetter);
 			// warn('is this a setter: ' + isSetter);
 			// warn('is this a isObservable: ' + isObservable);
-			warn('is this a isArray: ' + isArray);
+			// warn('is this a isArray: ' + isArray);
 
 			log(_func);
 
@@ -110,7 +111,8 @@ class ConvertService {
 					mute('use setter test with return value "${_func.returnValue.type}"');
 					ts.addFunction(createTestSetter(_func));
 				}
-			} else if (isArray) {
+			} else if (isReturnArray) {
+				// warn('array');
 				mute('use test with return value "${_func.returnValue.type}"');
 				ts.addFunction(createTestArray(_func));
 			} else {
@@ -456,6 +458,8 @@ class ConvertService {
 		return out;
 	}
 
+	// ____________________________________ getter/setter ____________________________________
+
 	/**
 	 * [Description]
 	 * @param func
@@ -565,12 +569,13 @@ class ConvertService {
 	function createVarFromFunctionParam(params:Array<TypedObj>):String {
 		var out = '';
 		var isArray = false;
+		var isUnion = false;
 		var gen = '[]';
 		for (i in 0...params.length) {
 			var _p = params[i];
-			log(_p);
-			if (_p.type.indexOf('[]') != -1)
-				isArray = true;
+			// log(_p);
+			isArray = (_p.type.indexOf('[]') != -1) ? true : false;
+			isUnion = (_p.type.indexOf('|') != -1) ? true : false;
 
 			switch (_p.type) {
 				case '{ id': // FIXME bug
@@ -753,9 +758,10 @@ class ConvertService {
 			name: \'\'
 		};';
 				default:
-					// TODO check array, object, etc
-					out += '// FIXME: add (all) missing properties \n\t\t';
-					out += 'const ${_p.name}: ${_p.type} = {};\n\t\t';
+					out += '\n\t\t// FIXME: add (all) missing properties \n\t\t';
+					out += '// const ${_p.name}: ${_p.type} = {};\n\t\t';
+					out += '// export const ${_p.name.toUpperCase()}: ${_p.type} = {}; // this var needs to be added to SPEC_CONST\n\t\t';
+					out += 'const ${_p.name}: ${_p.type} = SPEC_CONST.getValue(${_p.name.toUpperCase()});\n\t\t';
 					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
 			}
 
