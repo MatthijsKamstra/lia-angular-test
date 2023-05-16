@@ -1,6 +1,6 @@
 /*
-- WARNING: this is a generated test. 
-- Most likely you need to change and update this file. 
+- WARNING: this is a generated test.
+- Most likely you need to change and update this file.
 - Generated on: 2023-05-16
 - Version: 0.1.1
 */
@@ -59,7 +59,7 @@ fdescribe('GetterSetterService (Generated)', () => {
 	 *	}
 	 */
 	it('#getPagination should return IPagination', () => {
-		
+
 		const result: IPagination = service.getPagination();
 		expect(result).toBe(service._pagination);
 		expect(service.getPagination).toBeDefined();
@@ -79,7 +79,7 @@ fdescribe('GetterSetterService (Generated)', () => {
 			pageNumber: 0,
 			pageSize: 0
 		};
-		
+
 
 		// Act
 		service.setPagination(pagination);
@@ -93,19 +93,19 @@ fdescribe('GetterSetterService (Generated)', () => {
 	// 3. Generated test for "getSort"
 	// Test GETTER with return type `ISort`
 	/**
-	 *	
+	 *
 	 *	getSort(sortedBy: SortedByEnum = SortedByEnum.CODE): ISort {
 	 *		return this.sort;
 	 *	}
 	 */
 	it('#getSort should return ISort', () => {
-		
-		// FIXME: add (all) missing properties 
+
+		// FIXME: add (all) missing properties
 		// const sortedBy: SortedByEnum = SortedByEnum.CODE = {};
 		// export const SORTEDBY: SortedByEnum = SortedByEnum.CODE = {}; // this var needs to be added to SPEC_CONST
-		const sortedBy: SortedByEnum = SortedByEnum.CODE = SPEC_CONST.getValue(SORTEDBY);
-		
-		
+		const sortedBy: SortedByEnum = SortedByEnum.CODE;// = SPEC_CONST.getValue(SORTEDBY);
+
+
 		const result: ISort = service.getSort(sortedBy);
 		expect(result).toBe(service.sort);
 		expect(service.getSort).toBeDefined();
@@ -114,7 +114,7 @@ fdescribe('GetterSetterService (Generated)', () => {
 	// 4. Generated test for "setSort"
 	// Test SETTER with return type `void`
 	/**
-	 *	
+	 *
 	 *	setSort(sort: ISort) {
 	 *		this.sort = sort;
 	 *	}
@@ -125,7 +125,7 @@ fdescribe('GetterSetterService (Generated)', () => {
 			sortDir: SortDirectionEnum.ASC,
 			sortedBy: SortedByEnum.CODE
 		};
-		
+
 
 		// Act
 		service.setSort(sort);
