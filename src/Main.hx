@@ -105,6 +105,9 @@ class Main {
 				case '-b', '--basic':
 					mute('Config.IS_BASIC = true', 1);
 					Config.IS_BASIC = true;
+				case '--debug':
+					mute('Config.IS_DEBUG = true', 1);
+					Config.IS_DEBUG = true;
 				case '--help', '-h':
 					showHelp();
 				case '--out', '-o':

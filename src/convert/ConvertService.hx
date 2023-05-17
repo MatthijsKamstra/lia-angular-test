@@ -1,5 +1,6 @@
 package convert;
 
+import utils.GenValues;
 import haxe.macro.Expr.ExprOf;
 import utils.RegEx;
 import AST;
@@ -106,13 +107,20 @@ class ConvertService {
 				// warn('getter/setter');
 				if (isGetter) {
 					mute('use getter test with return value "${_func.returnValue.type}"');
+					ts.addFunction('// check if this deprecated getter is better then the test based upon return value');
+					ts.addFunction('/**');
 					ts.addFunction(createTestGetter(_func));
+					ts.addFunction('*/');
 				}
 				if (isSetter) {
 					mute('use setter test with return value "${_func.returnValue.type}"');
+					ts.addFunction('// check if this deprecated setter is better then the test based upon return value');
+					ts.addFunction('/**');
 					ts.addFunction(createTestSetter(_func));
+					ts.addFunction('*/');
 				}
-			} else if (isReturnArray) {
+			}
+			if (isReturnArray) {
 				// warn('array');
 				mute('use test with return value "${_func.returnValue.type}"');
 				ts.addFunction(createTestArray(_func));
@@ -259,12 +267,20 @@ class ConvertService {
 		var _param = convertFuncObjParam2String(func);
 
 		var out = '';
-		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {
+			out += '// Test with return type `${func.returnValue.type}`\n\t';
+			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		}
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const spy = spyOn(service, \'${func.name}\');
 		const result = service.${func.name}(${_param});
+		const spy = spyOn(service, \'${func.name}\');
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
 		expect(result).toBeUndefined();
 		expect(result).toBeFalsy();
 		expect(spy).toHaveBeenCalled();
@@ -305,20 +321,27 @@ class ConvertService {
 		}
 
 		var out = '';
-		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		// out += '// [WIP] test is default disabled (`xit`) \n\t';
-		// out += '// ${isCustomType} \n\t';
-		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {
+			out += '// Test with return type `${func.returnValue.type}`\n\t';
+			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		}
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
 		const arr: ${_arrayReturnType}[] = ${_return};
 		const spy = spyOn(service, \'${func.name}\').and.returnValue(arr);
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
 		expect(result).toEqual(arr);
 		expect(service.${func.name}).toBeDefined();
 		expect(spy).toHaveBeenCalled();
 	});
 ';
+
 		return out;
 	}
 
@@ -337,26 +360,33 @@ class ConvertService {
 		}
 
 		var out = '';
-		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		// out += '// [WIP] test is default disabled (`xit`) \n\t';
-		// out += '// [mck] weird stuff here, this should work\n\t';
-		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {
+			out += '// Test with return type `${func.returnValue.type}`\n\t';
+			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		}
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const str = ${_return};
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // "${GenValues.string()}"
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toBe(${_return});
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
+		expect(result).toBe(str);
 		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}(${_param})).toBe(${_return});
+		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalledTimes(2);
-		expect(service.${func.name}(${_param})).toContain(${_return});
+		expect(service.${func.name}(${_param})).toContain(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalledTimes(3);
-		expect(service.${func.name}(${_param})).toBe(str);
+		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalledTimes(4);
 		expect(service.${func.name}).toBeDefined();
 	});
 ';
+
 		return out;
 	}
 
@@ -365,7 +395,7 @@ class ConvertService {
 
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
+		var _return = 'true';
 		if (matches[0] != null) {
 			_return = matches[0] //
 				.replace('return', '') //
@@ -375,14 +405,22 @@ class ConvertService {
 		}
 
 		var out = '';
-		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		// out += '// [mck] weird stuff here, this should work\n\t';
-		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {
+			out += '// Test with return type `${func.returnValue.type}`\n\t';
+			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		}
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // true
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toBe(${_return});
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
+		expect(result).toBe(_${func.returnValue.type});
 		expect(result).toBeTruthy();
 		expect(spy).toHaveBeenCalled();
 		expect(service.${func.name}(${_param})).toBeTruthy();
@@ -401,7 +439,7 @@ class ConvertService {
 
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
+		var _return = '1';
 		if (matches[0] != null) {
 			_return = matches[0] //
 				.replace('return', '') //
@@ -411,14 +449,22 @@ class ConvertService {
 		}
 
 		var out = '';
-		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		// out += '// [mck] weird stuff here, this should work\n\t';
-		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {
+			out += '// Test with return type `${func.returnValue.type}`\n\t';
+			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		}
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const _${func.returnValue.type}: ${func.returnValue.type} = ${_return}; // ${GenValues.number()}
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toBe(${_return});
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
+		expect(result).toBe(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalled();
 		expect(service.${func.name}(${_param})).toBeTruthy();
 		expect(spy).toHaveBeenCalledTimes(2);
@@ -434,7 +480,7 @@ class ConvertService {
 
 		// get return .... test!
 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
+		var _return = '{}';
 		if (matches[0] != null) {
 			_return = matches[0] //
 				.replace('return', '') //
@@ -447,15 +493,25 @@ class ConvertService {
 		out += '// Test with return type `${func.returnValue.type}` (UNKNOWN)\n\t';
 		// out += '// [WIP] test is default disabled (`xit`) \n\t';
 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		if (Config.IS_DEBUG) {}
 
 		out += 'it(\'${getTitle(func)}\', () => {
+		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		// const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+		const _${func.returnValue.type.toLowerCase()}: ${func.returnValue.type} = ${_return};
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type.toLowerCase()});
+
+		// Act
+		service.${func.name}(${_param});
+
+		// Assert
 		expect(service.${func.name}).toBeDefined();
-		// expect(spy).toHaveBeenCalled();
+		expect(result).toBeTruthy();
+		expect(spy).toHaveBeenCalled();
 	});
 ';
+
 		return out;
 	}
 
@@ -485,12 +541,19 @@ class ConvertService {
 
 		var out = '';
 		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
-		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		// if (Config.IS_DEBUG) {
+		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		// }
 		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
+		const any: any = ${_return};
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(any);
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toBe(${_return});
+		expect(result).toBe(any);
+		expect(spy).toHaveBeenCalled();
+		// expect(service.${func.name}(${_param})).toBeTruthy();
+		// expect(spy).toHaveBeenCalledTimes(2);
+		// expect(service.${func.name}(${_param})).toBe(any);
 		expect(service.${func.name}).toBeDefined();
 	});
 ';
@@ -520,9 +583,9 @@ class ConvertService {
 		var out = '';
 		// out += '// ${haxe.Json.stringify(func)}';
 		out += '// Test SETTER with return type `${func.returnValue.type}`\n\t';
-		// out += '// [WIP] test is default disabled (change `xit` to `it` to activate) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-
+		// if (Config.IS_DEBUG) {
+		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		// }
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
 		${createVarFromFunctionParam(func.params)}
@@ -542,6 +605,8 @@ class ConvertService {
 
 		return out;
 	}
+
+	// ____________________________________ misc/tools ____________________________________
 
 	/**
 	 * convert params to string to use in call function
@@ -763,7 +828,7 @@ class ConvertService {
 		};';
 				default:
 					out += '\n\t\t// FIXME: add (all) missing properties \n\t\t';
-					out += '// const ${_p.name}: ${_p.type} = {};\n\t\t';
+					out += '// const _${_p.name}: ${_p.type} = {};\n\t\t';
 					out += '// export const ${_p.name.toUpperCase()}: ${_p.type} = {}; // this var needs to be added to SPEC_CONST\n\t\t';
 					out += 'const ${_p.name}: ${_p.type} = SPEC_CONST.getValue(${_p.name.toUpperCase()});\n\t\t';
 					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
@@ -806,66 +871,6 @@ class ConvertService {
 		});';
 		return out;
 	}
-
-	// /**
-	//  * get the values used in the functions (param)
-	//  *
-	//  * @param funcObj
-	//  * @param varName
-	//  */
-	// function getVarValueFrom(funcObj:FuncObj, varName:String) {
-	// 	// warn(funcObj);
-	// 	var out = '// FIXME: use "add (all) missing properties" (vars)\n';
-	// 	if (funcObj.params[0] == null)
-	// 		return '';
-	// 	var gen = '{}'; // start as an object
-	// 	// var varNameReturnValue = funcObj.name;
-	// 	// var varName = funcObj.name.toLowerCase().replace('[]', '');
-	// 	// var isArray = funcObj.name.indexOf('[]') != -1;
-	// 	// if (isArray)
-	// 	// 	gen = '[]'; // ha! it doesn't seem to be and object
-	// 	for (i in 0...funcObj.params.length) {
-	// 		var _params = funcObj.params[i];
-	// 		switch (_params.type) {
-	// 			case 'string':
-	// 				// sure what the type is
-	// 				gen = '""';
-	// 				out = '// (vars)\n';
-	// 			default:
-	// 				gen = '{}';
-	// 				// trace("case '" + _params.type + "': trace ('" + _params.type + "');");
-	// 		}
-	// 		out += '\t\t';
-	// 		out += 'const ${_params.name}: ${_params.type} = ${gen};';
-	// 	}
-	// 	// var params = '';
-	// 	// if (funcObj.params[0] != null)
-	// 	// 	params = '${funcObj.params[0].name.toLowerCase()}';
-	// 	return out;
-	// }
-	// /**
-	//  * create a const value to use in the tests
-	//  *
-	//  * @example
-	//  * 			`Observable<IHelp>` --> `const ihelp: IHelp = {};`
-	//  * 			`Observable<LightMeasurementDevice[]>` --> `const ischedules: ISchedules = {};`
-	//  *
-	//  * @param TypedObj
-	//  */
-	// function getVarValueFromReturnValue(obj:TypedObj) {
-	// 	// warn(obj);
-	// 	var gen = '{}'; // start as an object
-	// 	var varNameReturnValue = obj.value;
-	// 	var varName = obj.value.toLowerCase().replace('[]', '');
-	// 	var isArray = obj.value.indexOf('[]') != -1;
-	// 	if (isArray)
-	// 		gen = '[]'; // ha! it doesn't seem to be and object
-	// 	var out = '';
-	// 	if (!isArray)
-	// 		out += '// FIXME: use "add (all) missing properties" (return value)\n\t\t';
-	// 	out += 'const ${varName}: ${varNameReturnValue} = ${gen};';
-	// 	return out;
-	// }
 
 	/**
 	 * create a readable description of the test (?)
