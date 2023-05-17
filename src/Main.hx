@@ -194,6 +194,7 @@ Lia-angular-test (${Config.VERSION})
   --force / -f		: force overwrite
   --dryrun / -d		: run without writing files
   --basic / -b		: test without content
+  --debug			: write test with some extra debug information
 ----------------------------------------------------
 ');
 
