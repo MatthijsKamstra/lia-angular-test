@@ -259,7 +259,7 @@ class ConvertService {
 
 		var out = '';
 		// out += '// Test with return type `${func.returnValue.type}`\n\t';
-		// out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
 		out += 'it(\'${getTitle(func)}\', () => {
 		${createVarFromFunctionParam(func.params)}
 		const spy = spyOn(service, \'${func.name}\');
