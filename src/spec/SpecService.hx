@@ -9,6 +9,7 @@ class SpecService {
 	@:isVar public var importArray(get, set):Array<String> = [];
 	@:isVar public var constructorArray(get, set):Array<String> = [];
 	@:isVar public var testBedArray(get, set):Array<String> = [];
+	@:isVar public var providerArray(get, set):Array<String> = [];
 
 	public function new(type:String) {
 		this.type = type;
@@ -61,7 +62,16 @@ class SpecService {
 			}
 		}
 
-		return typescript(this.type, vars, funcs, imp, _constructor, _testBed);
+		var _provider = '';
+		for (i in 0...providerArray.length) {
+			var _providerArray = providerArray[i];
+			_provider += '${_providerArray}';
+			if (i < providerArray.length - 1) {
+				_provider += ', ';
+			}
+		}
+
+		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider);
 	}
 
 	/**
@@ -74,8 +84,8 @@ class SpecService {
 	 * @param testBed
 	 * @return String
 	 */
-	static public function typescript(name:String, vars:String = '', funcs:String = '', imports:String = '', constructor:String = '',
-			testBed:String = ''):String {
+	static public function typescript(name:String, vars:String = '', funcs:String = '', imports:String = '', constructor:String = '', testBed:String = '',
+			providers:String = ''):String {
 		var template = '
 import { TestBed } from \'@angular/core/testing\';
 import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';
@@ -99,7 +109,7 @@ ${constructor}
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule],
-			providers: [${Strings.toUpperCamel(name)}Service]
+			providers: [${Strings.toUpperCamel(name)}Service, ${providers}]
 		});
 		service = TestBed.inject(${Strings.toUpperCamel(name)}Service);
 		${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service); // [mck] might be removed in the future
@@ -155,6 +165,10 @@ ${testBed}
 
 	public function addConstructor(arg0:String) {
 		this.constructorArray.push(arg0);
+	}
+
+	public function addProviders(arg0:String) {
+		this.providerArray.push(arg0);
 	}
 
 	public function addTestbed(arg0:String) {
@@ -221,5 +235,13 @@ ${testBed}
 
 	function set_testBedArray(value:Array<String>):Array<String> {
 		return testBedArray = value;
+	}
+
+	function get_providerArray():Array<String> {
+		return providerArray;
+	}
+
+	function set_providerArray(value:Array<String>):Array<String> {
+		return providerArray = value;
 	}
 }

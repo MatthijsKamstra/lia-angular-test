@@ -59,6 +59,7 @@ class ConvertService {
 				continue;
 			ts.addConstructor('\tlet ${_constructor.name}: ${_constructor.type};');
 			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
+			ts.addProviders('${_constructor.type}');
 		}
 
 		// -----------------------------------------------------------
