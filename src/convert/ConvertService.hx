@@ -367,7 +367,7 @@ class ConvertService {
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // "${GenValues.string()}"
+		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // "${GenValues.string()}";
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
 
@@ -375,7 +375,7 @@ class ConvertService {
 		service.${func.name}(${_param});
 
 		// Assert
-		expect(result).toBe(str);
+		expect(result).toBe(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalled();
 		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
 		expect(spy).toHaveBeenCalledTimes(2);
@@ -412,7 +412,7 @@ class ConvertService {
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // true
+		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // true;
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
 
@@ -456,7 +456,7 @@ class ConvertService {
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
 		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = ${_return}; // ${GenValues.number()}
+		const _${func.returnValue.type}: ${func.returnValue.type} = ${_return}; // ${GenValues.number()};
 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
 
