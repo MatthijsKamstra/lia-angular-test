@@ -525,13 +525,16 @@ class ConvertService {
 		out += 'it(\'${getTitle(func)}\', () => {
 		// Arrange
 		${createVarFromFunctionParam(func.params)}
+		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+
 
 		// Act
 		service.${func.name}(${_param});
 
 		// Assert
 		const result: ${func.params[0].type} = service.${func.name.replace('set', 'get')}();
-		expect(result).toBe(${func.params[0].name});
+		expect(result).toEqual(${func.params[0].name});
+		expect(spy).toHaveBeenCalled();
 		expect(service.${func.name}).toBeDefined();
 	});
 ';

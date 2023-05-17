@@ -1,7 +1,7 @@
 /*
 - WARNING: this is a generated test.
 - Most likely you need to change and update this file.
-- Generated on: 2023-05-16
+- Generated on: 2023-05-17
 - Version: 0.1.1
 */
 
@@ -80,13 +80,16 @@ fdescribe('GetterSetterService (Generated)', () => {
 			pageSize: 0
 		};
 
+		const spy = spyOn(service, 'setPagination'); //.and.returnValue();
+
 
 		// Act
 		service.setPagination(pagination);
 
 		// Assert
 		const result: IPagination = service.getPagination();
-		expect(result).toBe(pagination);
+		expect(result).toEqual(pagination);
+		expect(spy).toHaveBeenCalled();
 		expect(service.setPagination).toBeDefined();
 	});
 
@@ -103,7 +106,7 @@ fdescribe('GetterSetterService (Generated)', () => {
 		// FIXME: add (all) missing properties
 		// const sortedBy: SortedByEnum = SortedByEnum.CODE = {};
 		// export const SORTEDBY: SortedByEnum = SortedByEnum.CODE = {}; // this var needs to be added to SPEC_CONST
-		const sortedBy: SortedByEnum = SortedByEnum.CODE;// = SPEC_CONST.getValue(SORTEDBY);
+		const sortedBy: SortedByEnum = SortedByEnum.CODE; //= SPEC_CONST.getValue(SORTEDBY);
 
 
 		const result: ISort = service.getSort(sortedBy);
@@ -126,13 +129,16 @@ fdescribe('GetterSetterService (Generated)', () => {
 			sortedBy: SortedByEnum.CODE
 		};
 
+		const spy = spyOn(service, 'setSort').and.returnValue();
+
 
 		// Act
 		service.setSort(sort);
 
 		// Assert
 		const result: ISort = service.getSort();
-		expect(result).toBe(sort);
+		expect(result).toEqual(sort);
+		expect(spy).toHaveBeenCalled();
 		expect(service.setSort).toBeDefined();
 	});
 
