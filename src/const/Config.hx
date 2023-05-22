@@ -17,8 +17,9 @@ class Config {
 	 * 0.1.3 - fix bug providers
 	 * 0.1.4 - AAA-testing boolean/etc
 	 * 0.1.5 - adding debug, generating values for testing
+	 * 0.1.6 - adding fake translations service if needed
 	 */
-	public static final VERSION:String = '0.1.5';
+	public static final VERSION:String = '0.1.6';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

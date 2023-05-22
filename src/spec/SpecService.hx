@@ -66,6 +66,10 @@ class SpecService {
 		for (i in 0...providerArray.length) {
 			var _providerArray = providerArray[i];
 			_provider += '${_providerArray}';
+			// TODO, remove other `TranslateService` ????
+			if (_providerArray == 'TranslateService') {
+				_provider += ', { provide: TranslateService, useValue: fakeTranslateService }';
+			}
 			if (i < providerArray.length - 1) {
 				_provider += ', ';
 			}
@@ -84,8 +88,24 @@ class SpecService {
 	 * @param testBed
 	 * @return String
 	 */
-	static public function typescript(name:String, vars:String = '', funcs:String = '', imports:String = '', constructor:String = '', testBed:String = '',
-			providers:String = ''):String {
+	static public function typescript( //
+		name:String, //
+		vars:String = '', //
+		funcs:String = '', //
+		imports:String = '', //
+		constructor:String = '', //
+		testBed:String = '', //
+			providers:String = '' //
+		//
+	):String {
+		var isTranslateService = providers.indexOf('TranslateService') != -1;
+
+		var fakeService = 'let fakeTranslateService: any;
+	// const stubTranslate = (value) => fakeTranslateService.instant.and.returnValue(value);
+';
+
+		// warn(isTranslateService);
+
 		var template = '
 import { TestBed } from \'@angular/core/testing\';
 import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';
@@ -105,6 +125,8 @@ ${constructor}
 	let httpMock: HttpTestingController;
 
 	${vars}
+
+	${(isTranslateService) ? fakeService : ''}
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
