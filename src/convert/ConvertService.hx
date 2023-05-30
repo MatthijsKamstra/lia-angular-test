@@ -234,8 +234,8 @@ class ConvertService {
 		var funcURL = '// URL used in class\n\t\t';
 		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
 
-		if (func.URL != '') {
-			funcURL += 'const ${func.URL != "" ? func.URL : ""}';
+		if (func._guessing != null && func._guessing.URL != '') {
+			funcURL += 'const ${func._guessing.URL != "" ? func._guessing.URL : ""}';
 		}
 
 		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
@@ -253,7 +253,7 @@ class ConvertService {
 		// Assert
 		const mockReq = httpMock.expectOne(url);
 		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("${(func.requestType)}");
+		expect(mockReq.request.method).toBe("${(func._guessing.requestType)}");
 		expect(mockReq.cancelled).toBeFalsy();
 		expect(mockReq.request.responseType).toEqual(\'json\');
 		mockReq.flush(${varName});
