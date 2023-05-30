@@ -3,6 +3,37 @@ package;
 /**
  * AST = Abstract Syntax Tree
  */
+typedef TypeScriptClassObject = {
+	var hasHttpClient:Bool; // false,
+	var hasUrl:Bool; // false,
+	var URL:String; // :'', // guessing
+	var constructor:TypeScriptConstructorObject;
+	var imports:Array<String>;
+	var functions:Array<FuncObj>;
+	var vars:Array<VarObj>;
+}
+
+typedef TypeScriptConstructorObject = {
+	var params:Array<TypedObj>;
+}
+
+typedef VarObj = {
+	// var access:String; // private|public|none
+	var name:String; // var-name
+	var type:String; // type of var
+	// var returnValue:TypedObj;
+	// var params:Array<TypedObj>;
+	var _content:String; // the original value
+	@:optional var optional:Bool;
+	@:optional var _guessing:GuessingObj;
+	@:optional var decorators:DecoratorsObj;
+}
+
+typedef DecoratorsObj = {
+	@:optional var input:Bool;
+	@:optional var output:Bool;
+}
+
 /**
  * used to define a function
  *
@@ -13,14 +44,21 @@ package;
  * ```
  */
 typedef FuncObj = {
-	var URL:String; // get this specific url for this function (is weird?)
-	var requestType:String; // POST|GET (weird?)
-	//
 	var access:String; // private|public|none
 	var name:String; // function-name
 	var returnValue:TypedObj;
 	var params:Array<TypedObj>;
 	var _content:String; // the original value
+	@:optional var _guessing:GuessingObj;
+}
+
+/**
+ * just a place to collect data that I am "guessing"
+ *
+ */
+typedef GuessingObj = {
+	@:optional var URL:String; // get this specific url for this function (is weird?)
+	@:optional var requestType:String; // POST|GET (weird?)
 }
 
 /**
@@ -44,4 +82,5 @@ typedef TypedObj = {
 	var value:String; // IConfigSettings
 	var type:String; // Observable, Boolean, String, whatever,
 	var _content:String; // the original value: Observable<IConfigSettings>
+	@:optional var _guessing:GuessingObj;
 }

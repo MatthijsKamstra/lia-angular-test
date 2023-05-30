@@ -8,6 +8,15 @@ Probably good to know
 - files generate with Angular CLI (aka `ng g service foobar`)
 - VSCODE [prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [formatting](https://marketplace.visualstudio.com/items?itemName=tombonnike.vscode-status-bar-format-toggle) is active on save
 
+## POC
+
+assumptions everywhere, thats why it is a Proof-of-concept
+
+- tabs (not spaces)
+- formatting (see above)
+- vars above the constructor (probably always a good idea, but ...)
+- ...
+
 ## how it works
 
 convert folders

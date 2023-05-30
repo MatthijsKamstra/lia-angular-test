@@ -1,3 +1,4 @@
+import convert.ConvertComponent;
 import convert.ConvertService;
 import const.Config;
 import haxe.io.Path;
@@ -42,7 +43,7 @@ class Main {
 		// mute('fileArr.length: ${fileArr.length / 4}', 1);
 		mute('ignoreArr: $ignoreArr', 1);
 
-		info('DATA');
+		info('CONVERT');
 		// do something clever
 		convertFiletype();
 
@@ -59,12 +60,35 @@ class Main {
 
 	function convertFiletype() {
 		convertServices();
+		convertComponents();
+	}
+
+	function convertComponents() {
+		info('Convert COMPONENTS');
+
+		var arr = [];
+		/**
+		 * convert
+		 */
+		for (i in 0...fileArr.length) {
+			var file = fileArr[i];
+
+			// do this first
+			if (file.indexOf('.component.ts') != -1) {
+				mute('Convert component: `${file.split('/src')[1]}`', 1);
+				var convertComponent = new ConvertComponent(file);
+				arr.push(file);
+				Progress.update(file);
+			}
+		}
+
+		info('arr.length: ${arr.length}', 1);
 	}
 
 	function convertServices() {
-		info('Convert existing services');
+		info('Convert SERVICES');
 
-		var serviceArr = [];
+		var arr = [];
 		/**
 		 * convert services
 		 */
@@ -75,12 +99,12 @@ class Main {
 			if (file.indexOf('.service.ts') != -1) {
 				mute('Convert Service: `${file.split('/src')[1]}`', 1);
 				var convertService = new ConvertService(file);
-				serviceArr.push(file);
+				arr.push(file);
 				Progress.update(file);
 			}
 		}
 
-		info('serviceArr.length: ${serviceArr.length}');
+		info('arr.length: ${arr.length}', 1);
 	}
 
 	function initArgs(?args:Array<String>) {

@@ -205,10 +205,20 @@ class GenValues {
 		"wretched", "wrong", "wry", "yellow", "yielding", "young", "youthful", "yummy", "zany", "zealous", "zesty", "zippy", "zonked"
 	];
 
+	/**
+	 * @example
+	 *
+	 * ```
+	 * GenValues.string()
+	 * ```
+	 *
+	 * @param pre
+	 * @return String
+	 */
 	static public function string(pre:String = ''):String {
 		var m = marvel[Math.round(Math.random() * marvel.length)];
 		var a = adjectives[Math.round(Math.random() * adjectives.length)];
-		var val = '${pre}${m}-${a}';
+		var val = '${pre}${a}-${m}';
 		return val;
 	}
 

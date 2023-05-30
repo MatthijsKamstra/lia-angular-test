@@ -89,7 +89,7 @@ class ConvertService {
 			// trace(_func);
 			ts.addFunction('// ${i + 1}. Generated test for "${_func.name}"');
 
-			log('${i}. - title test: ${getTitle(_func)}');
+			// log('${i}. - title test: ${getTitle(_func)}');
 
 			var isGetter:Bool = (_func.name.indexOf('get') != -1) ? true : false;
 			var isSetter:Bool = (_func.name.indexOf('set') != -1) ? true : false;

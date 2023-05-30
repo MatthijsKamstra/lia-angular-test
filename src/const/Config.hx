@@ -18,8 +18,10 @@ class Config {
 	 * 0.1.4 - AAA-testing boolean/etc
 	 * 0.1.5 - adding debug, generating values for testing
 	 * 0.1.6 - adding fake translations service if needed
+	 * 0.1.7 - START components
+	 * 0.1.8 - vars generated components
 	 */
-	public static final VERSION:String = '0.1.6';
+	public static final VERSION:String = '0.1.8';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

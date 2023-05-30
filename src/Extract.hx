@@ -6,7 +6,7 @@ import utils.RegEx;
 import AST;
 
 class Extract {
-	public static final OBJ_DEFAULT = {
+	public static final OBJ_DEFAULT:TypeScriptClassObject = {
 		hasHttpClient: false,
 		hasUrl: false,
 		URL: '',
@@ -14,10 +14,11 @@ class Extract {
 			params: []
 		},
 		imports: [],
-		functions: []
+		functions: [],
+		vars: [],
 	};
 
-	public static var OBJ = {
+	public static var OBJ:TypeScriptClassObject = {
 		hasHttpClient: false,
 		hasUrl: false,
 		URL: '',
@@ -25,23 +26,31 @@ class Extract {
 			params: []
 		},
 		imports: [],
-		functions: []
+		functions: [],
+		vars: [],
 	};
 
 	// public static var importMap:Map<String, String> = [];
 
-	public static function runExtract(content:String, name:String) {
+	/**
+	 * extract data from file
+	 *
+	 * @param content	content of the file (probably without comments)
+	 * @param name		name of the class/name of the file (example: `Foobar` or `Barfoo`)
+	 * @param type		type of class (example: `Service` or `Component`)
+	 */
+	public static function runExtract(content:String, name:String, type:String = 'Service') {
 		// log(content);
 
 		// restart OBJ every time it runs
 		OBJ = Json.parse(Json.stringify(OBJ_DEFAULT));
 
 		// create filename/class name
-		var fileName = '${Strings.toUpperCamel(name)}Service';
+		var fileName = '${Strings.toUpperCamel(name)}${type}';
 
 		// get the content of the class values
 		var startIndex = content.indexOf(fileName);
-		// trace(startIndex);
+
 		var str = content.substring(startIndex).trim();
 		var strStart = (str.indexOf('{'));
 		var strEnd = (str.lastIndexOf('}'));
@@ -57,7 +66,7 @@ class Extract {
 		// URL
 		var matches = RegEx.getMatches(RegEx.hasURL, cleandedStr);
 		// warn(matches);
-		OBJ.URL = matches[0]; // ugghhhhh, fix later
+		OBJ.URL = matches[0]; // ugghhhhh, fix later, much much later!!! (or never!)
 
 		// -----------------------------------------------------------------
 		// Find imports
@@ -83,6 +92,20 @@ class Extract {
 		}
 
 		// -----------------------------------------------------------------
+		// get vars
+		// -----------------------------------------------------------------
+		var temp = cleandedStr.split('constructor')[0];
+		var tempArr = temp.split('\n');
+		for (i in 0...tempArr.length) {
+			var _var = tempArr[i].trim();
+			if (_var != '') {
+				// warn(v);
+				var _obj:VarObj = convertVars(_var);
+				OBJ.vars.push(_obj);
+			}
+		}
+
+		// -----------------------------------------------------------------
 		// Find constructor
 		// -----------------------------------------------------------------
 		var matches = RegEx.getMatches(RegEx.classConstructor, str);
@@ -93,26 +116,27 @@ class Extract {
 				.replace('(', '') // remove '('
 				.replace('private', '') // FIXME remove 'private' (not sure, might need this in the future)
 				.replace('public', '') // FIXME remove 'public' (not sure, might need this in the future)
+				.replace('protected', '') // FIXME remove 'protected' (not sure, might need this in the future)
 				.replace('\t', '') // remove tab
 				.replace('\n', ''); // remove enter/return
 			// log(constructorParamString);
 			var constructorParamArr = constructorParamString.split(',');
 			// log(constructorParamArr);
 
-			// private|public
+			// private|public|protected
 			// param name
 			// param type
-			var constrObj = {
-				constructor: {
-					params: [
-						{
-							name: 'test',
-							type: 'foo'
-						}
-					]
-				}
-			};
-			constrObj.constructor.params.pop(); // remove example
+			// var constrObj = {
+			// 	constructor: {
+			// 		params: [
+			// 			{
+			// 				name: 'test',
+			// 				type: 'foo'
+			// 			}
+			// 		]
+			// 	}
+			// };
+			// constrObj.constructor.params.pop(); // remove example
 			for (i in 0...constructorParamArr.length) {
 				var _con = constructorParamArr[i].trim();
 				// trace(_con);
@@ -121,11 +145,13 @@ class Extract {
 
 				var _obj:TypedObj = convertParams(_con);
 
-				constrObj.constructor.params.push(_obj);
+				// constrObj.constructor.params.push(_obj);
+
+				OBJ.constructor.params.push(_obj);
 			}
 			// log(obj);
 
-			OBJ.constructor = constrObj.constructor;
+			// OBJ.constructor = constrObj.constructor;
 			// log(OBJ);
 		}
 
@@ -198,13 +224,15 @@ class Extract {
 				}
 
 				var _funcObj:FuncObj = {
-					URL: _URL,
-					requestType: _requestType,
 					access: _access,
 					name: _name,
 					returnValue: getReturnValues(_return),
 					params: _paramArr,
 					_content: _str,
+					_guessing: {
+						URL: _URL,
+						requestType: _requestType,
+					}
 				}
 				OBJ.functions.push(_funcObj);
 
@@ -298,6 +326,39 @@ class Extract {
 			value: _name,
 			type: _type,
 			_content: val
+		}
+	}
+
+	static function convertVars(val:String):VarObj {
+		var _val = val;
+		var _name = '';
+		var _type = '';
+		var _optional = false;
+		var _decorators:DecoratorsObj = {};
+		if (val.indexOf('!') != -1) {
+			_optional = true;
+			_val = _val.replace('!', '').trim();
+		}
+		if (val.indexOf('@Input()') != -1) {
+			_decorators.input = true;
+			_val = _val.replace('@Input()', '').trim();
+		}
+		if (val.indexOf('@Output()') != -1) {
+			_decorators.output = true;
+			_val = _val.replace('@Output()', '').trim();
+		}
+		_val = _val.replace(';', '').trim();
+
+		_name = _val.split(':')[0].trim();
+		_type = _val.split(':')[1].trim();
+
+		return {
+			name: _name,
+			type: _type,
+			decorators: _decorators,
+			optional: _optional,
+			_content: val,
+			// @:optional var _guessing:GuessingObj;
 		}
 	}
 }
