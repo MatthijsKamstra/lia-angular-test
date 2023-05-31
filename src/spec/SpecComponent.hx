@@ -142,7 +142,7 @@ ${_hasRouter ? "	let navigateSpy: jasmine.Spy;" : ""}
 
 ${constructor}
 
-	${vars}
+${vars}
 
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
@@ -153,7 +153,7 @@ ${_hasRouter ? "				RouterTestingModule.withRoutes([])" : ""}
 			],
 			declarations: [${Strings.toUpperCamel(name)}Component],
 			providers: [${providers}],
-			schemas: [NO_ERRORS_SCHEMA],
+${_hasHttpClient ? "			schemas: [NO_ERRORS_SCHEMA]," : ""}
 		})
 			.compileComponents();
 
@@ -175,9 +175,9 @@ ${_hasRouter ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
 		// saveButton = fixture.debugElement.query(By.css(\'[data-testid="saveButton"]\')).nativeElement;
 	});
 
-	afterEach(() => {
+${_hasHttpClient ? "	afterEach(() => {
 		httpTestingController.verify();
-	});
+	});" : ""}
 
 	it(\'should create\', () => {
 		expect(component).toBeTruthy();

@@ -191,9 +191,9 @@ class ConvertComponent {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
 			info('Open generated json file: ${jsonPath}', 2);
-			// content = content.replace('\n\n', '\n');
+			content = content.replace('\n\n\n', '\n\n');
+			content = content.replace('\n\n', '\n');
 			// content = content.replace('\n\n\n', '\n');
-			// content = content.replace('\n\n\n', '\n\n');
 			// content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
 			sys.io.File.saveContent(templatePath, content);
 			sys.io.File.saveContent(jsonPath, json);
