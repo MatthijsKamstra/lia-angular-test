@@ -110,6 +110,7 @@ class SpecComponent {
 		var _hasHttpClient = this.obj.hasHttpClient;
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
+		var _useTemplate:Bool = false;
 		// warn(isTranslateService);
 
 		var template = '
@@ -168,11 +169,10 @@ ${_hasRouter ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
 		fixture = TestBed.createComponent(${Strings.toUpperCamel(name)}Component);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
-
+${_useTemplate ? "
 		// const formGroupEl = fixture.debugElement.query(By.directive(FakeFormGroupComponent));
 		// formGroup = formGroupEl.componentInstance;
-
-		// saveButton = fixture.debugElement.query(By.css(\'[data-testid="saveButton"]\')).nativeElement;
+		// saveButton = fixture.debugElement.query(By.css('[data-testid='saveButton']')).nativeElement;" : ""}
 	});
 
 ${_hasHttpClient ? "	afterEach(() => {

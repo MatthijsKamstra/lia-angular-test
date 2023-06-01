@@ -24,9 +24,11 @@ typedef VarObj = {
 	// var returnValue:TypedObj;
 	// var params:Array<TypedObj>;
 	var _content:String; // the original value
-	@:optional var optional:Bool;
+	@:optional var optional:Bool; // `?`
+	@:optional var nonnull:Bool; // `!`
 	@:optional var _guessing:GuessingObj;
 	@:optional var decorators:DecoratorsObj;
+	@:optional var value:String;
 }
 
 typedef DecoratorsObj = {

@@ -154,7 +154,7 @@ class ConvertComponent {
 					mute('use test with return value "${_func.returnValue.type}"');
 
 					ts.addFunction('describe(\'${_func.name}\', () => {');
-					ts.addFunction(createBasicTest(_func, '\t\t'));
+					ts.addFunction(createComboTest(_func, '\t\t'));
 					ts.addFunction('});\n');
 				}
 			}
@@ -191,10 +191,10 @@ class ConvertComponent {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
 			info('Open generated json file: ${jsonPath}', 2);
-			content = content.replace('\n\n\n', '\n\n');
-			content = content.replace('\n\n', '\n');
-			// content = content.replace('\n\n\n', '\n');
-			// content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
+			// content = content.replace('\n\n\n', '\n\n');
+			// content = content.replace('\n\n', '\n');
+			// // content = content.replace('\n\n\n', '\n');
+			// // content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
 			sys.io.File.saveContent(templatePath, content);
 			sys.io.File.saveContent(jsonPath, json);
 		}
@@ -206,26 +206,51 @@ class ConvertComponent {
 	// ____________________________________ create test based upon return type ____________________________________
 
 	function createOnInitTest(func:FuncObj, ?tabs:String = '\t'):String {
-		// warn('subscribes total: ' + (func._content.split('.subscribe').length - 1));
-		// warn('this total: ' + (func._content.split('this.').length - 1));
-
-		// var matches = RegEx.getMatches(RegEx.getVars, func._content);
-		// if (matches.length > 0) {
-		// 	// log(matches);
-		// 	for (i in 0...matches.length) {
-		// 		var match = matches[i];
-		// 		trace(match);
-		// 	}
-		// }
-
 		var out = '\n';
-		out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
+		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
 		// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
-		out += 'it(\'${getTitle(func)}\', () => {
+		out += '${tabs}it(\'${getTitle(func)}\', () => {
 ${tabs}\tcomponent.ngOnInit();
-${tabs}\texpect(component).toBeDefined();
+${tabs}\texpect(component.ngOnInit).toBeDefined();
 ${tabs}});
 ';
+		return out;
+	}
+
+	function createComboTest(func:FuncObj, ?tabs:String = '\t'):String {
+		var out = '\n';
+		out += '${tabs}// test with return type `${func.returnValue.type}`\n${tabs}';
+
+		switch (func.returnValue.type) {
+			case 'string':
+				trace('string');
+			case 'boolean':
+				// ${tabs}\t// ${func.params}
+				// trace('boolean');
+				out += 'it(\'${getTitle(func)}\', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${convertFuncParams2Value(func)};
+${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${convertFuncReturn2Value(func)};
+${tabs}\tconst _spy = spyOn(component, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
+${tabs}\t// Act
+${tabs}\tcomponent.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)});
+${tabs}\t// Assert
+${tabs}\texpect(component.${func.name}).toBeDefined();
+${tabs}\texpect(_spy).toHaveBeenCalled();
+${tabs}});\n';
+			case 'void':
+				// trace('void');
+				out += 'it(\'${getTitle(func)}\', () => {
+${tabs}\t// Assert
+${tabs}\texpect(component.${func.name}).toBeDefined();
+${tabs}});\n';
+			default:
+				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+				out += 'xit(\'${getTitle(func)}\', () => {
+${tabs}\t//
+${tabs}});\n';
+				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
+		}
 
 		return out;
 	}
@@ -285,7 +310,7 @@ ${tabs}});
 	function setupVars(func:FuncObj, vars:VarObj, ?tabs:String = '\t') {
 		var out = '// Arrange
 ${tabs}\tconst _${vars.name}: ${vars.type} = ${convertVar2Value(vars)};
-${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} = component.${vars.name};
+${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};
 ${tabs}\tcomponent.${vars.name} = _${vars.name};
 ${tabs}\t// Act
 ${tabs}\tcomponent.ngOnInit();
@@ -297,17 +322,58 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 
 	// ____________________________________ converters ____________________________________
 
-	function convertVar2Value(vars:VarObj):String {
+	function convertFuncReturn2Value(func:FuncObj) {
+		// warn(func);
 		var out = '';
-		switch (vars.type) {
+		switch (func.returnValue.type) {
 			case 'string':
 				out = '"${GenValues.string()}"';
+			case 'string[]':
+				out = '["${GenValues.string()}", "${GenValues.string()}"]';
 			case 'bool', 'boolean':
 				out = 'true';
 			case 'any':
 				out = '{}';
 			default:
-				trace("case '" + vars + "': trace ('" + vars + "');");
+				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
+		}
+		return out;
+	}
+
+	function convertFuncParams2Value(func:FuncObj) {
+		// warn(func);
+		var out = '';
+		switch (func.params[0].type) {
+			case 'string':
+				out = '"${GenValues.string()}"';
+			case 'string[]':
+				out = '["${GenValues.string()}", "${GenValues.string()}"]';
+			case 'bool', 'boolean':
+				out = 'true';
+			case 'any':
+				out = '{}';
+			default:
+				trace("case '" + func.params[0].type + "': trace ('" + func.params[0].type + "');");
+		}
+		return out;
+	}
+
+	function convertVar2Value(vars:VarObj):String {
+		var out = '';
+		switch (vars.type) {
+			case 'string':
+				out = '"${GenValues.string()}"';
+			case 'string[]':
+				out = '["${GenValues.string()}", "${GenValues.string()}"]';
+			case 'bool', 'boolean':
+				out = 'true';
+			case 'any':
+				out = '{}';
+			default:
+				if (vars.value != "") {
+					out = vars.value;
+				}
+				trace("case '" + vars.type + "': trace ('" + vars.type + "');");
 		}
 		return out;
 	}

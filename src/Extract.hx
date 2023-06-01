@@ -332,11 +332,18 @@ class Extract {
 	static function convertVars(val:String):VarObj {
 		var _val = val;
 		var _name = '';
+		var _value = '';
 		var _type = '';
 		var _optional = false;
+		var _non_null = false;
 		var _decorators:DecoratorsObj = {};
-		if (val.indexOf('!') != -1) {
+
+		if (val.indexOf('?') != -1) {
 			_optional = true;
+			_val = _val.replace('?', '').trim();
+		}
+		if (val.indexOf('!') != -1) {
+			_non_null = true;
 			_val = _val.replace('!', '').trim();
 		}
 		if (val.indexOf('@Input()') != -1) {
@@ -347,16 +354,28 @@ class Extract {
 			_decorators.output = true;
 			_val = _val.replace('@Output()', '').trim();
 		}
+		if (val.indexOf('=') != -1) {
+			_value = val.split('=')[1].replace(';', '').trim();
+			_val = _val.split('=')[0].trim();
+		}
 		_val = _val.replace(';', '').trim();
 
-		_name = _val.split(':')[0].trim();
-		_type = _val.split(':')[1].trim();
+		if (_val.indexOf(':') != -1) {
+			_name = _val.split(':')[0].trim();
+			_type = _val.split(':')[1].trim();
+		} else {
+			warn(val);
+			_name = _val.split('=')[0].trim();
+			_type = 'any'; // hacky
+		}
 
 		return {
 			name: _name,
 			type: _type,
 			decorators: _decorators,
 			optional: _optional,
+			nonnull: _non_null,
+			value: _value,
 			_content: val,
 			// @:optional var _guessing:GuessingObj;
 		}
