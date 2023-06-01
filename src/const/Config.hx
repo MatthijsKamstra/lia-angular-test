@@ -20,8 +20,9 @@ class Config {
 	 * 0.1.6 - adding fake translations service if needed
 	 * 0.1.7 - START components
 	 * 0.1.8 - vars generated components
+	 * 0.1.9 - cleaning up, class vars
 	 */
-	public static final VERSION:String = '0.1.8';
+	public static final VERSION:String = '0.1.9';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

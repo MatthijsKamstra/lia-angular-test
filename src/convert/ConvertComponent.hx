@@ -1,5 +1,6 @@
 package convert;
 
+import utils.TranslateName;
 import utils.GenValues;
 import utils.RegEx;
 import AST;
@@ -53,6 +54,20 @@ class ConvertComponent {
 		// update class vars
 		// -----------------------------------------------------------
 		// ts.addVariable('// vars');
+		if (OBJ.vars.length >= 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for class vars "${name}"');
+			ts.addFunction('// ${name}');
+			ts.addFunction('describe(\'${name} class vars\', () => {');
+			// // ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
+			for (i in 0...OBJ.vars.length) {
+				// ts.addFunction('// ${OBJ.vars[i]}');
+				var _varObj:VarObj = OBJ.vars[i];
+				// ts.addFunction('\t// ${_varObj.name}');
+				ts.addFunction(createVarsTest(_varObj, '\t\t'));
+			}
+			ts.addFunction('});\n');
+		}
 
 		// -----------------------------------------------------------
 		// update the imports
@@ -80,8 +95,8 @@ class ConvertComponent {
 		for (i in 0...OBJ.constructor.params.length) {
 			var _constructor = OBJ.constructor.params[i];
 			// trace(_constructor);
-			if (_constructor.type.indexOf('HttpClient') != -1)
-				continue;
+			// if (_constructor.type.indexOf('HttpClient') != -1)
+			// 	continue;
 			ts.addConstructor('\tlet ${_constructor.name}Spy: jasmine.SpyObj<${_constructor.type}>;');
 			ts.addTestbed('\t\t${_constructor.name}Spy = TestBed.inject(${_constructor.type}) as jasmine.SpyObj<${_constructor.type}>;');
 			ts.addProviders('${_constructor.type}');
@@ -141,18 +156,9 @@ class ConvertComponent {
 					mute('use test with return value "${_func.returnValue.type}"');
 					ts.addFunction('describe(\'${_func.name}\', () => {');
 					ts.addFunction(createOnInitTest(_func, '\t\t'));
-
-					// ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
-					for (i in 0...OBJ.vars.length) {
-						var _varObj:VarObj = OBJ.vars[i];
-						// ts.addFunction('\t// ${_varObj.name}');
-						ts.addFunction(createVarsTest(_func, _varObj, '\t\t'));
-					}
-
 					ts.addFunction('});\n');
 				} else {
 					mute('use test with return value "${_func.returnValue.type}"');
-
 					ts.addFunction('describe(\'${_func.name}\', () => {');
 					ts.addFunction(createComboTest(_func, '\t\t'));
 					ts.addFunction('});\n');
@@ -191,8 +197,8 @@ class ConvertComponent {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
 			info('Open generated json file: ${jsonPath}', 2);
-			// content = content.replace('\n\n\n', '\n\n');
-			// content = content.replace('\n\n', '\n');
+			content = content.replace('\n\n\n', '\n\n');
+			content = content.replace('\n\n', '\n');
 			// // content = content.replace('\n\n\n', '\n');
 			// // content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
 			sys.io.File.saveContent(templatePath, content);
@@ -286,8 +292,8 @@ ${tabs}*/
 	 * @param tabs
 	 * @return String
 	 */
-	function createVarsTest(func:FuncObj, vars:VarObj, ?tabs:String = '\t'):String {
-		var title = ShouldTitleTest.getShouldVarsTitle(func, vars);
+	function createVarsTest(vars:VarObj, ?tabs:String = '\t'):String {
+		var title = ShouldTitleTest.getShouldVarsTitle(vars);
 		var out = '';
 
 		// out += '// this looks like an emtpy ngOnInit\n${tabs}';
@@ -298,7 +304,7 @@ ${tabs}*/
 
 		out += '\t';
 		out += 'it(\'${title}\', () => {
-${tabs}\t${setupVars(func, vars, tabs)}
+${tabs}\t${setupVars(vars, tabs)}
 ${tabs}});
 ';
 		// out += '${tabs}*/';
@@ -307,7 +313,7 @@ ${tabs}});
 
 	// ____________________________________ use vars ____________________________________
 
-	function setupVars(func:FuncObj, vars:VarObj, ?tabs:String = '\t') {
+	function setupVars(vars:VarObj, ?tabs:String = '\t') {
 		var out = '// Arrange
 ${tabs}\tconst _${vars.name}: ${vars.type} = ${convertVar2Value(vars)};
 ${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};

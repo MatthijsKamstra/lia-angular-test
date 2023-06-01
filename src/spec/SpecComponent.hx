@@ -71,11 +71,12 @@ class SpecComponent {
 			var _providerArray = providerArray[i];
 			// _provider += '${_providerArray}';
 			// // TODO, remove other `TranslateService` ????
-			// if (_providerArray == 'TranslateService') {
-			// 	_provider += ', { provide: TranslateService, useValue: fakeTranslateService }';
-			// }
-			// _provider += '{ provide: ${_providerArray}, \nuseValue: ${_providerArray}Spy }';
-			_provider += '{ \nprovide: ${_providerArray}, \nuseValue: jasmine.createSpyObj(\'${_providerArray}\', [\'CHANGE-2-CORRECT-METHODENAME(S)\'])\n}';
+			if (_providerArray == 'TranslateService') {
+				_provider += 'TranslateService, ';
+			} else {
+				// _provider += '{ provide: ${_providerArray}, \nuseValue: ${_providerArray}Spy }';
+				_provider += '{ provide: ${_providerArray}, useValue: jasmine.createSpyObj(\'${_providerArray}\', [\'CHANGE-2-CORRECT-METHODENAME(S)\'])}';
+			}
 			//  jasmine.createSpyObj('GroupsService', ['searchGroup', 'save'])
 			if (i < providerArray.length - 1) {
 				_provider += ',';
@@ -121,6 +122,7 @@ ${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/com
 ${_hasHttpClient ? "import { NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
 
 ${_hasTranslate ? "import { NgxTranslateModule } from \'src/app/module/translate/translate.module\';" : ""}
+${_hasTranslate ? "import { TranslateModule } from \'@ngx-translate/core\';" : ""}
 ${_hasRouter ? "import { RouterTestingModule } from \'@angular/router/testing\';" : ""}
 ${_hasRouter ? "import { Router } from \'@angular/router\';" : ""}
 
@@ -134,7 +136,8 @@ fdescribe(\'${Strings.toUpperCamel(name)}Component (Generated)\', () => {
 
 	let component: ${Strings.toUpperCamel(name)}Component;
 	let fixture: ComponentFixture<${Strings.toUpperCamel(name)}Component>;
-
+	//
+${_hasTranslate ? "	let translate: TranslateService;" : ""}
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClient ? "	let httpTestingController: HttpTestingController;" : ""}
 
@@ -150,22 +153,22 @@ ${vars}
 			imports: [
 ${_hasHttpClient ? "				HttpClientTestingModule," : ""}
 ${_hasTranslate ? "				NgxTranslateModule," : ""}
+${_hasTranslate ? "				TranslateModule.forRoot()," : ""}
 ${_hasRouter ? "				RouterTestingModule.withRoutes([])" : ""}
 			],
 			declarations: [${Strings.toUpperCamel(name)}Component],
 			providers: [${providers}],
 ${_hasHttpClient ? "			schemas: [NO_ERRORS_SCHEMA]," : ""}
-		})
-			.compileComponents();
-
+		}).compileComponents();
+		//
 ${testBed}
 
 ${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
 ${_hasHttpClient ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
-
 ${_hasRouter ? "		router = TestBed.inject(Router);" : ""}
 ${_hasRouter ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
-
+${_hasTranslate ? "		translate = TestBed.inject(TranslateService);" : ""}
+		//
 		fixture = TestBed.createComponent(${Strings.toUpperCamel(name)}Component);
 		component = fixture.componentInstance;
 		fixture.detectChanges();

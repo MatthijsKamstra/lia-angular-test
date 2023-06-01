@@ -4,11 +4,11 @@ import AST.VarObj;
 import AST.FuncObj;
 
 class ShouldTitleTest {
-	static public function getTitle(obj:FuncObj) {
-		return '#${obj.name} should return ${obj.returnValue._content}';
+	static public function getTitle(func:FuncObj) {
+		return '#${func.name} should return ${func.returnValue._content}';
 	}
 
-	static public function getShouldVarsTitle(func:FuncObj, vars:VarObj) {
-		return '#should set ${vars.name} with ${vars.type} value';
+	static public function getShouldVarsTitle(vars:VarObj) {
+		return '#should set ${vars.name} with `${vars.type}` value';
 	}
 }
