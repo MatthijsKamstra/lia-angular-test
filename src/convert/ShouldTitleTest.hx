@@ -8,6 +8,10 @@ class ShouldTitleTest {
 		return '#${func.name} should return ${func.returnValue._content}';
 	}
 
+	public static function getSubTitle(func:FuncObj) {
+		return '#should return ${func.returnValue._content}';
+	}
+
 	static public function getShouldVarsTitle(vars:VarObj) {
 		return '#should set ${vars.name} with `${vars.type}` value';
 	}

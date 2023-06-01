@@ -107,7 +107,9 @@ class SpecComponent {
 	):String {
 		var _isTranslateService = providers.indexOf('TranslateService') != -1;
 		var _hasSpecHelper = false;
-		var _hasRouter = false;
+		var _hasRouter = imports.indexOf('Router') != -1;
+		var _hasRouterTest = false;
+		var _hasNav = false;
 		var _hasHttpClient = this.obj.hasHttpClient;
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
@@ -116,6 +118,7 @@ class SpecComponent {
 
 		var template = '
 import { ComponentFixture, TestBed } from \'@angular/core/testing\';
+import { TranslateModule } from \'@ngx-translate/core\';
 
 ${_hasHttpClient ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
 ${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/common/http\';" : ""}
@@ -123,8 +126,8 @@ ${_hasHttpClient ? "import { NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
 
 ${_hasTranslate ? "import { NgxTranslateModule } from \'src/app/module/translate/translate.module\';" : ""}
 ${_hasTranslate ? "import { TranslateModule } from \'@ngx-translate/core\';" : ""}
-${_hasRouter ? "import { RouterTestingModule } from \'@angular/router/testing\';" : ""}
-${_hasRouter ? "import { Router } from \'@angular/router\';" : ""}
+${_hasRouterTest ? "import { RouterTestingModule } from \'@angular/router/testing\';" : ""}
+${_hasRouter ? "// import { Router } from \'@angular/router\';" : ""}
 
 ${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/spec-helpers/constants.spec-helper\';" : ""}
 
@@ -141,8 +144,7 @@ ${_hasTranslate ? "	let translate: TranslateService;" : ""}
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClient ? "	let httpTestingController: HttpTestingController;" : ""}
 
-${_hasRouter ? "	let router: Router;" : ""}
-${_hasRouter ? "	let navigateSpy: jasmine.Spy;" : ""}
+${_hasNav ? "	let navigateSpy: jasmine.Spy;" : ""}
 
 ${constructor}
 
@@ -151,10 +153,11 @@ ${vars}
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [
+				TranslateModule.forRoot(),
 ${_hasHttpClient ? "				HttpClientTestingModule," : ""}
 ${_hasTranslate ? "				NgxTranslateModule," : ""}
 ${_hasTranslate ? "				TranslateModule.forRoot()," : ""}
-${_hasRouter ? "				RouterTestingModule.withRoutes([])" : ""}
+${_hasRouterTest ? "				RouterTestingModule.withRoutes([])" : ""}
 			],
 			declarations: [${Strings.toUpperCamel(name)}Component],
 			providers: [${providers}],
@@ -165,8 +168,7 @@ ${testBed}
 
 ${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
 ${_hasHttpClient ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
-${_hasRouter ? "		router = TestBed.inject(Router);" : ""}
-${_hasRouter ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
+${_hasNav ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
 ${_hasTranslate ? "		translate = TestBed.inject(TranslateService);" : ""}
 		//
 		fixture = TestBed.createComponent(${Strings.toUpperCamel(name)}Component);
