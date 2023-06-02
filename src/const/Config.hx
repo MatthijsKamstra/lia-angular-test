@@ -21,8 +21,9 @@ class Config {
 	 * 0.1.7 - START components
 	 * 0.1.8 - vars generated components
 	 * 0.1.9 - cleaning up, class vars
+	 * 0.2.0 - testing services better
 	 */
-	public static final VERSION:String = '0.1.9';
+	public static final VERSION:String = '0.2.0';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

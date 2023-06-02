@@ -111,6 +111,7 @@ class SpecComponent {
 		var _hasRouterTest = false;
 		var _hasNav = false;
 		var _hasHttpClient = this.obj.hasHttpClient;
+		var _hasHttpClientTest = providers.indexOf('Service') != -1;
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
 		var _useTemplate:Bool = false;
@@ -120,7 +121,8 @@ class SpecComponent {
 import { ComponentFixture, TestBed } from \'@angular/core/testing\';
 import { TranslateModule } from \'@ngx-translate/core\';
 
-${_hasHttpClient ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
+${_hasHttpClientTest ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
+${_hasHttpClientTest ? "import { of, throwError } from 'rxjs';" : ""}
 ${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/common/http\';" : ""}
 ${_hasHttpClient ? "import { NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
 
@@ -142,7 +144,7 @@ fdescribe(\'${Strings.toUpperCamel(name)}Component (Generated)\', () => {
 	//
 ${_hasTranslate ? "	let translate: TranslateService;" : ""}
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
-${_hasHttpClient ? "	let httpTestingController: HttpTestingController;" : ""}
+${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
 
 ${_hasNav ? "	let navigateSpy: jasmine.Spy;" : ""}
 
@@ -154,7 +156,7 @@ ${vars}
 		await TestBed.configureTestingModule({
 			imports: [
 				TranslateModule.forRoot(),
-${_hasHttpClient ? "				HttpClientTestingModule," : ""}
+${_hasHttpClientTest ? "				HttpClientTestingModule," : ""}
 ${_hasTranslate ? "				NgxTranslateModule," : ""}
 ${_hasTranslate ? "				TranslateModule.forRoot()," : ""}
 ${_hasRouterTest ? "				RouterTestingModule.withRoutes([])" : ""}
@@ -165,9 +167,9 @@ ${_hasHttpClient ? "			schemas: [NO_ERRORS_SCHEMA]," : ""}
 		}).compileComponents();
 		//
 ${testBed}
-
+		//
 ${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
-${_hasHttpClient ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
+${_hasHttpClientTest ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
 ${_hasNav ? "		navigateSpy = spyOn(router, \'navigate\');" : ""}
 ${_hasTranslate ? "		translate = TestBed.inject(TranslateService);" : ""}
 		//
