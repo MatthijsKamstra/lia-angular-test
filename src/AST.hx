@@ -5,6 +5,9 @@ package;
  */
 typedef TypeScriptClassObject = {
 	var hasHttpClient:Bool; // false,
+	var hasConstructor:Bool; // false,
+	var hasOnInit:Bool; // false,
+	var hasOnChanged:Bool; // false,
 	var hasUrl:Bool; // false,
 	var URL:String; // :'', // guessing
 	var constructor:TypeScriptConstructorObject;

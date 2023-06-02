@@ -8,6 +8,9 @@ import AST;
 class Extract {
 	public static final OBJ_DEFAULT:TypeScriptClassObject = {
 		hasHttpClient: false,
+		hasConstructor: false,
+		hasOnInit: false,
+		hasOnChanged: false,
 		hasUrl: false,
 		URL: '',
 		constructor: {
@@ -20,6 +23,9 @@ class Extract {
 
 	public static var OBJ:TypeScriptClassObject = {
 		hasHttpClient: false,
+		hasConstructor: false,
+		hasOnInit: false,
+		hasOnChanged: false,
 		hasUrl: false,
 		URL: '',
 		constructor: {
@@ -61,6 +67,9 @@ class Extract {
 
 		// bools
 		OBJ.hasHttpClient = (str.indexOf('HttpClient') != -1);
+		OBJ.hasConstructor = (str.indexOf('constructor') != -1);
+		OBJ.hasOnChanged = (str.indexOf('ngOnChanges') != -1);
+		OBJ.hasOnInit = (str.indexOf('ngOnInit') != -1);
 		OBJ.hasUrl = (str.toLowerCase().indexOf('url') != -1); // guessing at best :(
 
 		// URL
@@ -108,6 +117,13 @@ class Extract {
 		// -----------------------------------------------------------------
 		// Find constructor
 		// -----------------------------------------------------------------
+		if (str.indexOf('constructor') == -1) {
+			warn('"is there constructor? " ${str.indexOf('constructor') != -1}');
+			warn('this code works only with an constructor');
+			warn('add `constructor() { }` between vars and functions');
+			return;
+		}
+
 		var matches = RegEx.getMatches(RegEx.classConstructor, str);
 		// not all classes have a constructor, check for it
 		if (matches.length > 0) {

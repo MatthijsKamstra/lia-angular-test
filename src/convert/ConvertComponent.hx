@@ -12,6 +12,8 @@ import utils.Copyright;
 import utils.GeneratedBy;
 
 class ConvertComponent {
+	private var OBJ:TypeScriptClassObject;
+
 	/**
 	 * constructor
 	 * @param path to original file (at this moment probably a component)
@@ -31,7 +33,7 @@ class ConvertComponent {
 
 		// first try for new extract
 		Extract.runExtract(originalContentNoComment, originalFileName.replace('.component.ts', ''), 'Component');
-		var OBJ:TypeScriptClassObject = Extract.OBJ;
+		OBJ = Extract.OBJ;
 
 		// start creating the spec of this file/component
 		var ts = new SpecComponent(className, OBJ);
@@ -263,6 +265,8 @@ ${tabs}
 	}
 
 	function createComboTest(func:FuncObj, ?tabs:String = '\t'):String {
+		// warn('test');
+
 		var out = '\n';
 		out += '${tabs}// test with return type `${func.returnValue.type}`\n${tabs}';
 
@@ -306,10 +310,18 @@ ${tabs}});
 ${tabs}\n';
 			case 'void':
 				// trace('void');
-				out += 'it(\'${getTitle(func)}\', () => {
+				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
+${tabs}\t// Arrange
+${tabs}\t${createParamsFromFunction(func, tabs)}
+${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
+${tabs}\t// Act
+${tabs}\t${createCall2Function(func, tabs)}
 ${tabs}\t// Assert
 ${tabs}\texpect(component.${func.name}).toBeDefined();
-${tabs}});\n';
+${tabs}\texpect(_spy).toHaveBeenCalled();
+${tabs}});
+${tabs}\n';
+
 			default:
 				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
 				out += 'xit(\'${getTitle(func)}\', () => {
@@ -318,6 +330,28 @@ ${tabs}});\n';
 				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
 		}
 
+		return out;
+	}
+
+	function createCall2Function(func:FuncObj, tabs:Null<String>):String {
+		var param = '';
+		var out = '';
+		for (i in 0...func.params.length) {
+			var _TypedObj = func.params[i];
+			param += '_param${Strings.toUpperCamel(_TypedObj.name)}';
+			if (i < func.params.length - 1) {
+				param += ', ';
+			}
+		}
+		return 'component.${func.name}(${param})';
+	}
+
+	function createParamsFromFunction(func:FuncObj, tabs:Null<String>):String {
+		var out = '';
+		for (i in 0...func.params.length) {
+			var _TypedObj = func.params[i];
+			out += 'const _param${Strings.toUpperCamel(_TypedObj.name)}: ${_TypedObj.type} = ${convertFuncParams2Value(func)};\n${tabs}\t';
+		}
 		return out;
 	}
 
@@ -379,7 +413,7 @@ ${tabs}\tconst _${vars.name}: ${vars.type} = ${convertVar2Value(vars)};
 ${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};
 ${tabs}\tcomponent.${vars.name} = _${vars.name};
 ${tabs}\t// Act
-${tabs}\tcomponent.ngOnInit();
+${tabs}\t${(OBJ.hasOnInit) ? 'component.ngOnInit();' : ''}
 ${tabs}\t// Assert
 ${tabs}\t${(vars.value == "") ? 'expect(_initial${Strings.toUpperCamel(vars.name)}).toBeUndefined();' : 'expect(_initial${Strings.toUpperCamel(vars.name)}).toBe(${vars.value});'}
 ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';

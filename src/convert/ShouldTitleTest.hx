@@ -13,6 +13,6 @@ class ShouldTitleTest {
 	}
 
 	static public function getShouldVarsTitle(vars:VarObj) {
-		return '#should set ${vars.name} with `${vars.type}` value';
+		return '#should set "${vars.name}" with `${vars.type}` value';
 	}
 }
