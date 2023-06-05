@@ -350,7 +350,7 @@ ${tabs}});\n';
 		var out = '';
 		for (i in 0...func.params.length) {
 			var _TypedObj = func.params[i];
-			out += 'const _param${Strings.toUpperCamel(_TypedObj.name)}: ${_TypedObj.type} = ${convertFuncParams2Value(func)};\n${tabs}\t';
+			out += 'const _param${Strings.toUpperCamel(_TypedObj.name)}: ${_TypedObj.type} = ${convertType2Value(_TypedObj.type)};\n${tabs}\t';
 		}
 		return out;
 	}
@@ -423,58 +423,40 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 	// ____________________________________ converters ____________________________________
 
 	function convertFuncReturn2Value(func:FuncObj) {
-		// warn(func);
-		var out = '';
-		switch (func.returnValue.type) {
-			case 'string':
-				out = '"${GenValues.string()}"';
-			case 'string[]':
-				out = '["${GenValues.string()}", "${GenValues.string()}"]';
-			case 'bool', 'boolean':
-				out = 'true';
-			case 'any':
-				out = '{}';
-			default:
-				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
-		}
-		return out;
+		return convertType2Value(func.returnValue.type);
 	}
 
 	function convertFuncParams2Value(func:FuncObj) {
-		// warn(func);
-		var out = '';
-		switch (func.params[0].type) {
-			case 'string':
-				out = '"${GenValues.string()}"';
-			case 'string[]':
-				out = '["${GenValues.string()}", "${GenValues.string()}"]';
-			case 'bool', 'boolean':
-				out = 'true';
-			case 'any':
-				out = '{}';
-			default:
-				trace("case '" + func.params[0].type + "': trace ('" + func.params[0].type + "');");
+		return convertType2Value(func.params[0].type);
+	}
+
+	function convertVar2Value(vars:VarObj):String {
+		var out = convertType2Value(vars.type);
+		if (vars.value != "") {
+			out = vars.value;
 		}
 		return out;
 	}
 
-	function convertVar2Value(vars:VarObj):String {
+	function convertType2Value(type:String) {
 		var out = '';
-		switch (vars.type) {
+		switch (type) {
 			case 'string':
 				out = '"${GenValues.string()}"';
 			case 'string[]':
 				out = '["${GenValues.string()}", "${GenValues.string()}"]';
 			case 'bool', 'boolean':
 				out = 'true';
+			case 'number', 'float':
+				out = '5000';
+			case 'date', 'Date':
+				out = 'new Date()';
 			case 'any':
 				out = '{}';
 			default:
 				out = '{}';
-				if (vars.value != "") {
-					out = vars.value;
-				}
-				trace("case '" + vars.type + "': trace ('" + vars.type + "');");
+
+				trace("case '" + type + "': trace ('" + type + "');");
 		}
 		return out;
 	}
