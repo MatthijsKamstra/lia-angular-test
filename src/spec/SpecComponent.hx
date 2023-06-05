@@ -154,7 +154,7 @@ ${vars}
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [
-				TranslateModule.forRoot(),
+				// TranslateModule.forRoot(),
 ${_hasHttpClientTest ? "				HttpClientTestingModule," : ""}
 ${_hasTranslate ? "				NgxTranslateModule," : ""}
 ${_hasTranslate ? "				TranslateModule.forRoot()," : ""}
