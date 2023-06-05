@@ -119,7 +119,6 @@ class SpecComponent {
 
 		var template = '
 import { ComponentFixture, TestBed } from \'@angular/core/testing\';
-import { TranslateModule } from \'@ngx-translate/core\';
 
 ${_hasHttpClientTest ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
 ${_hasHttpClientTest ? "import { of, throwError } from 'rxjs';" : ""}
@@ -142,7 +141,7 @@ fdescribe(\'${Strings.toUpperCamel(name)}Component (Generated)\', () => {
 	let component: ${Strings.toUpperCamel(name)}Component;
 	let fixture: ComponentFixture<${Strings.toUpperCamel(name)}Component>;
 	//
-${_hasTranslate ? "	let translate: TranslateService;" : ""}
+${_hasTranslate ? "	// let translate: TranslateService;" : ""}
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
 

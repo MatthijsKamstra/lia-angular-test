@@ -449,13 +449,14 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 				out = 'true';
 			case 'number', 'float':
 				out = '5000';
-			case 'date', 'Date':
+			case 'date', 'Date', 'string | Date':
 				out = 'new Date()';
 			case 'any':
 				out = '{}';
+			case 'undefined':
+				out = 'undefined';
 			default:
 				out = '{}';
-
 				trace("case '" + type + "': trace ('" + type + "');");
 		}
 		return out;
