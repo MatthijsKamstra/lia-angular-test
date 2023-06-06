@@ -134,7 +134,7 @@ class ConvertComponent {
 			// log(_func);
 			// log(Config.IS_BASIC);
 			if (_func._content == 'ngOnInit(): void { }') {
-				ts.addFunction(createEmptyOnInit(_func, '\t'));
+				ts.addFunction(createEmptyOnInitTest(_func, '\t'));
 				// continue;
 			}
 
@@ -220,6 +220,7 @@ class ConvertComponent {
 	}
 
 	// ____________________________________ create test based upon return type ____________________________________
+
 	function createOnChangeTest(func:FuncObj, ?tabs:String = '\t'):String {
 		var out = '\n';
 		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
@@ -273,7 +274,7 @@ ${tabs}
 		switch (func.returnValue.type) {
 			case 'string':
 				trace('string');
-				out += 'it(\'#should return boolean true\', () => {
+				out += 'it(\'#should return string\', () => {
 ${tabs}\t// Arrange
 ${tabs}\t// TODO
 ${tabs}});
@@ -365,7 +366,7 @@ ${tabs}});';
 		return out;
 	}
 
-	function createEmptyOnInit(func:FuncObj, ?tabs:String = '\t'):String {
+	function createEmptyOnInitTest(func:FuncObj, ?tabs:String = '\t'):String {
 		var out = '';
 		out += '${tabs}// this looks like an emtpy ngOnInit\n${tabs}';
 		// out += '// Basic test with return type `${func.returnValue.type}`\n${tabs}';
@@ -398,7 +399,7 @@ ${tabs}*/
 
 		out += '\n${tabs}';
 		out += 'it(\'${title}\', () => {
-${tabs}\t${setupVars(vars, tabs)}
+${tabs}\t${convertVarsObj2Test(vars, tabs)}
 ${tabs}});
 ';
 		// out += '${tabs}*/';
@@ -407,8 +408,8 @@ ${tabs}});
 
 	// ____________________________________ use vars ____________________________________
 
-	function setupVars(vars:VarObj, ?tabs:String = '\t') {
-		var out = '// Arrange
+	function convertVarsObj2Test(vars:VarObj, ?tabs:String = '\t') {
+		var out = '// Arrange yy
 ${tabs}\tconst _${vars.name}: ${vars.type} = ${convertVar2Value(vars)};
 ${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};
 ${tabs}\tcomponent.${vars.name} = _${vars.name};
@@ -438,7 +439,7 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 		return out;
 	}
 
-	function convertType2Value(type:String) {
+	function convertType2Value(type:String):String {
 		var out = '';
 		switch (type) {
 			case 'string':
@@ -453,10 +454,15 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 				out = 'new Date()';
 			case 'any':
 				out = '{}';
+			case 'Function', 'function':
+				out = '() => {}';
 			case 'undefined':
 				out = 'undefined';
+			case 'null':
+				out = 'null';
 			default:
-				out = '{}';
+				// SPEC_CONST.getValue(IHELP)
+				out = '{} /* SPEC_CONST.getValue(${type.toUpperCase()}) */';
 				trace("case '" + type + "': trace ('" + type + "');");
 		}
 		return out;
