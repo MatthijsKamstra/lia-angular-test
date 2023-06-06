@@ -29,6 +29,7 @@ class RegEx {
 	public static final commentHTML = ~/<!--[\S\s]*?-->/g;
 	public static final commentJS = ~/(\/\*)(.|\r|\n)*?(\*\/)/g;
 	public static final commentJSLine = ~/(\/\/)[\S\s]*?/g;
+	public static final commentJSLine3 = ~/(\/\/).*/g;
 	public static final commentJSLine2 = ~/\/\*[\s\S]*?\*\/|\/\/.*/g;
 
 	/**

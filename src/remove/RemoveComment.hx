@@ -6,13 +6,25 @@ using StringTools;
 
 class RemoveComment {
 	static public function all(content:String, templateType:String):String {
-		var commentReg = RegEx.commentHTML;
+		var _commentReg = RegEx.commentJSLine3;
+		var matches = RegEx.getMatches(_commentReg, content);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var match = matches[i];
+				// warn(match, 2, Yellow);
+				content = content.replace(match, '');
+			}
+		}
+
+		_commentReg = RegEx.commentHTML;
 		if (templateType != 'html') {
 			// warn('Comments in JS files don\'t work yet!');
-			commentReg = RegEx.commentJS;
+			_commentReg = RegEx.commentJS;
 		}
+
 		// if (content.indexOf('<!--') != -1) {
-		var matches = RegEx.getMatches(commentReg, content);
+		var matches = RegEx.getMatches(_commentReg, content);
 		if (matches.length > 0) {
 			// log(matches);
 			for (i in 0...matches.length) {
@@ -24,8 +36,8 @@ class RemoveComment {
 		// copyright comment removed
 		// }
 
-		commentReg = RegEx.commentJSLine2;
-		var matches = RegEx.getMatches(commentReg, content);
+		_commentReg = RegEx.commentJSLine2;
+		var matches = RegEx.getMatches(_commentReg, content);
 		if (matches.length > 0) {
 			// log(matches);
 			for (i in 0...matches.length) {
@@ -45,13 +57,13 @@ class RemoveComment {
 	 * @return String
 	 */
 	static public function copyright(content:String, templateType:String):String {
-		var commentReg = RegEx.commentHTML;
+		var _commentReg = RegEx.commentHTML;
 		if (templateType != 'html') {
 			warn('Comments in JS files don\'t work yet!');
-			// commentReg = RegEx.commentJS;
+			// _commentReg = RegEx.commentJS;
 		}
 
-		var matches = RegEx.getMatches(commentReg, content);
+		var matches = RegEx.getMatches(_commentReg, content);
 		if (matches.length > 0) {
 			// log(matches);
 			for (i in 0...matches.length) {

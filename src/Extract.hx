@@ -198,7 +198,7 @@ class Extract {
 				continue;
 
 			if (_str.indexOf(') {') != -1) {
-				trace('might be a function without a return type or void');
+				// trace('might be a function without a return type or void');
 			}
 			if (_str.indexOf('):') != -1 || _str.indexOf(') {') != -1) {
 				// info('${i}. looks like a function');
@@ -396,7 +396,7 @@ class Extract {
 			_name = _val.split(':')[0].trim();
 			_type = _val.split(':')[1].trim();
 		} else {
-			warn(val);
+			// warn(val);
 			if (_name == '')
 				_name = _val.split('=')[0].trim();
 			if (_type == '')
