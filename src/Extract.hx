@@ -72,6 +72,11 @@ class Extract {
 		OBJ.hasOnInit = (str.indexOf('ngOnInit') != -1);
 		OBJ.hasUrl = (str.toLowerCase().indexOf('url') != -1); // guessing at best :(
 
+		if (!OBJ.hasConstructor) {
+			warn('This generator doesn\'t work without constructor');
+			return;
+		}
+
 		// URL
 		var matches = RegEx.getMatches(RegEx.hasURL, cleandedStr);
 		// warn(matches);
@@ -370,10 +375,21 @@ class Extract {
 			_decorators.output = true;
 			_val = _val.replace('@Output()', '').trim();
 		}
-		if (val.indexOf('=') != -1) {
+
+		// warn(_val, 1, 'yellow');
+
+		// @Input() onCancel!: () => void;",
+		if (_val.indexOf('() => void') != -1) {
+			_value = '() => {}';
+			_type = 'any';
+			_val = _val.replace(': () => void', '').trim();
+		}
+		// warn(_val, 2, 'yellow');
+		if (_val.indexOf('=') != -1) {
 			_value = val.split('=')[1].replace(';', '').trim();
 			_val = _val.split('=')[0].trim();
 		}
+		// removing `;`
 		_val = _val.replace(';', '').trim();
 
 		if (_val.indexOf(':') != -1) {
@@ -381,8 +397,10 @@ class Extract {
 			_type = _val.split(':')[1].trim();
 		} else {
 			warn(val);
-			_name = _val.split('=')[0].trim();
-			_type = 'any'; // hacky
+			if (_name == '')
+				_name = _val.split('=')[0].trim();
+			if (_type == '')
+				_type = 'any'; // hacky
 		}
 
 		return {
