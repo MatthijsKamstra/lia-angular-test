@@ -1,7 +1,6 @@
 package remove;
 
 import utils.RegEx;
-import log.Logger.*;
 
 using StringTools;
 

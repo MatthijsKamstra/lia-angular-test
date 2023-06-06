@@ -2,7 +2,7 @@
 import const.Folder;
 import const.Global;
 import const.Project;
-import log.Logger.*;
+import logger.Logger.*;
 import utils.DateUtil;
 import utils.Emoji;
 import utils.FileName;
