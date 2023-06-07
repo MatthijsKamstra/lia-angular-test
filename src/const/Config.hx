@@ -23,8 +23,9 @@ class Config {
 	 * 0.1.9 - cleaning up, class vars
 	 * 0.2.0 - testing services better
 	 * 0.2.1 - void better test
+	 * 0.2.2 - FormControle / FormGroup exclude by comment, added SPEC_CONST, better type values
 	 */
-	public static final VERSION:String = '0.2.1';
+	public static final VERSION:String = '0.2.2';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

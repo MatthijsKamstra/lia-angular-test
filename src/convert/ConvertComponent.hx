@@ -316,7 +316,7 @@ ${tabs}\t// Arrange
 ${tabs}\t${createParamsFromFunction(func, tabs)}
 ${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${createCall2Function(func, tabs)}
+${tabs}\t${createCall2Function(func, tabs)};
 ${tabs}\t// Assert
 ${tabs}\texpect(component.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
@@ -389,6 +389,12 @@ ${tabs}*/
 	 */
 	function createVarsTest(vars:VarObj, ?tabs:String = '\t'):String {
 		var title = ShouldTitleTest.getShouldVarsTitle(vars);
+
+		// TODO: not sure how to do FormControl so remove it for now
+		// not sure what to do with this value, so for now I will comment the test
+		var isFormControl = vars._content.indexOf('FormControl') != -1;
+		var isFormGroup = vars._content.indexOf('FormGroup') != -1;
+
 		var out = '';
 
 		// out += '// this looks like an emtpy ngOnInit\n${tabs}';
@@ -398,18 +404,24 @@ ${tabs}*/
 		// log(func);
 
 		out += '\n${tabs}';
+		if (isFormControl || isFormGroup)
+			out += '/**\n${tabs}';
+
 		out += 'it(\'${title}\', () => {
 ${tabs}\t${convertVarsObj2Test(vars, tabs)}
 ${tabs}});
 ';
+
+		if (isFormControl || isFormGroup)
+			out += '\n${tabs}*/';
 		// out += '${tabs}*/';
 		return out;
 	}
 
 	// ____________________________________ use vars ____________________________________
-
+	// create vars test based upon variables private/public in class
 	function convertVarsObj2Test(vars:VarObj, ?tabs:String = '\t') {
-		var out = '// Arrange yy
+		var out = '// Arrange
 ${tabs}\tconst _${vars.name}: ${vars.type} = ${convertVar2Value(vars)};
 ${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};
 ${tabs}\tcomponent.${vars.name} = _${vars.name};
@@ -435,6 +447,10 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 		var out = convertType2Value(vars.type);
 		if (vars.value != "") {
 			out = vars.value;
+		}
+		// TODO: not sure how to do FormControl so remove it for now
+		if (vars._content.indexOf('FormControl') != -1) {
+			out = '';
 		}
 		return out;
 	}
