@@ -9,3 +9,5 @@ build_help.hxml
 build_componentss.hxml
 build_components.hxml
 build_elements.hxml
+build_pages.hxml
+build_services.hxml
