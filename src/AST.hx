@@ -4,6 +4,7 @@ package;
  * AST = Abstract Syntax Tree
  */
 typedef TypeScriptClassObject = {
+	var isFinished:Bool; // false,
 	var hasHttpClient:Bool; // false,
 	var hasConstructor:Bool; // false,
 	var hasOnInit:Bool; // false,
@@ -14,10 +15,18 @@ typedef TypeScriptClassObject = {
 	var imports:Array<String>;
 	var functions:Array<FuncObj>;
 	var vars:Array<VarObj>;
+	var subscribes:Array<SubScribeObj>;
 }
 
 typedef TypeScriptConstructorObject = {
 	var params:Array<TypedObj>;
+}
+
+// @example this.configSettingsService.getData().subscribe
+typedef SubScribeObj = {
+	var name:String; // var-name
+	var call:String; // call
+	var _content:String; // the original value
 }
 
 typedef VarObj = {

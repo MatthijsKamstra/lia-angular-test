@@ -7,6 +7,7 @@ import AST;
 
 class Extract {
 	public static final OBJ_DEFAULT:TypeScriptClassObject = {
+		isFinished: false,
 		hasHttpClient: false,
 		hasConstructor: false,
 		hasOnInit: false,
@@ -19,9 +20,11 @@ class Extract {
 		imports: [],
 		functions: [],
 		vars: [],
+		subscribes: [],
 	};
 
 	public static var OBJ:TypeScriptClassObject = {
+		isFinished: false,
 		hasHttpClient: false,
 		hasConstructor: false,
 		hasOnInit: false,
@@ -34,6 +37,7 @@ class Extract {
 		imports: [],
 		functions: [],
 		vars: [],
+		subscribes: [],
 	};
 
 	// public static var importMap:Map<String, String> = [];
@@ -74,6 +78,7 @@ class Extract {
 
 		if (!OBJ.hasConstructor) {
 			warn('This generator doesn\'t work without constructor');
+			OBJ.isFinished = false;
 			return;
 		}
 
@@ -103,6 +108,21 @@ class Extract {
 			}
 			// log(OBJ);
 			// info('importMap: ' + importMap);
+		}
+
+		// -----------------------------------------------------------------
+		// Find .subscribe
+		// -----------------------------------------------------------------
+		var matches = RegEx.getMatches(RegEx.getSubscribe, content);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var match = matches[i];
+				// trace(match);
+				// OBJ.subscribes.push(match);
+				var _obj:SubScribeObj = convertSubScribes(match);
+				OBJ.subscribes.push(_obj);
+			}
 		}
 
 		// -----------------------------------------------------------------
@@ -260,6 +280,8 @@ class Extract {
 				// trace(_funcObj);
 			}
 		}
+
+		OBJ.isFinished = true;
 		info('end extract');
 		// log(OBJ);
 	}
@@ -347,6 +369,23 @@ class Extract {
 			value: _name,
 			type: _type,
 			_content: val
+		}
+	}
+
+	// this.configSettingsService.getData().subscribe
+	// this.helpService.getData().subscribe
+	static function convertSubScribes(match:String):SubScribeObj {
+		var _val = match;
+		var _name = '';
+		var _func = '';
+		var _value = '';
+		_val = _val.replace('this.', '').replace('.subscribe', '');
+		_name = _val.split('.')[0];
+		_func = _val.split('.')[1];
+		return {
+			name: _name,
+			call: _func,
+			_content: match,
 		}
 	}
 

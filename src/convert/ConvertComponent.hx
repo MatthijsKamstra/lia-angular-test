@@ -72,6 +72,22 @@ class ConvertComponent {
 		}
 
 		// -----------------------------------------------------------
+		// update subscibes
+		// -----------------------------------------------------------
+		ts.addSubscribes('// subscribes');
+		if (OBJ.subscribes.length >= 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use subscribes in class "${name}"');
+			for (i in 0...OBJ.subscribes.length) {
+				var _sub:SubScribeObj = OBJ.subscribes[i];
+				ts.addSubscribes('\t// ${name} subscribe of ${_sub.name}');
+				ts.addSubscribes('\tdescribe(\'${name} subscribes\', () => {');
+				ts.addSubscribes(createSubTest(_sub, '\t\t'));
+				ts.addSubscribes('\t});\n');
+			}
+		}
+
+		// -----------------------------------------------------------
 		// update the imports
 		// -----------------------------------------------------------
 		ts.addImport('// import directly from ${className}.component');
@@ -262,6 +278,33 @@ ${tabs}\t// expect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}
 ';
+		return out;
+	}
+
+	function createSubTest(sub:SubScribeObj, ?tabs:String = '\t'):String {
+		var out = '\n';
+		// it('#should spy "configSettingsService" ngOnInit with `IHelp` value', () => {
+		out += '${tabs}it(\'#should spy on "${sub.name}" call "${sub.call}" and return dummy data\', () => {
+${tabs}\t// Arrange
+${tabs}\t// Act
+${tabs}\t// Assert
+${tabs}\t// TODO
+			// Arrange
+			const _IHelp: IHelp = SPEC_CONST.getValue(IHELP);
+			helpServiceSpy.getData.and.returnValue(of(_IHelp));
+			// Act
+			component.help = _IHelp;
+			component.ngOnInit();
+			// Assert
+			// expect(_initialHelp).toBeUndefined();
+			expect(component.help).toBe(_IHelp);
+
+${tabs}});
+
+
+
+${tabs}\n';
+
 		return out;
 	}
 

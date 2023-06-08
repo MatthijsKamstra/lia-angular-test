@@ -13,6 +13,7 @@ class SpecComponent {
 	@:isVar public var constructorArray(get, set):Array<String> = [];
 	@:isVar public var testBedArray(get, set):Array<String> = [];
 	@:isVar public var providerArray(get, set):Array<String> = [];
+	@:isVar public var subscribesArray(get, set):Array<String> = [];
 
 	public function new(type:String, obj:TypeScriptClassObject) {
 		this.type = type;
@@ -83,7 +84,16 @@ class SpecComponent {
 			}
 		}
 
-		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider);
+		var _subscribes = '';
+		for (i in 0...subscribesArray.length) {
+			var _subscribesArray = subscribesArray[i];
+			_subscribes += _subscribesArray;
+			if (i < subscribesArray.length - 1) {
+				_subscribes += '\n';
+			}
+		}
+
+		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider, _subscribes);
 	}
 
 	/**
@@ -103,7 +113,8 @@ class SpecComponent {
 		imports:String = '', //
 		constructor:String = '', //
 		testBed:String = '', //
-			providers:String = '' //
+			providers:String = '', //
+		subscribes:String = '' //
 	):String {
 		var _isTranslateService = providers.indexOf('TranslateService') != -1;
 		var _hasSpecHelper = false;
@@ -190,6 +201,9 @@ ${_hasHttpClient ? "	afterEach(() => {
 	});
 
 	${funcs}
+
+	${subscribes}
+
 });
 ';
 
@@ -220,6 +234,10 @@ ${_hasHttpClient ? "	afterEach(() => {
 
 	public function addFunction(arg0:String) {
 		this.functionsArray.push(arg0);
+	}
+
+	public function addSubscribes(arg0:String) {
+		this.subscribesArray.push(arg0);
 	}
 
 	// ____________________________________ getter/setter ____________________________________
@@ -278,5 +296,13 @@ ${_hasHttpClient ? "	afterEach(() => {
 
 	function set_providerArray(value:Array<String>):Array<String> {
 		return providerArray = value;
+	}
+
+	function get_subscribesArray():Array<String> {
+		return subscribesArray;
+	}
+
+	function set_subscribesArray(value:Array<String>):Array<String> {
+		return subscribesArray = value;
 	}
 }
