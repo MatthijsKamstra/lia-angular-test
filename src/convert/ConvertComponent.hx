@@ -77,7 +77,7 @@ class ConvertComponent {
 		// -----------------------------------------------------------
 		ts.addSubscribes('// subscribes');
 		if (OBJ.subscribes.length >= 0) {
-			ts.addImport('import { HttpErrorResponse, HttpEventType, HttpHeaders } from \'@angular/common/http\';');
+			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
 			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');
 
 			var name = '${Strings.toUpperCamel(className)}Component';

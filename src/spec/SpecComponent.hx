@@ -70,17 +70,42 @@ class SpecComponent {
 		var _provider = '';
 		for (i in 0...providerArray.length) {
 			var _providerArray = providerArray[i];
+			_provider += '${_providerArray}';
+			if (i < providerArray.length) {
+				_provider += ', ';
+			}
+		}
+		for (i in 0...providerArray.length) {
+			var _providerArray = providerArray[i];
 			// _provider += '${_providerArray}';
 			// // TODO, remove other `TranslateService` ????
 			if (_providerArray == 'TranslateService') {
-				_provider += 'TranslateService, ';
+				// _provider += 'TranslateService, ';
 			} else {
 				// _provider += '{ provide: ${_providerArray}, \nuseValue: ${_providerArray}Spy }';
 				_provider += '{ provide: ${_providerArray}, useValue: jasmine.createSpyObj(\'${_providerArray}\', [\'CHANGE-2-CORRECT-METHODENAME(S)\'])}';
 			}
 			//  jasmine.createSpyObj('GroupsService', ['searchGroup', 'save'])
 			if (i < providerArray.length - 1) {
-				_provider += ',';
+				_provider += ', ';
+			}
+		}
+
+		// add this for easier access
+		for (i in 0...this.obj.subscribes.length) {
+			var _subscribe:AST.SubScribeObj = this.obj.subscribes[i];
+			_provider += '{ provide: ${Strings.toUpperCamel(_subscribe.name)}, useValue: jasmine.createSpyObj(\'${Strings.toUpperCamel(_subscribe.name)}\', [\'${_subscribe.call.name}\'])}';
+			if (i < this.obj.subscribes.length - 1) {
+				_provider += ', ';
+			}
+			// [mck] hacky
+			// _testBed += '\n\t\t// ---------------------';
+			_testBed += '\n\t\t\n\t\t// ${_subscribe.name}';
+			_testBed += '\n\t\tconst _IValue: IValue = SPEC_CONST.getValue(IVALUE); // [mck] use controle click on `${_subscribe.call.name}` to get the correct values';
+			_testBed += '\n\t\t${_subscribe.name}Spy.${_subscribe.call.name}.and.returnValue(of(_IValue));';
+			_testBed += '\n\t\t\n\t\t';
+			if (i < testBedArray.length - 1) {
+				_testBed += '\n';
 			}
 		}
 
@@ -92,7 +117,6 @@ class SpecComponent {
 				_subscribes += '\n';
 			}
 		}
-
 		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider, _subscribes);
 	}
 
