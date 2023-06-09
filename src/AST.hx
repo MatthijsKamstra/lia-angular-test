@@ -25,7 +25,10 @@ typedef TypeScriptConstructorObject = {
 // @example this.configSettingsService.getData().subscribe
 typedef SubScribeObj = {
 	var name:String; // var-name
-	var call:String; // call
+	var call:{
+		name:String,
+		param:String,
+	}
 	var _content:String; // the original value
 }
 

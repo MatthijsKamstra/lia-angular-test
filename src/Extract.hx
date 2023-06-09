@@ -379,12 +379,16 @@ class Extract {
 		var _name = '';
 		var _func = '';
 		var _value = '';
-		_val = _val.replace('this.', '').replace('.subscribe', '');
+		var _param = '';
+		_val = _val.replace('this.', '').replace('.subscribe', '').replace('()', '');
 		_name = _val.split('.')[0];
 		_func = _val.split('.')[1];
 		return {
 			name: _name,
-			call: _func,
+			call: {
+				name: _func,
+				param: _param,
+			},
 			_content: match,
 		}
 	}
