@@ -28,39 +28,63 @@ class ConvertService {
 		// parent dir
 		var parent = Path.directory(path);
 
-		// start creating the spec of this file/service
-		var ts = new SpecService(className);
-		// add values
-		// ts.addVariable('// add vars');
-		// add functions
-		// ts.addFunction('// add functions');
-		// add imports
-		// ts.addImport('// add imports');
-
 		// first try for new extract
 		Extract.runExtract(originalContentNoComment, originalFileName.replace('.service.ts', ''));
 		var OBJ = Extract.OBJ;
-		// var map:Map<String, String> = Extract.importMap;
 
-		// TODO: if `HttpClient` exists in map, we should add `imports: [HttpClientTestingModule],` otherwise it might not be needed!
+		// start creating the spec of this file/service
+		var ts = new SpecService(className, OBJ);
+		// // add imports
+		// ts.addImport('// add imports');
+		// // add constructor
+		// ts.addConstructor('// add constructor');
+		// // add providers
+		// ts.addProviders('/* add providers */');
+		// // add testbed
+		// ts.addTestbed('// testbed');
+		// // add values
+		// ts.addVariable('// add vars');
+		// // add functions
+		// ts.addFunction('// add functions');
 
 		// -----------------------------------------------------------
 		// update class vars
 		// -----------------------------------------------------------
+		// ts.addVariable('// vars');
+		/*
+			if (OBJ.vars.length >= 0) {
+				var name = '${Strings.toUpperCamel(className)}Component';
+				mute('use test for class vars "${name}"');
+				ts.addFunction('// ${name}');
+				ts.addFunction('describe(\'${name} class vars\', () => {');
+				// // ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
+				for (i in 0...OBJ.vars.length) {
+					// ts.addFunction('// ${OBJ.vars[i]}');
+					var _varObj:VarObj = OBJ.vars[i];
+					// ts.addFunction('\t// ${_varObj.name}');
+					ts.addFunction(spec.VarsTest.services(_varObj, '\t\t'));
+				}
+				ts.addFunction('});\n');
+			}
+		 */
 
 		// -----------------------------------------------------------
-		// update constructor
+		// update subscibes
 		// -----------------------------------------------------------
-		// log(OBJ.constructor);
-		// ts.addConstructor('// constructor');
-		for (i in 0...OBJ.constructor.params.length) {
-			var _constructor = OBJ.constructor.params[i];
-			// trace(_constructor);
-			if (_constructor.type.indexOf('HttpClient') != -1)
-				continue;
-			ts.addConstructor('\tlet ${_constructor.name}: ${_constructor.type};');
-			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
-			ts.addProviders('${_constructor.type}');
+		if (OBJ.subscribes.length >= 0) {
+			ts.addSubscribes('// subscribes');
+			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
+			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');
+
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use subscribes in class "${name}"');
+			for (i in 0...OBJ.subscribes.length) {
+				var _sub:SubScribeObj = OBJ.subscribes[i];
+				ts.addSubscribes('\t// ${name} subscribe of ${_sub.name}');
+				ts.addSubscribes('\tdescribe(\'${name} subscribes\', () => {');
+				ts.addSubscribes(spec.SubTest.services(_sub, '\t\t'));
+				ts.addSubscribes('\t});\n');
+			}
 		}
 
 		// -----------------------------------------------------------
@@ -79,6 +103,37 @@ class ConvertService {
 				continue;
 			// not ignored
 			ts.addImport('${_import}');
+		}
+
+		// -----------------------------------------------------------
+		// update constructor
+		// -----------------------------------------------------------
+		// log(OBJ.constructor);
+		// ts.addConstructor('// constructor');
+		/*
+			for (i in 0...OBJ.constructor.params.length) {
+				var _constructor = OBJ.constructor.params[i];
+				// trace(_constructor);
+				if (_constructor.type.indexOf('HttpClient') != -1)
+					continue;
+				ts.addConstructor('\tlet ${_constructor.name}: ${_constructor.type};');
+				ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
+				ts.addProviders('${_constructor.type}');
+			}
+		 */
+		for (i in 0...OBJ.constructor.params.length) {
+			var _constructor = OBJ.constructor.params[i];
+			// trace(_constructor);
+			if (_constructor.type.indexOf('HttpClient') != -1)
+				continue;
+			// add to constructor
+			ts.addConstructor('\tlet ${_constructor.name}: ${_constructor.type};');
+			ts.addConstructor('\tlet ${_constructor.name}Spy: jasmine.SpyObj<${_constructor.type}>;');
+			// add to testbed
+			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
+			ts.addTestbed('\t\t${_constructor.name}Spy = TestBed.inject(${_constructor.type}) as jasmine.SpyObj<${_constructor.type}>;');
+			// add to providers
+			ts.addProviders('${_constructor.type}');
 		}
 
 		// -----------------------------------------------------------
@@ -101,55 +156,65 @@ class ConvertService {
 			// warn('is this a isObservable: ' + isObservable);
 			// warn('is this a isArray: ' + isArray);
 
-			log(_func);
+			// log(_func);
 
-			if ((isGetter || isSetter) && !isObservable) {
-				// warn('getter/setter');
-				if (isGetter) {
-					mute('use getter test with return value "${_func.returnValue.type}"');
-					ts.addFunction('// check if this deprecated getter is better then the test based upon return value');
-					ts.addFunction('/**');
-					ts.addFunction(createTestGetter(_func));
-					ts.addFunction('*/');
-				}
-				if (isSetter) {
-					mute('use setter test with return value "${_func.returnValue.type}"');
-					ts.addFunction('// check if this deprecated setter is better then the test based upon return value');
-					ts.addFunction('/**');
-					ts.addFunction(createTestSetter(_func));
-					ts.addFunction('*/');
-				}
-			}
-			if (isReturnArray) {
-				// warn('array');
-				mute('use test with return value "${_func.returnValue.type}"');
-				ts.addFunction(createTestArray(_func));
+			if (Config.IS_BASIC) {
+				// [hooks?] ngOnInit /
+				// TODO ngOnDestroy
 			} else {
-				// warn('return type');
-				// warn(_func.returnValue);
-				// trace(_func.returnValue.type, _func.name);
-				switch (_func.returnValue.type) {
-					case 'void':
-						mute('use test with return value "void"');
-						ts.addFunction(createTestvoid(_func));
-					case 'string', 'string | undefined':
-						mute('use test with return value "string"');
-						ts.addFunction(createTestString(_func));
-					case 'Observable':
-						mute('use test with return value "Observable"');
-						ts.addFunction(createTestObservable(_func));
-					case 'boolean', 'Boolean':
-						mute('use test with return value "boolean"');
-						ts.addFunction(createTestboolean(_func));
-					case 'number':
-						mute('use test with return value "number"');
-						ts.addFunction(createTestNumber(_func));
-					default:
-						warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
-							+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
-						ts.addFunction(createTestUnknown(_func));
-				}
+				mute('use test with return value "${_func.returnValue.type}"');
+				ts.addFunction('describe(\'${_func.name}\', () => {');
+				ts.addFunction(spec.ComboTest.services(_func, '\t\t'));
+				ts.addFunction('});\n');
 			}
+
+			// if ((isGetter || isSetter) && !isObservable) {
+			// 	// warn('getter/setter');
+			// 	if (isGetter) {
+			// 		mute('use getter test with return value "${_func.returnValue.type}"');
+			// 		ts.addFunction('// check if this deprecated getter is better then the test based upon return value');
+			// 		ts.addFunction('/**');
+			// 		ts.addFunction(createTestGetter(_func));
+			// 		ts.addFunction('*/');
+			// 	}
+			// 	if (isSetter) {
+			// 		mute('use setter test with return value "${_func.returnValue.type}"');
+			// 		ts.addFunction('// check if this deprecated setter is better then the test based upon return value');
+			// 		ts.addFunction('/**');
+			// 		ts.addFunction(createTestSetter(_func));
+			// 		ts.addFunction('*/');
+			// 	}
+			// }
+			// if (isReturnArray) {
+			// 	// warn('array');
+			// 	mute('use test with return value "${_func.returnValue.type}"');
+			// 	ts.addFunction(createTestArray(_func));
+			// } else {
+			// 	// warn('return type');
+			// 	// warn(_func.returnValue);
+			// 	// trace(_func.returnValue.type, _func.name);
+			// 	switch (_func.returnValue.type) {
+			// 		case 'void':
+			// 			mute('use test with return value "void"');
+			// 			ts.addFunction(createTestvoid(_func));
+			// 		case 'string', 'string | undefined':
+			// 			mute('use test with return value "string"');
+			// 			ts.addFunction(createTestString(_func));
+			// 		case 'Observable':
+			// 			mute('use test with return value "Observable"');
+			// 			ts.addFunction(createTestObservable(_func));
+			// 		case 'boolean', 'Boolean':
+			// 			mute('use test with return value "boolean"');
+			// 			ts.addFunction(createTestboolean(_func));
+			// 		case 'number':
+			// 			mute('use test with return value "number"');
+			// 			ts.addFunction(createTestNumber(_func));
+			// 		default:
+			// 			warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
+			// 				+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
+			// 			ts.addFunction(createTestUnknown(_func));
+			// 	}
+			// }
 		}
 
 		// -----------------------------------------------------------
@@ -251,7 +316,7 @@ class ConvertService {
 		${funcValue}
 
 		// Assert
-		const mockReq = httpMock.expectOne(url);
+		const mockReq = httpTestingController.expectOne(url);
 		expect(mockReq.request.url).toBe(url);
 		expect(mockReq.request.method).toBe("${(func._guessing.requestType)}");
 		expect(mockReq.cancelled).toBeFalsy();

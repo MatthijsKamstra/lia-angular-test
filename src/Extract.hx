@@ -76,9 +76,16 @@ class Extract {
 		OBJ.hasOnInit = (str.indexOf('ngOnInit') != -1);
 		OBJ.hasUrl = (str.toLowerCase().indexOf('url') != -1); // guessing at best :(
 
+		Constants.HAS_HTTP_CLIENT = OBJ.hasHttpClient;
+		Constants.HAS_CONSTRUCTOR = OBJ.hasConstructor;
+		Constants.HAS_ONCHANGED = OBJ.hasOnChanged;
+		Constants.HAS_ONINIT = OBJ.hasOnInit;
+		Constants.HAS_URL = OBJ.hasUrl;
+
 		if (!OBJ.hasConstructor) {
 			warn('This generator doesn\'t work without constructor');
 			OBJ.isFinished = false;
+			Constants.HAS_FINISHED = OBJ.isFinished;
 			return;
 		}
 

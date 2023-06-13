@@ -117,6 +117,7 @@ class SpecComponent {
 				_subscribes += '\n';
 			}
 		}
+
 		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider, _subscribes);
 	}
 
@@ -141,7 +142,7 @@ class SpecComponent {
 		subscribes:String = '' //
 	):String {
 		var _isTranslateService = providers.indexOf('TranslateService') != -1;
-		var _hasSpecHelper = false;
+		var _hasSpecHelper = false; // [mck] what should I check
 		var _hasRouter = imports.indexOf('Router') != -1;
 		var _hasRouterTest = false;
 		var _hasNav = false;
@@ -165,7 +166,7 @@ ${_hasTranslate ? "import { TranslateModule } from \'@ngx-translate/core\';" : "
 ${_hasRouterTest ? "import { RouterTestingModule } from \'@angular/router/testing\';" : ""}
 ${_hasRouter ? "// import { Router } from \'@angular/router\';" : ""}
 
-${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/spec-helpers/constants.spec-helper\';" : ""}
+${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';" : ""}
 
 import { ${Strings.toUpperCamel(name)}Component } from \'./${name.toLowerCase()}.component\';
 

@@ -51,8 +51,6 @@ class ConvertComponent {
 		// // add functions
 		// ts.addFunction('// add functions');
 
-		// return;
-
 		// -----------------------------------------------------------
 		// update class vars
 		// -----------------------------------------------------------
@@ -75,8 +73,8 @@ class ConvertComponent {
 		// -----------------------------------------------------------
 		// update subscibes
 		// -----------------------------------------------------------
-		ts.addSubscribes('// subscribes');
 		if (OBJ.subscribes.length >= 0) {
+			ts.addSubscribes('// subscribes');
 			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
 			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');
 
@@ -153,10 +151,10 @@ class ConvertComponent {
 
 			// log(_func);
 			// log(Config.IS_BASIC);
-			if (_func._content == 'ngOnInit(): void { }') {
-				ts.addFunction(createEmptyOnInitTest(_func, '\t'));
-				// continue;
-			}
+			// if (_func._content == 'ngOnInit(): void { }') {
+			// 	ts.addFunction(createEmptyOnInitTest(_func, '\t'));
+			// 	// continue;
+			// }
 
 			if (Config.IS_BASIC) {
 				// [hooks?] ngOnInit /
