@@ -8,6 +8,8 @@ import utils.Emoji;
 import utils.FileName;
 import utils.SaveFile;
 import utils.Strings;
+import spec.*;
+import spec.convert.*;
 // haxe
 import sys.io.File;
 import haxe.io.Path;

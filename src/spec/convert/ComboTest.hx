@@ -1,13 +1,23 @@
-package spec;
+package spec.convert;
 
 import AST.FuncObj;
 import convert.ShouldTitleTest;
 
+/**
+ * use the retrun type of a function to generate a test
+ * @see FuncObj
+ *
+ * @example
+ * 		`function foo() : boolean { }`
+ */
 class ComboTest {
-	static public function create() {}
+	static public function create():String {
+		return '// TODO';
+	}
 
 	/**
-	 * [Description]
+	 * specific for Components, use the retrun type of a function to generate a test
+	 *
 	 * @param func
 	 * @param tabs
 	 * @return String
@@ -32,8 +42,8 @@ ${tabs}\n';
 				// out += 'it(\'${getSubTitle(func)}\', () => {
 				out += 'it(\'#should return boolean true\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${spec.Type2Value.convertFuncParams2Value(func)};' : '// '}
-${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${spec.Type2Value.convertFuncReturn2Value(func)};
+${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
+${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${Type2Value.convertFuncReturn2Value(func)};
 ${tabs}\tconst _spy = spyOn(component, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
 ${tabs}\t${(func.params.length > 0) ? 'component.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}' : 'component.${func.name}()'};
@@ -45,7 +55,7 @@ ${tabs}});
 ${tabs}
 ${tabs}it(\'#should return boolean false\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${spec.Type2Value.convertFuncParams2Value(func)};' : '// '}
+${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
 ${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = false;
 ${tabs}\tconst _spy = spyOn(component, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
@@ -60,10 +70,10 @@ ${tabs}\n';
 				// trace('void');
 				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${spec.ParamsFromFunction.create(func, tabs)}
+${tabs}\t${ParamsFromFunction.create(func, tabs)}
 ${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${spec.Call2Function.create(func, tabs)};
+${tabs}\t${Call2Function.create(func, tabs)};
 ${tabs}\t// Assert
 ${tabs}\texpect(component.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
@@ -82,7 +92,8 @@ ${tabs}});\n';
 	}
 
 	/**
-	 * [Description]
+	 * specific for Services, use the retrun type of a function to generate a test
+	 *
 	 * @param func
 	 * @param tabs
 	 * @return String
@@ -90,7 +101,7 @@ ${tabs}});\n';
 	static public function services(func:FuncObj, ?tabs:String = '\t'):String {
 		// warn('test');
 
-		var out = '\n';
+		var out = '\nxxxx';
 		out += '${tabs}// test with return type `${func.returnValue.type}`\n${tabs}';
 
 		switch (func.returnValue.type) {
@@ -107,27 +118,27 @@ ${tabs}\n';
 				// out += 'it(\'${getSubTitle(func)}\', () => {
 				out += 'it(\'#should return boolean true\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${spec.Type2Value.convertFuncParams2Value(func)};' : '// '}
-${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${spec.Type2Value.convertFuncReturn2Value(func)};
-${tabs}\tconst _spy = spyOn(component, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
+${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
+${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${Type2Value.convertFuncReturn2Value(func)};
+${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
-${tabs}\t${(func.params.length > 0) ? 'component.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}' : 'component.${func.name}()'};
+${tabs}\t${(func.params.length > 0) ? 'service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}' : 'service.${func.name}()'};
 ${tabs}\t// Assert
-${tabs}\texpect(component.${func.name}).toBeDefined();
-${tabs}\t${(func.params.length > 0) ? 'expect(component.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeTrue()' : 'expect(component.${func.name}()).toBeTrue()'};
+${tabs}\texpect(service.${func.name}).toBeDefined();
+${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeTrue()' : 'expect(service.${func.name}()).toBeTrue()'};
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}
 ${tabs}it(\'#should return boolean false\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${spec.Type2Value.convertFuncParams2Value(func)};' : '// '}
+${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
 ${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = false;
-${tabs}\tconst _spy = spyOn(component, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
+${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
-${tabs}\t${(func.params.length > 0) ? 'component.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})' : 'component.${func.name}()'};
+${tabs}\t${(func.params.length > 0) ? 'service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})' : 'service.${func.name}()'};
 ${tabs}\t// Assert
-${tabs}\texpect(component.${func.name}).toBeDefined();
-${tabs}\t${(func.params.length > 0) ? 'expect(component.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeFalse()' : 'expect(component.${func.name}()).toBeFalse()'};
+${tabs}\texpect(service.${func.name}).toBeDefined();
+${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeFalse()' : 'expect(service.${func.name}()).toBeFalse()'};
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}\n';
@@ -135,12 +146,12 @@ ${tabs}\n';
 				// trace('void');
 				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${spec.ParamsFromFunction.create(func, tabs)}
-${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
+${tabs}\t${ParamsFromFunction.create(func, tabs)}
+${tabs}\tconst _spy = spyOn(service, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${spec.Call2Function.create(func, tabs)};
+${tabs}\t${Call2Function.create(func, tabs)};
 ${tabs}\t// Assert
-${tabs}\texpect(component.${func.name}).toBeDefined();
+${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}\n';

@@ -1,4 +1,4 @@
-package spec;
+package spec.convert;
 
 import AST.VarObj;
 import AST.FuncObj;
