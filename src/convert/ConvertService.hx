@@ -1,12 +1,12 @@
 package convert;
 
+import haxe.Json;
 import utils.GenValues;
 import haxe.macro.Expr.ExprOf;
 import utils.RegEx;
 import AST;
 import const.Config;
 import remove.RemoveComment;
-import spec.SpecService;
 import utils.Copyright;
 import utils.GeneratedBy;
 
@@ -62,7 +62,7 @@ class ConvertService {
 					// ts.addFunction('// ${OBJ.vars[i]}');
 					var _varObj:VarObj = OBJ.vars[i];
 					// ts.addFunction('\t// ${_varObj.name}');
-					ts.addFunction(spec.VarsTest.services(_varObj, '\t\t'));
+					ts.addFunction(VarsTest.services(_varObj, '\t\t'));
 				}
 				ts.addFunction('});\n');
 			}
@@ -82,7 +82,7 @@ class ConvertService {
 				var _sub:SubScribeObj = OBJ.subscribes[i];
 				ts.addSubscribes('\t// ${name} subscribe of ${_sub.name}');
 				ts.addSubscribes('\tdescribe(\'${name} subscribes\', () => {');
-				ts.addSubscribes(spec.SubTest.services(_sub, '\t\t'));
+				ts.addSubscribes(SubTest.services(_sub, '\t\t'));
 				ts.addSubscribes('\t});\n');
 			}
 		}
@@ -164,7 +164,7 @@ class ConvertService {
 			} else {
 				mute('use test with return value "${_func.returnValue.type}"');
 				ts.addFunction('describe(\'${_func.name}\', () => {');
-				ts.addFunction(spec.ComboTest.services(_func, '\t\t'));
+				ts.addFunction(ComboTest.services(_func, '\t\t'));
 				ts.addFunction('});\n');
 			}
 
@@ -234,6 +234,10 @@ class ConvertService {
 
 		// correct filename
 		var templatePath = '${parent}/${newFileName}';
+		var jsonPath = '${parent}/_${newFileName.replace('.spec.ts', '.json')}';
+		var json = Json.stringify(OBJ, null, '  ');
+
+		// var templatePath = '${parent}/${newFileName}';
 		if (!Config.IS_OVERWRITE) {
 			// create a name that is destincable from orignal file
 			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.spec')}';
@@ -244,7 +248,10 @@ class ConvertService {
 		} else {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
-			sys.io.File.saveContent(templatePath, content.replace('\n\t\n', '\n'));
+			info('Open generated json file: ${jsonPath}', 2);
+			// sys.io.File.saveContent(templatePath, content.replace('\n\t\n', '\n'));
+			sys.io.File.saveContent(templatePath, content);
+			sys.io.File.saveContent(jsonPath, json);
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
