@@ -70,10 +70,10 @@ ${tabs}\n';
 				// trace('void');
 				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${ParamsFromFunction.create(func, tabs)}
+${tabs}\t${FunctionParams.create(func, tabs)}
 ${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${Call2Function.create(func, tabs)};
+${tabs}\t${FunctionCall.create(func, tabs)};
 ${tabs}\t// Assert
 ${tabs}\texpect(component.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
@@ -92,6 +92,7 @@ ${tabs}});\n';
 	}
 
 	/**
+	 * SERVICES
 	 * specific for Services, use the retrun type of a function to generate a test
 	 *
 	 * @param func
@@ -101,7 +102,7 @@ ${tabs}});\n';
 	static public function services(func:FuncObj, ?tabs:String = '\t'):String {
 		// warn('test');
 
-		var out = '\nxxxx';
+		var out = '\n';
 		out += '${tabs}// test with return type `${func.returnValue.type}`\n${tabs}';
 
 		switch (func.returnValue.type) {
@@ -146,10 +147,10 @@ ${tabs}\n';
 				// trace('void');
 				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${ParamsFromFunction.create(func, tabs)}
+${tabs}\t${FunctionParams.create(func, tabs)}
 ${tabs}\tconst _spy = spyOn(service, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${Call2Function.create(func, tabs)};
+${tabs}\t${FunctionCall.services(func, tabs)};
 ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
