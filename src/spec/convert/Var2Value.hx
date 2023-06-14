@@ -9,7 +9,7 @@ class Var2Value {
 	 * @return String
 	 */
 	static public function create(vars:VarObj):String {
-		var out = spec.Type2Value.create(vars.type);
+		var out = Type2Value.create(vars.type);
 		if (vars.value != "") {
 			out = vars.value;
 		}

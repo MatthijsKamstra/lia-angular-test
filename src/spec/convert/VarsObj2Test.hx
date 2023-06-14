@@ -6,9 +6,7 @@ class VarsObj2Test {
 	// create vars test based upon variables private/public in class
 
 	/**
-	 * [Description]
-	 * @param vars
-	 * @param tabs
+	 * GENERIC
 	 */
 	static public function create(vars:VarObj, ?tabs:String = '\t') {
 		var out = '// Arrange
@@ -22,13 +20,11 @@ ${tabs}\t//
 	}
 
 	/**
-	 * [Description]
-	 * @param vars
-	 * @param tabs
+	 * COMPONENTS
 	 */
 	static public function components(vars:VarObj, ?tabs:String = '\t') {
 		var out = '// Arrange
-${tabs}\tconst _${vars.name}: ${vars.type} = ${spec.Var2Value.create(vars)};
+${tabs}\tconst _${vars.name}: ${vars.type} = ${Var2Value.create(vars)};
 ${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= component.${vars.name};
 ${tabs}\tcomponent.${vars.name} = _${vars.name};
 ${tabs}\t// Act
@@ -40,18 +36,17 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 	}
 
 	/**
-	 * for services
-	 * @param vars
-	 * @param tabs
+	 * SERVICES
 	 */
 	static public function services(vars:VarObj, ?tabs:String = '\t') {
 		var out = '// Arrange
-${tabs}\tconst _${vars.name}: ${vars.type} = ${spec.Var2Value.create(vars)};
+${tabs}\tconst _${vars.name}: ${vars.type} = ${Var2Value.create(vars)};
+${tabs}\tconst _initial${Strings.toUpperCamel(vars.name)}: ${vars.type} ${(vars.optional) ? '| undefined' : ''}= service.${vars.name};
 ${tabs}\t// Act
-${tabs}\tcomponent.${vars.name} = _${vars.name};
+${tabs}\tservice.${vars.name} = _${vars.name};
 ${tabs}\t// Assert
 ${tabs}\t${(vars.value == "") ? 'expect(_initial${Strings.toUpperCamel(vars.name)}).toBeUndefined();' : 'expect(_initial${Strings.toUpperCamel(vars.name)}).toBe(${vars.value});'}
-${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
+${tabs}\texpect(service.${vars.name}).toBe(_${vars.name});';
 		return out;
 	}
 }

@@ -30,7 +30,7 @@ class VarsTest {
 			out += '/**\n${tabs}';
 
 		out += 'it(\'${title}\', () => {
-${tabs}\t${spec.VarsObj2Test.create(vars, tabs)}
+${tabs}\t${VarsObj2Test.create(vars, tabs)}
 ${tabs}});
 ';
 
@@ -68,7 +68,7 @@ ${tabs}});
 			out += '/**\n${tabs}';
 
 		out += 'it(\'${title}\', () => {
-${tabs}\t${spec.VarsObj2Test.services(vars, tabs)}
+${tabs}\t${VarsObj2Test.services(vars, tabs)}
 ${tabs}});
 ';
 

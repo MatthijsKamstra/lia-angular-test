@@ -147,7 +147,7 @@ ${tabs}\n';
 				// trace('void');
 				out += 'it(\'#should spy on "${func.name}" with return void\', () => {
 ${tabs}\t// Arrange
-${tabs}\t${FunctionParams.create(func, tabs)}
+${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\tconst _spy = spyOn(service, \'${func.name}\');
 ${tabs}\t// Act
 ${tabs}\t${FunctionCall.services(func, tabs)};
