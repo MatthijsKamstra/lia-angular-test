@@ -26,8 +26,9 @@ class Config {
 	 * 0.2.2 - FormControle / FormGroup exclude by comment, added SPEC_CONST, better type values
 	 * 0.2.3 - subscribe service tests
 	 * 0.2.4 - fix missing imports, values, setup
+	 * 0.2.5 - rewrite services
 	 */
-	public static final VERSION:String = '0.2.4';
+	public static final VERSION:String = '0.2.5';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;
