@@ -73,7 +73,7 @@ class ConvertComponent {
 		// -----------------------------------------------------------
 		// update subscibes
 		// -----------------------------------------------------------
-		if (OBJ.subscribes.length >= 0) {
+		if (OBJ.subscribes.length > 0) {
 			ts.addSubscribes('// subscribes');
 			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
 			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');

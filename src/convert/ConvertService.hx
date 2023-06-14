@@ -51,27 +51,27 @@ class ConvertService {
 		// update class vars
 		// -----------------------------------------------------------
 		// ts.addVariable('// vars');
-		/*
-			if (OBJ.vars.length >= 0) {
-				var name = '${Strings.toUpperCamel(className)}Component';
-				mute('use test for class vars "${name}"');
-				ts.addFunction('// ${name}');
-				ts.addFunction('describe(\'${name} class vars\', () => {');
-				// // ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
-				for (i in 0...OBJ.vars.length) {
-					// ts.addFunction('// ${OBJ.vars[i]}');
-					var _varObj:VarObj = OBJ.vars[i];
-					// ts.addFunction('\t// ${_varObj.name}');
-					ts.addFunction(VarsTest.services(_varObj, '\t\t'));
-				}
-				ts.addFunction('});\n');
+
+		if (OBJ.vars.length >= 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for class vars "${name}"');
+			ts.addFunction('// ${name}');
+			ts.addFunction('describe(\'${name} class vars\', () => {');
+			// // ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
+			for (i in 0...OBJ.vars.length) {
+				// ts.addFunction('// ${OBJ.vars[i]}');
+				var _varObj:VarObj = OBJ.vars[i];
+				// ts.addFunction('\t// ${_varObj.name}');
+				ts.addFunction(VarsTest.services(_varObj, '\t\t'));
 			}
-		 */
+			ts.addFunction('});\n');
+		}
+		/* */
 
 		// -----------------------------------------------------------
 		// update subscibes
 		// -----------------------------------------------------------
-		if (OBJ.subscribes.length >= 0) {
+		if (OBJ.subscribes.length > 0) {
 			ts.addSubscribes('// subscribes');
 			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
 			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');
