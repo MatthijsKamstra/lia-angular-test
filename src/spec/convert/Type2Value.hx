@@ -21,6 +21,7 @@ class Type2Value {
 	}
 
 	static public function convertFuncParams2Value(func:FuncObj) {
+		// TODO FIXME
 		return Type2Value.convertType2Value(func.params[0].type);
 	}
 
@@ -59,7 +60,7 @@ class Type2Value {
 				out = 'null';
 			default:
 				// SPEC_CONST.getValue(IHELP)
-				out = '{} /* SPEC_CONST.getValue(${type.toUpperCase()}) */';
+				out = 'SPEC_CONST.getValue(${type.toUpperCase()}); // {}';
 				trace("case '" + type + "': trace ('" + type + "');");
 		}
 		return out;

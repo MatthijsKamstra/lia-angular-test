@@ -4,11 +4,12 @@ import AST.FuncObj;
 
 /**
  * create a call to this specific function
+ *
  * @see FuncObj
  * @example
- * ```
+ * ```ts
  * // Act
- * service.foo(bar)
+ * service.foo(bar,soap);
  * ```
  */
 class FunctionCall {
@@ -23,14 +24,14 @@ class FunctionCall {
 	 * COMPONENTS
 	 */
 	static public function components(func:FuncObj, tabs:String = '\t'):String {
-		return 'component.${build(func, tabs)}';
+		return 'component.${build(func, tabs)};';
 	}
 
 	/**
 	 * SEVICES
 	 */
 	static public function services(func:FuncObj, tabs:String = '\t'):String {
-		return 'service.${build(func, tabs)}';
+		return 'service.${build(func, tabs)};';
 	}
 
 	/**
@@ -44,8 +45,8 @@ class FunctionCall {
 		var param = '';
 		var out = '';
 		for (i in 0...func.params.length) {
-			var _TypedObj = func.params[i];
-			param += '_param${Strings.toUpperCamel(_TypedObj.name)}';
+			var _typedObj = func.params[i];
+			param += '_param${Strings.toUpperCamel(_typedObj.name)}';
 			if (i < func.params.length - 1) {
 				param += ', ';
 			}

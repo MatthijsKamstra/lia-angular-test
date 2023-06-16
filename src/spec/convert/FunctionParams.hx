@@ -2,6 +2,9 @@ package spec.convert;
 
 import AST.FuncObj;
 
+/**
+ *
+ */
 class FunctionParams {
 	/**
 	 * GENERIC
@@ -25,16 +28,23 @@ class FunctionParams {
 	}
 
 	/**
-	 * [Description]
+	 * create param vars based upon FuncOjb.params
+	 *
+	 * @example
+	 *
+	 *
 	 * @param func
 	 * @param tabs
 	 * @return String
 	 */
-	static private function build(func:FuncObj, tabs:Null<String>):String {
+	static private function build(func:FuncObj, tabs:String = '\t'):String {
 		var out = '';
 		for (i in 0...func.params.length) {
-			var _TypedObj = func.params[i];
-			out += 'const _param${Strings.toUpperCamel(_TypedObj.name)}: ${_TypedObj.type} = ${Type2Value.convertType2Value(_TypedObj.type)};\n${tabs}\t';
+			var _typedObj = func.params[i];
+			out += 'const _param${Strings.toUpperCamel(_typedObj.name)}: ${_typedObj.type} = ${Type2Value.convertType2Value(_typedObj.type)};';
+			if (i < func.params.length - 1) {
+				out += '\n${tabs}\t';
+			}
 		}
 		return out;
 	}

@@ -107,10 +107,12 @@ ${tabs}});\n';
 
 		switch (func.returnValue.type) {
 			case 'string':
-				trace('string');
+				// trace('string');
 				out += 'it(\'#should return string\', () => {
+${tabs}\t// FIXME this is WIP
 ${tabs}\t// Arrange
-${tabs}\t// TODO
+${tabs}\t// Act
+${tabs}\t// Assert
 ${tabs}});
 ${tabs}\n';
 			case 'boolean':
@@ -119,11 +121,12 @@ ${tabs}\n';
 				// out += 'it(\'${getSubTitle(func)}\', () => {
 				out += 'it(\'#should return boolean true\', () => {
 ${tabs}\t// Arrange
+${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
 ${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${Type2Value.convertFuncReturn2Value(func)};
 ${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
-${tabs}\t${(func.params.length > 0) ? 'service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}' : 'service.${func.name}()'};
+${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeTrue()' : 'expect(service.${func.name}()).toBeTrue()'};
@@ -132,15 +135,23 @@ ${tabs}});
 ${tabs}
 ${tabs}it(\'#should return boolean false\', () => {
 ${tabs}\t// Arrange
+${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
 ${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = false;
 ${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
 ${tabs}\t// Act
-${tabs}\t${(func.params.length > 0) ? 'service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})' : 'service.${func.name}()'};
+${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})).toBeFalse()' : 'expect(service.${func.name}()).toBeFalse()'};
 ${tabs}\texpect(_spy).toHaveBeenCalled();
+${tabs}});
+${tabs}
+${tabs}it(\'#should check return value "${func.name}"\', () => {
+${tabs}\t// Arrange
+${tabs}\t// Act
+${tabs}\t// Assert
+${tabs}\texpect(${FunctionCall.services(func, tabs).replace(';', '')}).toBeTrue();
 ${tabs}});
 ${tabs}\n';
 			case 'void':
@@ -150,21 +161,46 @@ ${tabs}\t// Arrange
 ${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\tconst _spy = spyOn(service, \'${func.name}\');
 ${tabs}\t// Act
-${tabs}\t${FunctionCall.services(func, tabs)};
+${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}\n';
-
+			case 'Observable':
+				// trace('Observable');
+				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+				out += '${TestObservable.services(func, tabs)}';
+			// out += 'it(\'#should return Observable<${func.returnValue.value}>\', () => {
+			// ${tabs}\t// FIXME "${func.name}" with return type "${func.returnValue.type}"
+			// ${tabs}\t${FunctionObservable.services(func, tabs)}
+			// ${tabs}});
+			// ${tabs}\n';
 			default:
 				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
-				out += 'xit(\'${ShouldTitleTest.getTitle(func)}\', () => {
-${tabs}\t//
-${tabs}});\n';
+				out += 'it(\'${ShouldTitleTest.getTitle(func)}\', () => {
+${tabs}\t// FIXME "${func.name}" with return type `${func.returnValue.type}` (x)
+${tabs}\t// Arrange
+${tabs}\t${FunctionParams.services(func, tabs)}
+${tabs}\tconst _return${Strings.toUpperCamel(func.returnValue.type)}: ${func.returnValue.type} = ${Type2Value.convertFuncReturn2Value(func)};
+${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(_return${Strings.toUpperCamel(func.returnValue.type)});
+${tabs}\t// Act
+${tabs}\t${FunctionCall.services(func, tabs)}
+${tabs}\t// Assert
+${tabs}\texpect(service.${func.name}).toBeDefined();
+${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).toBe(_param${Strings.toUpperCamel(func.params[0].name)})' : 'expect(service.${func.name}()).toBe(_return${Strings.toUpperCamel(func.returnValue.type)})'};
+${tabs}\texpect(_spy).toHaveBeenCalled();
+${tabs}});
+${tabs}\n';
+
 				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
 		}
 
+		// ${tabs}\t${(func.params.length > 0)
+		// ?
+		// 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).toBe(_param${Strings.toUpperCamel(func.params[0].name)}})'
+		// :
+		// 'expect(service.${func.name}()).toBe(_param${Strings.toUpperCamel(func.params[0].name)})';
 		return out;
 	}
 }

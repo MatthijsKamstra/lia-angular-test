@@ -82,7 +82,7 @@ class ConvertService {
 				var _sub:SubScribeObj = OBJ.subscribes[i];
 				ts.addSubscribes('\t// ${name} subscribe of ${_sub.name}');
 				ts.addSubscribes('\tdescribe(\'${name} subscribes\', () => {');
-				ts.addSubscribes(SubTest.services(_sub, '\t\t'));
+				ts.addSubscribes(TestSubscribe.services(_sub, '\t\t'));
 				ts.addSubscribes('\t});\n');
 			}
 		}
@@ -132,6 +132,7 @@ class ConvertService {
 			// add to testbed
 			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
 			ts.addTestbed('\t\t${_constructor.name}Spy = TestBed.inject(${_constructor.type}) as jasmine.SpyObj<${_constructor.type}>;');
+			ts.addTestbed('\t\t// ${_constructor.name}Spy.[functionname].and.returnValue("foobar");');
 			// add to providers
 			ts.addProviders('${_constructor.type}');
 		}
@@ -251,7 +252,7 @@ class ConvertService {
 			info('Open generated json file: ${jsonPath}', 2);
 			// sys.io.File.saveContent(templatePath, content.replace('\n\t\n', '\n'));
 			sys.io.File.saveContent(templatePath, content);
-			sys.io.File.saveContent(jsonPath, json);
+			// sys.io.File.saveContent(jsonPath, json);
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');

@@ -2,15 +2,15 @@ package spec.convert;
 
 import AST.SubScribeObj;
 
-class SubTest {
+class TestSubscribe {
 	static public function create() {
 		//
 	}
 
 	static public function components(sub:SubScribeObj, ?tabs:String = '\t'):String {
-		var out = '\n';
-		// it('#should spy "configSettingsService" ngOnInit with `IHelp` value', () => {
-		out += '${tabs}it(\'#should spy on "${sub.name}" call "${sub.call}" and return dummy data\', () => {
+		var out = '';
+		out += '
+${tabs}it(\'#should spy on "${sub.name}" call "${sub.call}" and return dummy data\', () => {
 ${tabs}\t// Arrange
 ${tabs}\tconst _IValue: IValue = SPEC_CONST.getValue(IValue);
 ${tabs}\t// command click on "${sub.call.name}()" to see what value it will return
@@ -22,8 +22,7 @@ ${tabs}\t// Assert
 ${tabs}\texpect(component.help).toBe(_IValue);
 ${tabs}});
 ${tabs}
-
-${tabs}it(\'should set "${sub.name}" errorMessage and error if http.get returns an error\', () => {
+${tabs}it(\'#should set "${sub.name}" errorMessage and error if http.get returns an error\', () => {
 ${tabs}\t// Arrange
 ${tabs}\tconst _url: string = "/test";
 ${tabs}\tconst _errorMessage = \'deliberate 404 error\';
@@ -36,8 +35,7 @@ ${tabs}\texpect(${sub.name}Spy.${sub.call.name}).toHaveBeenCalled();
 ${tabs}\texpect(notificationService.error).toHaveBeenCalled();
 ${tabs}});
 ${tabs}
-
-${tabs}it(\'should set "${sub.name}" errorMessage and error if http.get returns an error and calls notificationService\', () => {
+${tabs}it(\'#should set "${sub.name}" errorMessage and error if http.get returns an error and calls notificationService\', () => {
 ${tabs}\t// Arrange
 ${tabs}\tconst _errorMessage = "Er is een fout opgetreden bij het ophalen van het online help document.";
 ${tabs}\tconst _error: any = { error: _errorMessage, status: 404, statusText: "Not Found" };

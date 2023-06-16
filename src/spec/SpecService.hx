@@ -174,9 +174,13 @@ class SpecService {
 
 		var template = '
 import { TestBed } from \'@angular/core/testing\';
-import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';
 
-${_hasSpecHelper ? "// import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';" : ""}
+${_hasHttpClientTest ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
+${_hasHttpClientTest ? "import { of, throwError } from 'rxjs';" : ""}
+${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/common/http\';" : ""}
+${_hasHttpClient ? "import { NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
+
+${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';" : ""}
 
 import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.service\';
 
@@ -187,6 +191,7 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 	let service: ${Strings.toUpperCamel(name)}Service;
 	// let ${Strings.toLowerCamel(name)}Service: ${Strings.toUpperCamel(name)}Service; // [mck] might be removed in the future
 	//
+${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
 
 ${constructor}
@@ -205,6 +210,7 @@ ${_hasHttpClientTest ? "				HttpClientTestingModule," : ""}
 		// ${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service); // [mck] might be removed in the future
 ${testBed}
 		//
+${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
 ${_hasHttpClientTest ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
 
 	});
