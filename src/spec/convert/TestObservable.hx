@@ -48,7 +48,11 @@ ${tabs}\texpect(testRequest.request.url).toBe(_url);
 ${tabs}\texpect(testRequest.request.method).toBe("${(func._guessing.requestType)}");
 ${tabs}\texpect(testRequest.cancelled).toBeFalsy();
 ${tabs}\texpect(testRequest.request.responseType).toEqual(\'json\');
+${(func.params.length > 0) ? '
 ${tabs}\ttestRequest.flush(_param${Strings.toUpperCamel(func.params[0].name)});
+' : '
+${tabs}\ttestRequest.flush({});
+'}
 ${tabs}});
 ${tabs}
 ${tabs}it(\'#should call "${func.name}" with return `Observable<${func.returnValue.value}>`\', (done: DoneFn) => {
@@ -60,11 +64,18 @@ ${tabs}\t${ConvertURL(func)}
 ${tabs}\t// Act
 ${tabs}\t// ${FunctionCall.services(func, tabs)}
 ${tabs}\t// create the service call
-${tabs}\t// TODO: command click on "${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})" to see what value it will return
+${(func.params.length > 0) ? '${tabs}\t// TODO: command click on "${func.name}(_param${Strings.toUpperCamel(func.params[0].name)})" to see what value it will return' : '${tabs}\t// TODO: command click on "${func.name}()" to see what value it will return'}
+${(func.params.length > 0) ? '
 ${tabs}\tservice.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).subscribe(value => {
 ${tabs}\t	expect(value).toBe(_IValue);
 ${tabs}\t	done();
 ${tabs}\t});
+' : '
+${tabs}\tservice.${func.name}().subscribe(value => {
+${tabs}\t	expect(value).toBe(_IValue);
+${tabs}\t	done();
+${tabs}\t});
+'}
 ${tabs}\t// Assert
 ${tabs}\tconst testRequest = httpTestingController.expectOne(_url);
 ${tabs}\texpect(testRequest.request.url).toBe(_url);
@@ -83,7 +94,11 @@ ${tabs}\tconst _spy = spyOn(service, \'${func.name}\').and.returnValue(of(_IValu
 ${tabs}\t// Act
 ${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
+${(func.params.length > 0) ? '
 ${tabs}\texpect(service.${func.name}).toHaveBeenCalledWith(_param${Strings.toUpperCamel(func.params[0].name)});
+' : '
+${tabs}\texpect(service.${func.name}).toHaveBeenCalledWith();
+'}
 ${tabs}});
 ${tabs}
 ${tabs}it(\'#can test HttpClient.${func._guessing.requestType.toLowerCase()} in "${func.name}"\', () => {
@@ -108,7 +123,7 @@ ${tabs}\t// Arrange
 ${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\tconst _url = "/test";
 ${tabs}\tconst _data: any = { name: \'Test Data\' };
-${tabs}\tconst _spy: jasmine.Spy<${func.returnValue.value}> = spyOn(httpClient, \'${func._guessing.requestType.toLowerCase()}\').and.returnValue(of(_data));
+${tabs}\tconst _spy = spyOn(httpClient, \'${func._guessing.requestType.toLowerCase()}\').and.returnValue(of(_data));
 ${tabs}\t// Act (should call the tested function itself)
 ${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
@@ -153,8 +168,10 @@ ${tabs}';
 	static function ConvertURL(func:FuncObj):String {
 		var url = func._guessing.URL;
 		url = url.replace('this.', '') //
-			.replace('url ', '_url ') //
-			.replace('${func.params[0].name}', '_param${Strings.toUpperCamel(func.params[0].name)}');
+			.replace('url ', '_url ');
+		//
+		if (func.params.length > 0)
+			url = url.replace('${func.params[0].name}', '_param${Strings.toUpperCamel(func.params[0].name)}');
 		if (url == '')
 			url = '_url: string = "/test";';
 		return 'const ' + url;

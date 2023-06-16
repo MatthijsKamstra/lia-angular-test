@@ -106,15 +106,15 @@ ${tabs}});\n';
 		out += '${tabs}// test with return type `${func.returnValue.type}`\n${tabs}';
 
 		switch (func.returnValue.type) {
-			case 'string':
-				// trace('string');
-				out += 'it(\'#should return string\', () => {
-${tabs}\t// FIXME this is WIP
-${tabs}\t// Arrange
-${tabs}\t// Act
-${tabs}\t// Assert
-${tabs}});
-${tabs}\n';
+			// 			case 'string':
+			// 				// trace('string');
+			// 				out += 'it(\'#should return string\', () => {
+			// ${tabs}\t// FIXME this is WIP
+			// ${tabs}\t// Arrange
+			// ${tabs}\t// Act
+			// ${tabs}\t// Assert
+			// ${tabs}});
+			// ${tabs}\n';
 			case 'boolean':
 				// ${tabs}\t// ${func.params}
 				// trace('boolean');
@@ -177,7 +177,7 @@ ${tabs}\n';
 			// ${tabs}});
 			// ${tabs}\n';
 			default:
-				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+				// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
 				out += 'it(\'${ShouldTitleTest.getTitle(func)}\', () => {
 ${tabs}\t// FIXME "${func.name}" with return type `${func.returnValue.type}` (x)
 ${tabs}\t// Arrange
@@ -191,7 +191,15 @@ ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).toBe(_param${Strings.toUpperCamel(func.params[0].name)})' : 'expect(service.${func.name}()).toBe(_return${Strings.toUpperCamel(func.returnValue.type)})'};
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
-${tabs}\n';
+${tabs}
+${tabs}xit(\'${ShouldTitleTest.getTitle(func)}\', () => {
+${tabs}\t// Arrange
+${tabs}\t// ${FunctionParams.services(func, tabs)}
+${tabs}\t// Act
+${tabs}\t// const _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.services(func, tabs)}
+${tabs}\t// Assert
+${tabs}});
+${tabs}';
 
 				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");
 		}

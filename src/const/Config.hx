@@ -27,8 +27,9 @@ class Config {
 	 * 0.2.3 - subscribe service tests
 	 * 0.2.4 - fix missing imports, values, setup
 	 * 0.2.5 - rewrite services
+	 * 0.2.6 - adding more if/else statements, adding starting point test
 	 */
-	public static final VERSION:String = '0.2.5';
+	public static final VERSION:String = '0.2.6';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

@@ -160,7 +160,7 @@ class SpecService {
 		var _hasRouterTest = false;
 		var _hasNav = false;
 		var _hasHttpClient = this.obj.hasHttpClient;
-		var _hasHttpClientTest = providers.indexOf('Service') != -1;
+		var _hasHttpClientTest = this.obj.hasHttpClient;
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
 		var _useTemplate:Bool = false;
@@ -215,9 +215,9 @@ ${_hasHttpClientTest ? "		httpTestingController = TestBed.inject(HttpTestingCont
 
 	});
 
-	afterEach(() => {
+${_hasHttpClientTest ? "	afterEach(() => {
 		httpTestingController.verify();
-	});
+	});" : ""}
 
 	it(\'should be created\', () => {
 		expect(service).toBeTruthy();
