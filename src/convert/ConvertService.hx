@@ -241,7 +241,7 @@ class ConvertService {
 		// var templatePath = '${parent}/${newFileName}';
 		if (!Config.IS_OVERWRITE) {
 			// create a name that is destincable from orignal file
-			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.spec')}';
+			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.speec')}';
 		}
 
 		if (Config.IS_DRYRUN) {

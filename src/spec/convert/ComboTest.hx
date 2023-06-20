@@ -166,6 +166,19 @@ ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
+${tabs}
+${tabs}/*
+${tabs}// dummy test to write a quick test
+${tabs}it(\'${ShouldTitleTest.getTitle(func)}\', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _IValue: IValue = SPEC_CONST.getValue(IValue);
+${tabs}\t${FunctionParams.services(func, tabs)}
+${tabs}\t// Act
+${tabs}\tconst _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.services(func, tabs)}
+${tabs}\t// Assert
+${tabs}\texpect(_${func.returnValue.type}).toEqual(_IValue.foo);
+${tabs}});
+${tabs}*/;
 ${tabs}\n';
 			case 'Observable':
 				// trace('Observable');
@@ -192,13 +205,18 @@ ${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strin
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}
-${tabs}xit(\'${ShouldTitleTest.getTitle(func)}\', () => {
+${tabs}/*
+${tabs}// dummy test to write a quick test
+${tabs}it(\'${ShouldTitleTest.getTitle(func)}\', () => {
 ${tabs}\t// Arrange
-${tabs}\t// ${FunctionParams.services(func, tabs)}
+${tabs}\tconst _IValue: IValue = SPEC_CONST.getValue(IValue);
+${tabs}\t${FunctionParams.services(func, tabs)}
 ${tabs}\t// Act
-${tabs}\t// const _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.services(func, tabs)}
+${tabs}\tconst _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
+${tabs}\texpect(_${func.returnValue.type}).toEqual(_IValue.foo);
 ${tabs}});
+${tabs}*/
 ${tabs}';
 
 				trace("case '" + func.returnValue.type + "': trace ('" + func.returnValue.type + "');");

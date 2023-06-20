@@ -107,6 +107,9 @@ class SpecService {
 		// add this for easier access
 		for (i in 0...this.obj.subscribes.length) {
 			var _subscribe:AST.SubScribeObj = this.obj.subscribes[i];
+			if (_subscribe.name.toLowerCase() == 'http') {
+				continue;
+			}
 			_provider += '{ provide: ${Strings.toUpperCamel(_subscribe.name)}, useValue: jasmine.createSpyObj(\'${Strings.toUpperCamel(_subscribe.name)}\', [\'${_subscribe.call.name}\'])}';
 			if (i < this.obj.subscribes.length - 1) {
 				_provider += ', ';
