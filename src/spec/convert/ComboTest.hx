@@ -201,7 +201,7 @@ ${tabs}\t// Act
 ${tabs}\t${FunctionCall.services(func, tabs)}
 ${tabs}\t// Assert
 ${tabs}\texpect(service.${func.name}).toBeDefined();
-${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).toBe(_param${Strings.toUpperCamel(func.params[0].name)})' : 'expect(service.${func.name}()).toBe(_return${Strings.toUpperCamel(func.returnValue.type)})'};
+${tabs}\t${(func.params.length > 0) ? 'expect(service.${func.name}(_param${Strings.toUpperCamel(func.params[0].name)}).toBe(_return${Strings.toUpperCamel(func.returnValue.type)})' : 'expect(service.${func.name}()).toBe(_return${Strings.toUpperCamel(func.returnValue.type)})'};
 ${tabs}\texpect(_spy).toHaveBeenCalled();
 ${tabs}});
 ${tabs}
