@@ -1,15 +1,12 @@
 package convert;
 
-import haxe.macro.Expr.Access;
-import utils.TranslateName;
-import utils.GenValues;
-import utils.RegEx;
 import AST;
 import const.Config;
 import haxe.Json;
 import remove.RemoveComment;
 import spec.SpecComponent;
 import utils.Copyright;
+import utils.GenValues;
 import utils.GeneratedBy;
 
 class ConvertComponent {
@@ -123,6 +120,7 @@ class ConvertComponent {
 			// add to testbed
 			ts.addTestbed('\t\t${_constructor.name} = TestBed.inject(${_constructor.type});');
 			ts.addTestbed('\t\t${_constructor.name}Spy = TestBed.inject(${_constructor.type}) as jasmine.SpyObj<${_constructor.type}>;');
+			ts.addTestbed('\t\t// ${_constructor.name}Spy.[functionname].and.returnValue("foobar");');
 			// add to providers
 			ts.addProviders('${_constructor.type}');
 		}
@@ -150,48 +148,55 @@ class ConvertComponent {
 			// warn('is this a isReturnUnion: ' + isReturnUnion);
 
 			// log(_func);
-			// log(Config.IS_BASIC);
-			// if (_func._content == 'ngOnInit(): void { }') {
-			// 	ts.addFunction(createEmptyOnInitTest(_func, '\t'));
-			// 	// continue;
-			// }
 
 			if (Config.IS_BASIC) {
 				// [hooks?] ngOnInit /
 				// TODO ngOnDestroy
-				if (_func.name == 'ngOnInit') {
-					mute('use test with return value "${_func.returnValue.type}"');
-					ts.addFunction('describe(\'ngOnInit\', () => {');
-					ts.addFunction(createBasicTest(_func, '\t\t'));
-					ts.addFunction('});\n');
-
-					// ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
-				} else {
-					mute('use test with return value "${_func.returnValue.type}"');
-					ts.addFunction(createBasicTest(_func));
-				}
 			} else {
-				// not basic
-				// [hooks?] ngOnInit
-				// warn(_func._content);
-
-				if (_func.name == 'ngOnInit') {
-					mute('use ngOnInit test with return value "${_func.returnValue.type}"');
-					ts.addFunction('describe(\'${_func.name}\', () => {');
-					ts.addFunction(createOnInitTest(_func, '\t\t'));
-					ts.addFunction('});\n');
-				} else if (_func.name == 'ngOnChanges') {
-					mute('use ngOnChanges test with return value "${_func.returnValue.type}"');
-					ts.addFunction('describe(\'${_func.name}\', () => {');
-					ts.addFunction(createOnChangeTest(_func, '\t\t'));
-					ts.addFunction('});\n');
-				} else {
-					mute('use test with return value "${_func.returnValue.type}"');
-					ts.addFunction('describe(\'${_func.name}\', () => {');
-					ts.addFunction(createComboTest(_func, '\t\t'));
-					ts.addFunction('});\n');
-				}
+				mute('use test with return value "${_func.returnValue.type}"');
+				ts.addFunction('describe(\'${_func.name}\', () => {');
+				ts.addFunction(ComboTest.components(_func, '\t\t'));
+				ts.addFunction('});\n');
 			}
+
+			/*
+				if (Config.IS_BASIC) {
+					// [hooks?] ngOnInit /
+					// TODO ngOnDestroy
+					if (_func.name == 'ngOnInit') {
+						mute('use test with return value "${_func.returnValue.type}"');
+						ts.addFunction('describe(\'ngOnInit\', () => {');
+						ts.addFunction(createBasicTest(_func, '\t\t'));
+						ts.addFunction('});\n');
+
+						// ts.addFunction('// OBJ.vars.length: ${OBJ.vars.length}\n');
+					} else {
+						mute('use test with return value "${_func.returnValue.type}"');
+						ts.addFunction(createBasicTest(_func));
+					}
+				} else {
+					// not basic
+					// [hooks?] ngOnInit
+					// warn(_func._content);
+
+					if (_func.name == 'ngOnInit') {
+						mute('use ngOnInit test with return value "${_func.returnValue.type}"');
+						ts.addFunction('describe(\'${_func.name}\', () => {');
+						ts.addFunction(createOnInitTest(_func, '\t\t'));
+						ts.addFunction('});\n');
+					} else if (_func.name == 'ngOnChanges') {
+						mute('use ngOnChanges test with return value "${_func.returnValue.type}"');
+						ts.addFunction('describe(\'${_func.name}\', () => {');
+						ts.addFunction(createOnChangeTest(_func, '\t\t'));
+						ts.addFunction('});\n');
+					} else {
+						mute('use test with return value "${_func.returnValue.type}"');
+						ts.addFunction('describe(\'${_func.name}\', () => {');
+						ts.addFunction(createComboTest(_func, '\t\t'));
+						ts.addFunction('});\n');
+					}
+				}
+			 */
 		}
 
 		// -----------------------------------------------------------
@@ -216,7 +221,7 @@ class ConvertComponent {
 
 		if (!Config.IS_OVERWRITE) {
 			// create a name that is destincable from orignal file
-			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.spec')}';
+			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.speec')}';
 		}
 
 		if (Config.IS_DRYRUN) {
@@ -234,54 +239,51 @@ class ConvertComponent {
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
-		// log(json);
 	}
 
 	// ____________________________________ create test based upon return type ____________________________________
-
-	function createOnChangeTest(func:FuncObj, ?tabs:String = '\t'):String {
-		var out = '\n';
-		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
-		// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
-		// out += '${tabs}it(\'${getSubTitle(func)}\', () => {
-		out += '${tabs}it(\'#should check if ngOnChanges exists\', () => {
-${tabs}\tlet _changes: SimpleChanges = {};
-${tabs}\tcomponent.ngOnChanges(_changes);
-${tabs}\texpect(component.ngOnChanges).toBeDefined();
-${tabs}});
-${tabs}
-${tabs}xit(\'#should check what ngOnChanges does\', () => {
-${tabs}\t// let _spy = spyOn(component, \'init\');
-${tabs}\tlet _changes: SimpleChanges = {};
-${tabs}\tcomponent.ngOnChanges(_changes);
-${tabs}\texpect(component.ngOnChanges).toBeDefined();
-${tabs}\t// expect(_spy).toHaveBeenCalled();
-${tabs}});
-${tabs}
-';
-		return out;
-	}
-
-	function createOnInitTest(func:FuncObj, ?tabs:String = '\t'):String {
-		var out = '\n';
-		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
-		// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
-		// out += '${tabs}it(\'${getSubTitle(func)}\', () => {
-		out += '${tabs}it(\'#should check if ngOnInit exists \', () => {
-${tabs}\tcomponent.ngOnInit();
-${tabs}\texpect(component.ngOnInit).toBeDefined();
-${tabs}});
-${tabs}
-${tabs}xit(\'#should check what ngOnInit does\', () => {
-${tabs}\t// let _spy = spyOn(component, \'init\');
-${tabs}\tcomponent.ngOnInit();
-${tabs}\texpect(component.ngOnInit).toBeDefined();
-${tabs}\t// expect(_spy).toHaveBeenCalled();
-${tabs}});
-${tabs}
-';
-		return out;
-	}
+	// 	function createOnChangeTest(func:FuncObj, ?tabs:String = '\t'):String {
+	// 		var out = '\n';
+	// 		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
+	// 		// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+	// 		// out += '${tabs}it(\'${getSubTitle(func)}\', () => {
+	// 		out += '${tabs}it(\'#should check if ngOnChanges exists\', () => {
+	// ${tabs}\tlet _changes: SimpleChanges = {};
+	// ${tabs}\tcomponent.ngOnChanges(_changes);
+	// ${tabs}\texpect(component.ngOnChanges).toBeDefined();
+	// ${tabs}});
+	// ${tabs}
+	// ${tabs}xit(\'#should check what ngOnChanges does\', () => {
+	// ${tabs}\t// let _spy = spyOn(component, \'init\');
+	// ${tabs}\tlet _changes: SimpleChanges = {};
+	// ${tabs}\tcomponent.ngOnChanges(_changes);
+	// ${tabs}\texpect(component.ngOnChanges).toBeDefined();
+	// ${tabs}\t// expect(_spy).toHaveBeenCalled();
+	// ${tabs}});
+	// ${tabs}
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createOnInitTest(func:FuncObj, ?tabs:String = '\t'):String {
+	// 		var out = '\n';
+	// 		// out += '${tabs}// Test with return type `${func.returnValue.type}`\n${tabs}';
+	// 		// out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+	// 		// out += '${tabs}it(\'${getSubTitle(func)}\', () => {
+	// 		out += '${tabs}it(\'#should check if ngOnInit exists \', () => {
+	// ${tabs}\tcomponent.ngOnInit();
+	// ${tabs}\texpect(component.ngOnInit).toBeDefined();
+	// ${tabs}});
+	// ${tabs}
+	// ${tabs}xit(\'#should check what ngOnInit does\', () => {
+	// ${tabs}\t// let _spy = spyOn(component, \'init\');
+	// ${tabs}\tcomponent.ngOnInit();
+	// ${tabs}\texpect(component.ngOnInit).toBeDefined();
+	// ${tabs}\t// expect(_spy).toHaveBeenCalled();
+	// ${tabs}});
+	// ${tabs}
+	// ';
+	// 		return out;
+	// 	}
 
 	function createSubTest(sub:SubScribeObj, ?tabs:String = '\t'):String {
 		var out = '\n';

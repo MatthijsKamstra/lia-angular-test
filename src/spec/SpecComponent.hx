@@ -142,12 +142,12 @@ class SpecComponent {
 		subscribes:String = '' //
 	):String {
 		var _isTranslateService = providers.indexOf('TranslateService') != -1;
-		var _hasSpecHelper = false; // [mck] what should I check
+		var _hasSpecHelper = true; // [mck] what should I check
 		var _hasRouter = imports.indexOf('Router') != -1;
 		var _hasRouterTest = false;
 		var _hasNav = false;
 		var _hasHttpClient = this.obj.hasHttpClient;
-		var _hasHttpClientTest = providers.indexOf('Service') != -1;
+		var _hasHttpClientTest = this.obj.hasHttpClient;
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
 		var _useTemplate:Bool = false;
