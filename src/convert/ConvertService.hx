@@ -1,16 +1,17 @@
 package convert;
 
-import haxe.Json;
-import utils.GenValues;
-import haxe.macro.Expr.ExprOf;
-import utils.RegEx;
 import AST;
 import const.Config;
+import haxe.Json;
 import remove.RemoveComment;
 import utils.Copyright;
+import utils.GenValues;
 import utils.GeneratedBy;
+import utils.RegEx;
 
 class ConvertService {
+	private var OBJ:TypeScriptClassObject;
+
 	/**
 	 * constructor
 	 * @param path to original file (at this moment probably a service)
@@ -30,7 +31,7 @@ class ConvertService {
 
 		// first try for new extract
 		Extract.runExtract(originalContentNoComment, originalFileName.replace('.service.ts', ''));
-		var OBJ = Extract.OBJ;
+		OBJ = Extract.OBJ;
 
 		// start creating the spec of this file/service
 		var ts = new SpecService(className, OBJ);
@@ -51,7 +52,6 @@ class ConvertService {
 		// update class vars
 		// -----------------------------------------------------------
 		// ts.addVariable('// vars');
-
 		if (OBJ.vars.length >= 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
 			mute('use test for class vars "${name}"');
@@ -66,7 +66,6 @@ class ConvertService {
 			}
 			ts.addFunction('});\n');
 		}
-		/* */
 
 		// -----------------------------------------------------------
 		// update subscibes
@@ -152,10 +151,12 @@ class ConvertService {
 			var isObservable:Bool = (_func._content.indexOf('Observable') != -1) ? true : false;
 			var isReturnArray:Bool = (_func.returnValue.type.indexOf('[]') != -1) ? true : false;
 			var isReturnUnion:Bool = (_func.returnValue.type.indexOf('|') != -1) ? true : false;
+
 			// warn('is this a getter: ' + isGetter);
 			// warn('is this a setter: ' + isSetter);
 			// warn('is this a isObservable: ' + isObservable);
-			// warn('is this a isArray: ' + isArray);
+			// warn('is this a isReturnArray: ' + isReturnArray);
+			// warn('is this a isReturnUnion: ' + isReturnUnion);
 
 			// log(_func);
 
@@ -259,698 +260,619 @@ class ConvertService {
 	}
 
 	// ____________________________________ create test based upon return type ____________________________________
-
-	/**
-	 * disabled test, without guessing
-	 *
-	 * @param func
-	 * @return String
-	 */
-	function createTestDisabled(func:FuncObj):String {
-		var out = '';
-		out += '// Test with return type `${func.returnValue.type}`\n\t';
-		out += '// [WIP] test is default disabled (`xit`) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		out += 'xit(\'${getTitle(func)}\', () => {
-		// expect(result).toBe(true);
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-		return out;
-	}
-
-	function createTestObservable(func:FuncObj):String {
-		var out = '';
-		out += '// Test with return type `Observable`\n\t';
-		// 	out += 'it(\'${getTitle(func)}\', () => {
-		// 	expect(true).toBe(true);
-		// });';
-
-		var varNameReturnValue = func.returnValue.value;
-		var varName = func.returnValue.value.toLowerCase().replace('[]', ' ');
-
-		// var varValue = getVarValueFromReturnValue(func.returnValue);
-
-		// TODO: maybe the return value of a function needs to better defined
-		// for now an quick and dirty fix
-		var __temp:Array<TypedObj> = [
-			{
-				name: '${func.returnValue.value.toLowerCase()}',
-				value: '',
-				type: '${func.returnValue.value}',
-				_content: ''
-			}
-		];
-
-		var funcValue = getFuncFrom(func, varName);
-
-		var funcURL = '// URL used in class\n\t\t';
-		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
-
-		if (func._guessing != null && func._guessing.URL != '') {
-			funcURL += 'const ${func._guessing.URL != "" ? func._guessing.URL : ""}';
-		}
-
-		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
-
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-
-		${createVarFromFunctionParam(__temp)}
-
-		${funcURL}
-
-		// Act
-		${funcValue}
-
-		// Assert
-		const mockReq = httpTestingController.expectOne(url);
-		expect(mockReq.request.url).toBe(url);
-		expect(mockReq.request.method).toBe("${(func._guessing.requestType)}");
-		expect(mockReq.cancelled).toBeFalsy();
-		expect(mockReq.request.responseType).toEqual(\'json\');
-		mockReq.flush(${varName});
-	});
-';
-
-		return out;
-	}
-
-	function createTestvoid(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		var out = '';
-		if (Config.IS_DEBUG) {
-			out += '// Test with return type `${func.returnValue.type}`\n\t';
-			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		}
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const result = service.${func.name}(${_param});
-		const spy = spyOn(service, \'${func.name}\');
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(result).toBeUndefined();
-		expect(result).toBeFalsy();
-		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-
-		return out;
-	}
-
-	function createTestArray(func:FuncObj) {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-		// check for what array is used
-		var _arrayReturnType = '';
-		_arrayReturnType = func.returnValue.type.replace('[]', '');
-
-		var isCustomType = true;
-		switch (_arrayReturnType) {
-			case 'string', 'boolean', 'number':
-				isCustomType = false;
-			default:
-				trace("case '" + _arrayReturnType + "': trace ('" + _arrayReturnType + "');");
-		}
-
-		if (isCustomType) {
-			_return = '[]; // ${_return} // TODO add vars';
-		}
-
-		var out = '';
-		if (Config.IS_DEBUG) {
-			out += '// Test with return type `${func.returnValue.type}`\n\t';
-			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		}
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const arr: ${_arrayReturnType}[] = ${_return};
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(arr);
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(result).toEqual(arr);
-		expect(service.${func.name}).toBeDefined();
-		expect(spy).toHaveBeenCalled();
-	});
-';
-
-		return out;
-	}
-
-	function createTestString(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '';
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		var out = '';
-		if (Config.IS_DEBUG) {
-			out += '// Test with return type `${func.returnValue.type}`\n\t';
-			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		}
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // "${GenValues.string()}";
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(result).toBe(_${func.returnValue.type});
-		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
-		expect(spy).toHaveBeenCalledTimes(2);
-		expect(service.${func.name}(${_param})).toContain(_${func.returnValue.type});
-		expect(spy).toHaveBeenCalledTimes(3);
-		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
-		expect(spy).toHaveBeenCalledTimes(4);
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-
-		return out;
-	}
-
-	function createTestboolean(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = 'true';
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		var out = '';
-		if (Config.IS_DEBUG) {
-			out += '// Test with return type `${func.returnValue.type}`\n\t';
-			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		}
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // true;
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(result).toBe(_${func.returnValue.type});
-		expect(result).toBeTruthy();
-		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}(${_param})).toBeTruthy();
-		expect(spy).toHaveBeenCalledTimes(2);
-		expect(service.${func.name}(${_param})).toBeTrue();
-		expect(spy).toHaveBeenCalledTimes(3);
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-
-		return out;
-	}
-
-	function createTestNumber(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '1';
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		var out = '';
-		if (Config.IS_DEBUG) {
-			out += '// Test with return type `${func.returnValue.type}`\n\t';
-			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		}
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type}: ${func.returnValue.type} = ${_return}; // ${GenValues.number()};
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(result).toBe(_${func.returnValue.type});
-		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}(${_param})).toBeTruthy();
-		expect(spy).toHaveBeenCalledTimes(2);
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-
-		return out;
-	}
-
-	function createTestUnknown(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		var _return = '{}';
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		var out = '';
-		out += '// Test with return type `${func.returnValue.type}` (UNKNOWN)\n\t';
-		// out += '// [WIP] test is default disabled (`xit`) \n\t';
-		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		if (Config.IS_DEBUG) {}
-
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const _${func.returnValue.type.toLowerCase()}: ${func.returnValue.type} = ${_return};
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type.toLowerCase()});
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		expect(service.${func.name}).toBeDefined();
-		expect(result).toBeTruthy();
-		expect(spy).toHaveBeenCalled();
-	});
-';
-
-		return out;
-	}
-
+	// 	/**
+	// 	 * disabled test, without guessing
+	// 	 *
+	// 	 * @param func
+	// 	 * @return String
+	// 	 */
+	// 	function createTestDisabled(func:FuncObj):String {
+	// 		var out = '';
+	// 		out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 		out += '// [WIP] test is default disabled (`xit`) \n\t';
+	// 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		out += 'xit(\'${getTitle(func)}\', () => {
+	// 		// expect(result).toBe(true);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestObservable(func:FuncObj):String {
+	// 		var out = '';
+	// 		out += '// Test with return type `Observable`\n\t';
+	// 		// 	out += 'it(\'${getTitle(func)}\', () => {
+	// 		// 	expect(true).toBe(true);
+	// 		// });';
+	// 		var varNameReturnValue = func.returnValue.value;
+	// 		var varName = func.returnValue.value.toLowerCase().replace('[]', ' ');
+	// 		// var varValue = getVarValueFromReturnValue(func.returnValue);
+	// 		// TODO: maybe the return value of a function needs to better defined
+	// 		// for now an quick and dirty fix
+	// 		var __temp:Array<TypedObj> = [
+	// 			{
+	// 				name: '${func.returnValue.value.toLowerCase()}',
+	// 				value: '',
+	// 				type: '${func.returnValue.value}',
+	// 				_content: ''
+	// 			}
+	// 		];
+	// 		var funcValue = getFuncFrom(func, varName);
+	// 		var funcURL = '// URL used in class\n\t\t';
+	// 		// var funcURL = ' const${OBJ.URL != "" ? OBJ.URL : ""} // url used in class';
+	// 		if (func._guessing != null && func._guessing.URL != '') {
+	// 			funcURL += 'const ${func._guessing.URL != "" ? func._guessing.URL : ""}';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', (done: DoneFn) => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		${createVarFromFunctionParam(__temp)}
+	// 		${funcURL}
+	// 		// Act
+	// 		${funcValue}
+	// 		// Assert
+	// 		const mockReq = httpTestingController.expectOne(url);
+	// 		expect(mockReq.request.url).toBe(url);
+	// 		expect(mockReq.request.method).toBe("${(func._guessing.requestType)}");
+	// 		expect(mockReq.cancelled).toBeFalsy();
+	// 		expect(mockReq.request.responseType).toEqual(\'json\');
+	// 		mockReq.flush(${varName});
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestvoid(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		var out = '';
+	// 		if (Config.IS_DEBUG) {
+	// 			out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const result = service.${func.name}(${_param});
+	// 		const spy = spyOn(service, \'${func.name}\');
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(result).toBeUndefined();
+	// 		expect(result).toBeFalsy();
+	// 		expect(spy).toHaveBeenCalled();
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestArray(func:FuncObj) {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		var _return = '';
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		// check for what array is used
+	// 		var _arrayReturnType = '';
+	// 		_arrayReturnType = func.returnValue.type.replace('[]', '');
+	// 		var isCustomType = true;
+	// 		switch (_arrayReturnType) {
+	// 			case 'string', 'boolean', 'number':
+	// 				isCustomType = false;
+	// 			default:
+	// 				trace("case '" + _arrayReturnType + "': trace ('" + _arrayReturnType + "');");
+	// 		}
+	// 		if (isCustomType) {
+	// 			_return = '[]; // ${_return} // TODO add vars';
+	// 		}
+	// 		var out = '';
+	// 		if (Config.IS_DEBUG) {
+	// 			out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const arr: ${_arrayReturnType}[] = ${_return};
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(arr);
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(result).toEqual(arr);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 		expect(spy).toHaveBeenCalled();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestString(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		var _return = '';
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		var out = '';
+	// 		if (Config.IS_DEBUG) {
+	// 			out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // "${GenValues.string()}";
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(result).toBe(_${func.returnValue.type});
+	// 		expect(spy).toHaveBeenCalled();
+	// 		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
+	// 		expect(spy).toHaveBeenCalledTimes(2);
+	// 		expect(service.${func.name}(${_param})).toContain(_${func.returnValue.type});
+	// 		expect(spy).toHaveBeenCalledTimes(3);
+	// 		expect(service.${func.name}(${_param})).toBe(_${func.returnValue.type});
+	// 		expect(spy).toHaveBeenCalledTimes(4);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestboolean(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		var _return = 'true';
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		var out = '';
+	// 		if (Config.IS_DEBUG) {
+	// 			out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const _${func.returnValue.type}: ${func.returnValue.type} = (${_return}); // true;
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(result).toBe(_${func.returnValue.type});
+	// 		expect(result).toBeTruthy();
+	// 		expect(spy).toHaveBeenCalled();
+	// 		expect(service.${func.name}(${_param})).toBeTruthy();
+	// 		expect(spy).toHaveBeenCalledTimes(2);
+	// 		expect(service.${func.name}(${_param})).toBeTrue();
+	// 		expect(spy).toHaveBeenCalledTimes(3);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestNumber(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		var _return = '1';
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		var out = '';
+	// 		if (Config.IS_DEBUG) {
+	// 			out += '// Test with return type `${func.returnValue.type}`\n\t';
+	// 			out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const _${func.returnValue.type}: ${func.returnValue.type} = ${_return}; // ${GenValues.number()};
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(result).toBe(_${func.returnValue.type});
+	// 		expect(spy).toHaveBeenCalled();
+	// 		expect(service.${func.name}(${_param})).toBeTruthy();
+	// 		expect(spy).toHaveBeenCalledTimes(2);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	function createTestUnknown(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		var _return = '{}';
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		var out = '';
+	// 		out += '// Test with return type `${func.returnValue.type}` (UNKNOWN)\n\t';
+	// 		// out += '// [WIP] test is default disabled (`xit`) \n\t';
+	// 		out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		if (Config.IS_DEBUG) {}
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const _${func.returnValue.type.toLowerCase()}: ${func.returnValue.type} = ${_return};
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(_${func.returnValue.type.toLowerCase()});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		expect(service.${func.name}).toBeDefined();
+	// 		expect(result).toBeTruthy();
+	// 		expect(spy).toHaveBeenCalled();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
 	// ____________________________________ getter/setter ____________________________________
-
-	/**
-	 * [Description]
-	 * @param func
-	 * @return String
-	 */
-	function createTestGetter(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var _return = '';
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		// warn(func);
-		// warn(createVarFromFunctionParam(func.params));
-
-		var out = '';
-		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
-		// if (Config.IS_DEBUG) {
-		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		// }
-		out += 'it(\'${getTitle(func)}\', () => {
-		${createVarFromFunctionParam(func.params)}
-		const any: any = ${_return};
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(any);
-		const result: ${func.returnValue.type} = service.${func.name}(${_param});
-		expect(result).toBe(any);
-		expect(spy).toHaveBeenCalled();
-		// expect(service.${func.name}(${_param})).toBeTruthy();
-		// expect(spy).toHaveBeenCalledTimes(2);
-		// expect(service.${func.name}(${_param})).toBe(any);
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-		return out;
-	}
-
-	/**
-	 *
-	 *
-	 * @param func
-	 * @return String
-	 */
-	function createTestSetter(func:FuncObj):String {
-		var _param = convertFuncObjParam2String(func);
-
-		// get return .... test!
-		var _return = '';
-		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
-		if (matches[0] != null) {
-			_return = matches[0] //
-				.replace('return', '') //
-				.replace(';', '') //
-				.replace('this', 'service') //
-				.trim();
-		}
-
-		var out = '';
-		// out += '// ${haxe.Json.stringify(func)}';
-		out += '// Test SETTER with return type `${func.returnValue.type}`\n\t';
-		// if (Config.IS_DEBUG) {
-		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
-		// }
-		out += 'it(\'${getTitle(func)}\', () => {
-		// Arrange
-		${createVarFromFunctionParam(func.params)}
-		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
-
-
-		// Act
-		service.${func.name}(${_param});
-
-		// Assert
-		const result: ${func.params[0].type} = service.${func.name.replace('set', 'get')}();
-		expect(result).toEqual(${func.params[0].name});
-		expect(spy).toHaveBeenCalled();
-		expect(service.${func.name}).toBeDefined();
-	});
-';
-
-		return out;
-	}
-
+	// 	/**
+	// 	 * [Description]
+	// 	 * @param func
+	// 	 * @return String
+	// 	 */
+	// 	function createTestGetter(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var _return = '';
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		// warn(func);
+	// 		// warn(createVarFromFunctionParam(func.params));
+	// 		var out = '';
+	// 		out += '// Test GETTER with return type `${func.returnValue.type}`\n\t';
+	// 		// if (Config.IS_DEBUG) {
+	// 		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		// }
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const any: any = ${_return};
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(any);
+	// 		const result: ${func.returnValue.type} = service.${func.name}(${_param});
+	// 		expect(result).toBe(any);
+	// 		expect(spy).toHaveBeenCalled();
+	// 		// expect(service.${func.name}(${_param})).toBeTruthy();
+	// 		// expect(spy).toHaveBeenCalledTimes(2);
+	// 		// expect(service.${func.name}(${_param})).toBe(any);
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
+	// 	/**
+	// 	 *
+	// 	 *
+	// 	 * @param func
+	// 	 * @return String
+	// 	 */
+	// 	function createTestSetter(func:FuncObj):String {
+	// 		var _param = convertFuncObjParam2String(func);
+	// 		// get return .... test!
+	// 		var _return = '';
+	// 		var matches = RegEx.getMatches(RegEx.getReturn, func._content);
+	// 		if (matches[0] != null) {
+	// 			_return = matches[0] //
+	// 				.replace('return', '') //
+	// 				.replace(';', '') //
+	// 				.replace('this', 'service') //
+	// 				.trim();
+	// 		}
+	// 		var out = '';
+	// 		// out += '// ${haxe.Json.stringify(func)}';
+	// 		out += '// Test SETTER with return type `${func.returnValue.type}`\n\t';
+	// 		// if (Config.IS_DEBUG) {
+	// 		// 	out += '/**\n\t *\t${func._content.replace('\n', '\n\t *\t')}\n\t */\n\t';
+	// 		// }
+	// 		out += 'it(\'${getTitle(func)}\', () => {
+	// 		// Arrange
+	// 		${createVarFromFunctionParam(func.params)}
+	// 		const spy = spyOn(service, \'${func.name}\').and.returnValue(${_return});
+	// 		// Act
+	// 		service.${func.name}(${_param});
+	// 		// Assert
+	// 		const result: ${func.params[0].type} = service.${func.name.replace('set', 'get')}();
+	// 		expect(result).toEqual(${func.params[0].name});
+	// 		expect(spy).toHaveBeenCalled();
+	// 		expect(service.${func.name}).toBeDefined();
+	// 	});
+	// ';
+	// 		return out;
+	// 	}
 	// ____________________________________ misc/tools ____________________________________
-
-	/**
-	 * convert params to string to use in call function
-	 * ```ts
-	 * service.func(param);
-	 * ```
-	 *
-	 * @param func
-	 * @return String
-	 */
-	function convertFuncObjParam2String(func:FuncObj):String {
-		var _param = '';
-		for (i in 0...func.params.length) {
-			var _p = func.params[i];
-			_param += '${_p.name}';
-			if ((i + 1) < func.params.length) {
-				_param += ', ';
-			}
-		}
-		return _param;
-	}
-
-	/**
-	 * [WARNING] very specific for project
-	 *
-	 * @param params
-	 * @return String
-	 */
-	function createVarFromFunctionParam(params:Array<TypedObj>):String {
-		var out = '';
-		var isArray = false;
-		var isUnion = false;
-		var gen = '[]';
-		for (i in 0...params.length) {
-			var _p = params[i];
-			// log(_p);
-			isArray = (_p.type.indexOf('[]') != -1) ? true : false;
-			isUnion = (_p.type.indexOf('|') != -1) ? true : false;
-
-			switch (_p.type) {
-				case '{ id': // FIXME bug
-					out += 'const id = 0;';
-				case 'bool', 'boolean', 'Boolean':
-					out += 'const ${_p.name}: ${_p.type} = true;';
-				case 'number':
-					out += 'const ${_p.name}: ${_p.type} = 0;';
-				case 'string':
-					out += 'const ${_p.name}: ${_p.type} = "";';
-				case 'any', 'object':
-					out += 'const ${_p.name}: ${_p.type} = {};';
-				case 'ILightSchedule':
-					out += 'const ${_p.name}: ${_p.type} = {
-			astronomicalSunriseOffset: 0,
-			astronomicalSunsetOffset: 0,
-			code: \'\',
-			color: \'\',
-			defaultSchedule: false,
-			description: \'\',
-			id: 0,
-			name: \'\',
-			relayFunctions: [],
-			scheduleEntries: [],
-			success: false,
-			superUser: false,
-			template: false,
-			usedByDevice: false,
-			usedByGroup: false,
-			usedBySubstation: false
-		};';
-				case 'IValidate':
-					out += 'const ${_p.name}: ${_p.type} = {
-			success: false,
-			description: \'\',
-			savable: false
-		};';
-
-				case 'ISchedulesDetail[]':
-					out += 'const ${_p.name.replace('[]', '')}: ${_p.type} = [{
-			id: 0,
-			name: \'\',
-			description: \'\',
-			color: \'\',
-			code: \'\',
-			usedByDevice: false,
-			usedByGroup: false,
-			usedBySubstation: false,
-			defaultSchedule: false,
-			success: false,
-			template: false,
-			superUser: false,
-			astronomicalSunriseOffset: 0,
-			astronomicalSunsetOffset: 0,
-			scheduleEntries: [],
-			relayFunctions: []
-		}];';
-
-				case 'ISchedulesDetail':
-					out += 'const ${_p.name}: ${_p.type} = {
-			id: 0,
-			name: \'\',
-			description: \'\',
-			color: \'\',
-			code: \'\',
-			usedByDevice: false,
-			usedByGroup: false,
-			usedBySubstation: false,
-			defaultSchedule: false,
-			success: false,
-			template: false,
-			superUser: false,
-			astronomicalSunriseOffset: 0,
-			astronomicalSunsetOffset: 0,
-			scheduleEntries: [],
-			relayFunctions: []
-		};';
-
-				case 'IUser':
-					// make sure we don't have to do this over and over
-					out += 'const ${_p.name}: ${_p.type} = {
-			username: \'\',
-			roles: {
-				ROLE_ADMIN: true,
-				ROLE_MANAGER: true,
-				ROLE_READONLY: true,
-			},
-			token: \'\',
-			organisation: \'\',
-			domains: {
-				TARIFF_SWITCHING: true,
-				COMMON: true,
-				PUBLIC_LIGHTING: true,
-			},
-			substationManagement: false
-		};';
-				case 'ISettings':
-					// make sure we don't have to do this over and over
-					out += 'const ${_p.name}: ${_p.type} = {
-			organisationLocationLatitude: 0,
-			organisationLocationLongitude: 0,
-			organisationPrefix: \'\',
-			privacyStatementFile: \'\',
-			scheduleCodeSeed: 0
-		};';
-				case 'ISort':
-					// make sure we don't have to do this over and over
-					out += 'const ${_p.name}: ${_p.type} = {
-			sortDir: SortDirectionEnum.ASC,
-			sortedBy: SortedByEnum.CODE
-		};';
-				case 'IPagination':
-					out += 'const ${_p.name}: ${_p.type} = {
-			totalItems: 0,
-			pageNumber: 0,
-			pageSize: 0
-		};';
-				case 'IBanner':
-					out += 'const ${_p.name}: ${_p.type} = {
-			startDate: \'\',
-			endDate: \'\',
-			url: \'\',
-			message: \'\',
-		};';
-				case 'ISchedules':
-					out += 'const ${_p.name}: ${_p.type} = {
-			contents: [],
-			pageSize: 0,
-			totalItems: 0,
-			totalPages: 0
-		};';
-				case 'ISortedData':
-					out += 'const ${_p.name}: ${_p.type} = {
-			currentPage: 0,
-			pageSize: 0,
-			sortDir: SortDirectionEnum.ASC,
-			sortedBy: SortedByEnum.CODE
-		};';
-				case 'IPage':
-					out += 'const ${_p.name}: ${_p.type} = {
-			contents: [],
-			totalItems: 0,
-			totalPages: 0,
-			pageSize: 0
-		};';
-				case 'IHelp':
-					out += 'const ${_p.name}: ${_p.type} = {
-			url: \'\'
-		};';
-				case 'IGroup':
-					out += 'const ${_p.name}: ${_p.type} =  {
-			id: 0,
-			organisationIdentification: \'\',
-			groupIdentification: \'\',
-			description: \'\',
-			deviceIdentifications: [],
-			lightSchedule: null,
-			tariffSchedule: null,
-			lightMeasurementDevice: null,
-			groupType: 0,
-			deviceFilter: null
-		};';
-				case 'ISchedulesContent':
-					out += 'const ${_p.name}: ${_p.type} =  {
-			astronomicalSunriseOffset: 0,
-			astronomicalSunsetOffset: 0,
-			defaultSchedule: false,
-			description: \'\',
-			id: 0,
-			relayFunctions: [],
-			scheduleEntries: [],
-			success: false,
-			superUser: false,
-			template: false,
-			usedByDevice: false,
-			usedByGroup: false,
-			usedBySubstation: false,
-			code: \'\',
-			color: \'\',
-			name: \'\'
-		};';
-				default:
-					out += '\n\t\t// FIXME: add (all) missing properties \n\t\t';
-					out += '// const _${_p.name}: ${_p.type} = {};\n\t\t';
-					out += '// export const ${_p.name.toUpperCase()}: ${_p.type} = {}; // this var needs to be added to SPEC_CONST\n\t\t';
-					out += 'const ${_p.name}: ${_p.type} = SPEC_CONST.getValue(${_p.name.toUpperCase()});\n\t\t';
-					trace("case '" + _p.type + "': trace ('" + _p.type + "');");
-			}
-
-			out += '\n\t\t';
-		}
-
-		return out;
-	}
-
-	/**
-	 * use the return value of the function to create mock data
-	 *
-	 * @param funcObj
-	 * @param varName
-	 */
-	function getFuncFrom(funcObj:FuncObj, varName:String) {
-		// warn(funcObj);
-
-		var varNameReturnValue = funcObj.returnValue.value;
-		var varName = funcObj.returnValue.value.toLowerCase().replace('[]', ' ');
-
-		var params = '';
-		// loop
-		for (i in 0...funcObj.params.length) {
-			var _p = funcObj.params[i];
-			params += '${_p.name}';
-			if ((i + 1) < funcObj.params.length) {
-				params += ', ';
-			}
-		}
-
-		var out = '// create the service call\n';
-		// out += '${createVarFromFunctionParam(funcObj.params)}';
-		out += '\t\t';
-		out += 'service.${funcObj.name}(${params}).subscribe(value => {
-			expect(value).toBe(${varName});
-			done();
-		});';
-		return out;
-	}
-
-	/**
-	 * create a readable description of the test (?)
-	 *
-	 * @param obj
-	 */
-	function getTitle(obj:FuncObj) {
-		return '#${obj.name} should return ${obj.returnValue._content}';
-	}
+	// /**
+	//  * convert params to string to use in call function
+	//  * ```ts
+	//  * service.func(param);
+	//  * ```
+	//  *
+	//  * @param func
+	//  * @return String
+	//  */
+	// function convertFuncObjParam2String(func:FuncObj):String {
+	// 	var _param = '';
+	// 	for (i in 0...func.params.length) {
+	// 		var _p = func.params[i];
+	// 		_param += '${_p.name}';
+	// 		if ((i + 1) < func.params.length) {
+	// 			_param += ', ';
+	// 		}
+	// 	}
+	// 	return _param;
+	// }
+	// /**
+	//  * [WARNING] very specific for project
+	//  *
+	//  * @param params
+	//  * @return String
+	//  */
+	// function createVarFromFunctionParam(params:Array<TypedObj>):String {
+	// 	var out = '';
+	// 	var isArray = false;
+	// 	var isUnion = false;
+	// 	var gen = '[]';
+	// 	for (i in 0...params.length) {
+	// 		var _p = params[i];
+	// 		// log(_p);
+	// 		isArray = (_p.type.indexOf('[]') != -1) ? true : false;
+	// 		isUnion = (_p.type.indexOf('|') != -1) ? true : false;
+	// 		switch (_p.type) {
+	// 			case '{ id': // FIXME bug
+	// 				out += 'const id = 0;';
+	// 			case 'bool', 'boolean', 'Boolean':
+	// 				out += 'const ${_p.name}: ${_p.type} = true;';
+	// 			case 'number':
+	// 				out += 'const ${_p.name}: ${_p.type} = 0;';
+	// 			case 'string':
+	// 				out += 'const ${_p.name}: ${_p.type} = "";';
+	// 			case 'any', 'object':
+	// 				out += 'const ${_p.name}: ${_p.type} = {};';
+	// 			case 'ILightSchedule':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		astronomicalSunriseOffset: 0,
+	// 		astronomicalSunsetOffset: 0,
+	// 		code: \'\',
+	// 		color: \'\',
+	// 		defaultSchedule: false,
+	// 		description: \'\',
+	// 		id: 0,
+	// 		name: \'\',
+	// 		relayFunctions: [],
+	// 		scheduleEntries: [],
+	// 		success: false,
+	// 		superUser: false,
+	// 		template: false,
+	// 		usedByDevice: false,
+	// 		usedByGroup: false,
+	// 		usedBySubstation: false
+	// 	};';
+	// 			case 'IValidate':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		success: false,
+	// 		description: \'\',
+	// 		savable: false
+	// 	};';
+	// 			case 'ISchedulesDetail[]':
+	// 				out += 'const ${_p.name.replace('[]', '')}: ${_p.type} = [{
+	// 		id: 0,
+	// 		name: \'\',
+	// 		description: \'\',
+	// 		color: \'\',
+	// 		code: \'\',
+	// 		usedByDevice: false,
+	// 		usedByGroup: false,
+	// 		usedBySubstation: false,
+	// 		defaultSchedule: false,
+	// 		success: false,
+	// 		template: false,
+	// 		superUser: false,
+	// 		astronomicalSunriseOffset: 0,
+	// 		astronomicalSunsetOffset: 0,
+	// 		scheduleEntries: [],
+	// 		relayFunctions: []
+	// 	}];';
+	// 			case 'ISchedulesDetail':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		id: 0,
+	// 		name: \'\',
+	// 		description: \'\',
+	// 		color: \'\',
+	// 		code: \'\',
+	// 		usedByDevice: false,
+	// 		usedByGroup: false,
+	// 		usedBySubstation: false,
+	// 		defaultSchedule: false,
+	// 		success: false,
+	// 		template: false,
+	// 		superUser: false,
+	// 		astronomicalSunriseOffset: 0,
+	// 		astronomicalSunsetOffset: 0,
+	// 		scheduleEntries: [],
+	// 		relayFunctions: []
+	// 	};';
+	// 			case 'IUser':
+	// 				// make sure we don't have to do this over and over
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		username: \'\',
+	// 		roles: {
+	// 			ROLE_ADMIN: true,
+	// 			ROLE_MANAGER: true,
+	// 			ROLE_READONLY: true,
+	// 		},
+	// 		token: \'\',
+	// 		organisation: \'\',
+	// 		domains: {
+	// 			TARIFF_SWITCHING: true,
+	// 			COMMON: true,
+	// 			PUBLIC_LIGHTING: true,
+	// 		},
+	// 		substationManagement: false
+	// 	};';
+	// 			case 'ISettings':
+	// 				// make sure we don't have to do this over and over
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		organisationLocationLatitude: 0,
+	// 		organisationLocationLongitude: 0,
+	// 		organisationPrefix: \'\',
+	// 		privacyStatementFile: \'\',
+	// 		scheduleCodeSeed: 0
+	// 	};';
+	// 			case 'ISort':
+	// 				// make sure we don't have to do this over and over
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		sortDir: SortDirectionEnum.ASC,
+	// 		sortedBy: SortedByEnum.CODE
+	// 	};';
+	// 			case 'IPagination':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		totalItems: 0,
+	// 		pageNumber: 0,
+	// 		pageSize: 0
+	// 	};';
+	// 			case 'IBanner':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		startDate: \'\',
+	// 		endDate: \'\',
+	// 		url: \'\',
+	// 		message: \'\',
+	// 	};';
+	// 			case 'ISchedules':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		contents: [],
+	// 		pageSize: 0,
+	// 		totalItems: 0,
+	// 		totalPages: 0
+	// 	};';
+	// 			case 'ISortedData':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		currentPage: 0,
+	// 		pageSize: 0,
+	// 		sortDir: SortDirectionEnum.ASC,
+	// 		sortedBy: SortedByEnum.CODE
+	// 	};';
+	// 			case 'IPage':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		contents: [],
+	// 		totalItems: 0,
+	// 		totalPages: 0,
+	// 		pageSize: 0
+	// 	};';
+	// 			case 'IHelp':
+	// 				out += 'const ${_p.name}: ${_p.type} = {
+	// 		url: \'\'
+	// 	};';
+	// 			case 'IGroup':
+	// 				out += 'const ${_p.name}: ${_p.type} =  {
+	// 		id: 0,
+	// 		organisationIdentification: \'\',
+	// 		groupIdentification: \'\',
+	// 		description: \'\',
+	// 		deviceIdentifications: [],
+	// 		lightSchedule: null,
+	// 		tariffSchedule: null,
+	// 		lightMeasurementDevice: null,
+	// 		groupType: 0,
+	// 		deviceFilter: null
+	// 	};';
+	// 			case 'ISchedulesContent':
+	// 				out += 'const ${_p.name}: ${_p.type} =  {
+	// 		astronomicalSunriseOffset: 0,
+	// 		astronomicalSunsetOffset: 0,
+	// 		defaultSchedule: false,
+	// 		description: \'\',
+	// 		id: 0,
+	// 		relayFunctions: [],
+	// 		scheduleEntries: [],
+	// 		success: false,
+	// 		superUser: false,
+	// 		template: false,
+	// 		usedByDevice: false,
+	// 		usedByGroup: false,
+	// 		usedBySubstation: false,
+	// 		code: \'\',
+	// 		color: \'\',
+	// 		name: \'\'
+	// 	};';
+	// 			default:
+	// 				out += '\n\t\t// FIXME: add (all) missing properties \n\t\t';
+	// 				out += '// const _${_p.name}: ${_p.type} = {};\n\t\t';
+	// 				out += '// export const ${_p.name.toUpperCase()}: ${_p.type} = {}; // this var needs to be added to SPEC_CONST\n\t\t';
+	// 				out += 'const ${_p.name}: ${_p.type} = SPEC_CONST.getValue(${_p.name.toUpperCase()});\n\t\t';
+	// 				trace("case '" + _p.type + "': trace ('" + _p.type + "');");
+	// 		}
+	// 		out += '\n\t\t';
+	// 	}
+	// 	return out;
+	// }
+	// /**
+	//  * use the return value of the function to create mock data
+	//  *
+	//  * @param funcObj
+	//  * @param varName
+	//  */
+	// function getFuncFrom(funcObj:FuncObj, varName:String) {
+	// 	// warn(funcObj);
+	// 	var varNameReturnValue = funcObj.returnValue.value;
+	// 	var varName = funcObj.returnValue.value.toLowerCase().replace('[]', ' ');
+	// 	var params = '';
+	// 	// loop
+	// 	for (i in 0...funcObj.params.length) {
+	// 		var _p = funcObj.params[i];
+	// 		params += '${_p.name}';
+	// 		if ((i + 1) < funcObj.params.length) {
+	// 			params += ', ';
+	// 		}
+	// 	}
+	// 	var out = '// create the service call\n';
+	// 	// out += '${createVarFromFunctionParam(funcObj.params)}';
+	// 	out += '\t\t';
+	// 	out += 'service.${funcObj.name}(${params}).subscribe(value => {
+	// 		expect(value).toBe(${varName});
+	// 		done();
+	// 	});';
+	// 	return out;
+	// }
+	// /**
+	//  * create a readable description of the test (?)
+	//  *
+	//  * @param obj
+	//  */
+	// function getTitle(obj:FuncObj) {
+	// 	return '#${obj.name} should return ${obj.returnValue._content}';
+	// }
 }
