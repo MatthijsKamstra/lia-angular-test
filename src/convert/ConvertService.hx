@@ -5,9 +5,7 @@ import const.Config;
 import haxe.Json;
 import remove.RemoveComment;
 import utils.Copyright;
-import utils.GenValues;
 import utils.GeneratedBy;
-import utils.RegEx;
 
 class ConvertService {
 	private var OBJ:TypeScriptClassObject;
