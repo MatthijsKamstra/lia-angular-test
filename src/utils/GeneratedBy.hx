@@ -14,10 +14,11 @@ class GeneratedBy {
 
 	static public function message(type:String) {
 		var message = '- WARNING: this is a generated test. \n- Most likely you need to change and update this file. \n- Generated on: ${DateTools.format(Date.now(), "%F")}\n- Version: ${Config.VERSION}';
+		var message2 = '- Generated on: ${DateTools.format(Date.now(), "%F")}\n- Version: ${Config.VERSION}';
 		if (type == 'js' || type == 'ts') {
 			return '/*\n${message}\n*/';
 		} else {
-			return '<!--\n${message}\n-->';
+			return '<!--\n${message2}\n-->';
 		}
 	}
 
