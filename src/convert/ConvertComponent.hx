@@ -10,7 +10,8 @@ import utils.GenValues;
 import utils.GeneratedBy;
 
 class ConvertComponent {
-	private var OBJ:TypeScriptClassObject;
+	// private var OBJ:TypeScriptClassObject;
+	@:isVar public var OBJ(get, set):TypeScriptClassObject;
 
 	/**
 	 * constructor
@@ -594,5 +595,15 @@ ${tabs}\texpect(component.${vars.name}).toBe(_${vars.name});';
 
 	function getSubTitle(func:FuncObj) {
 		return ShouldTitleTest.getSubTitle(func);
+	}
+
+	// ____________________________________ getter/setter ____________________________________
+
+	function get_OBJ():TypeScriptClassObject {
+		return OBJ;
+	}
+
+	function set_OBJ(value:TypeScriptClassObject):TypeScriptClassObject {
+		return OBJ = value;
 	}
 }

@@ -29,8 +29,9 @@ class Config {
 	 * 0.2.5 - rewrite services
 	 * 0.2.6 - adding more if/else statements, adding starting point test
 	 * 0.2.7 - update components with info from services
+	 * 0.2.8 - html templates
 	 */
-	public static final VERSION:String = '0.2.7';
+	public static final VERSION:String = '0.2.8';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

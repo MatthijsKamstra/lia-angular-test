@@ -1,3 +1,6 @@
+import AST.TypeScriptClassObject;
+import convert.ConvertHTML;
+import logger.Logger;
 import convert.ConvertComponent;
 import convert.ConvertService;
 import const.Config;
@@ -77,10 +80,30 @@ class Main {
 			if (file.indexOf('.component.ts') != -1) {
 				mute('Convert component: `${file.split('/src')[1]}`', 1);
 				var convertComponent = new ConvertComponent(file);
+				var _TypeScriptClassObject:TypeScriptClassObject = convertComponent.OBJ;
 				arr.push(file);
 				Progress.update(file);
+
+				// force html after component
+				var fileHTML = file.replace('.component.ts', '.component.html');
+				mute('Convert html template: `${fileHTML.split('/src')[1]}`', 1);
+
+				var convertHTML = new ConvertHTML(fileHTML, _TypeScriptClassObject);
 			}
 		}
+
+		info('Convert TEMPLATES');
+		// //
+		// for (i in 0...fileArr.length) {
+		// 	var file = fileArr[i];
+		// 	// check html templates after that
+		// 	if (file.indexOf('.component.html') != -1) {
+		// 		mute('Convert html template: `${file.split('/src')[1]}`', 1);
+		// 		var convertHTML = new ConvertHTML(file);
+		// 		// arr.push(file);
+		// 		// Progress.update(file);
+		// 	}
+		// }
 
 		info('arr.length: ${arr.length}', 1);
 	}

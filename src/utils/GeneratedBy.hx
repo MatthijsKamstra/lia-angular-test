@@ -17,7 +17,7 @@ class GeneratedBy {
 		if (type == 'js' || type == 'ts') {
 			return '/*\n${message}\n*/';
 		} else {
-			return '<!-- ${message} -->';
+			return '<!--\n${message}\n-->';
 		}
 	}
 
