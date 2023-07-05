@@ -3,6 +3,16 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// ____________________________________ html ____________________________________
+	//
+	// angular default components name
+	public static var htmlAngularComponent = ~/<app-.*<\/app-.*>/g;
+
+	// angular interpolation {{ }}
+	public static var htmlInterpolation = ~/{{.*}}/g;
+
+	// ____________________________________ typescript ____________________________________
+	//
 	// for example: `this.help = data;`
 	public static var getVars = ~/(this.).+/g;
 

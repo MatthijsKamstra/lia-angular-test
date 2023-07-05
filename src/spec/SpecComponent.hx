@@ -151,6 +151,7 @@ class SpecComponent {
 		var _hasTranslate = providers.indexOf('TranslateService') != -1;
 		var _hasTest:String = (true) ? "true" : "false";
 		var _useTemplate:Bool = false;
+		var _useEnv:Bool = imports.indexOf('environment') != -1;
 		// warn(isTranslateService);
 
 		var template = '
@@ -170,13 +171,17 @@ ${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/test/spec-helper
 
 import { ${Strings.toUpperCamel(name)}Component } from \'./${name.toLowerCase()}.component\';
 
+${_useEnv ? "import { Environment } from 'src/app/shared/interfaces/i-environment';" : ""}
+
 ${imports}
 
 fdescribe(\'${Strings.toUpperCamel(name)}Component (Generated)\', () => {
 
 	let component: ${Strings.toUpperCamel(name)}Component;
 	let fixture: ComponentFixture<${Strings.toUpperCamel(name)}Component>;
-	//
+
+${_useEnv ? "	const environmentCopy: Environment = Object.assign({}, environment);" : ""}
+
 ${_hasTranslate ? "	// let translate: TranslateService;" : ""}
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
@@ -220,6 +225,12 @@ ${_useTemplate ? "
 ${_hasHttpClient ? "	afterEach(() => {
 		httpTestingController.verify();
 	});" : ""}
+
+${_useEnv ? "	afterAll(() => {
+		environment.apiEnabled = environmentCopy.apiEnabled;
+		environment.production = environmentCopy.production;
+	});" : ""}
+
 
 	it(\'should create\', () => {
 		expect(component).toBeTruthy();

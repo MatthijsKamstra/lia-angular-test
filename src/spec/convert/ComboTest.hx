@@ -1,5 +1,6 @@
 package spec.convert;
 
+import utils.GenValues;
 import AST.FuncObj;
 import convert.ShouldTitleTest;
 
@@ -148,6 +149,34 @@ ${tabs}\t// Assert
 ${tabs}\texpect(_${func.returnValue.type}).toEqual(_IValue.foo);
 ${tabs}});
 ${tabs}*/;
+${tabs}\n';
+
+			case 'string':
+				out += '/**\n${tabs} *\t${func._content.replace('\n', '\n${tabs} *\t')}\n${tabs} */\n${tabs}';
+				out += 'xit(\'${ShouldTitleTest.getTitle(func)}\', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _returnString: string = "${GenValues.string()}";
+${tabs}\t${FunctionParams.components(func, tabs)}
+${tabs}\t// Act
+${tabs}\tconst _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.components(func, tabs)}
+${tabs}\t// Assert
+${tabs}\texpect(_${func.returnValue.type}).toBe(_returnString);
+${tabs}});
+${tabs}
+${tabs}it(\'#should spy on "${func.name}" \', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _returnString: string = "${GenValues.string()}";
+${tabs}\t${FunctionParams.components(func, tabs)}
+${tabs}\tconst _spy = spyOn(component, \'${func.name}\');
+${tabs}\t_spy.and.returnValue(_returnString);
+${tabs}\t// Act
+${tabs}\tconst _${func.returnValue.type}: ${func.returnValue.type} = ${FunctionCall.components(func, tabs)}
+${tabs}\t// Assert
+${tabs}\texpect(component.${func.name}).toBeDefined();
+${tabs}\texpect(_spy).toHaveBeenCalled();
+${tabs}\texpect(_${func.returnValue.type}).toBe(_returnString);
+${tabs}});
+${tabs}
 ${tabs}\n';
 
 			default:

@@ -1,5 +1,6 @@
 package convert;
 
+import utils.TranslateName;
 import AST;
 import const.Config;
 import haxe.Json;
@@ -10,7 +11,7 @@ import utils.GenValues;
 import utils.GeneratedBy;
 
 class ConvertHTML {
-	private var OBJ:TypeScriptClassObject;
+	private var OBJ:HTMLClassObject;
 
 	/**
 	 * constructor
@@ -34,68 +35,180 @@ class ConvertHTML {
 		log(className);
 
 		// // first try for new extract
-		// Extract.runExtract(originalContentNoComment, originalFileName.replace('.component.ts', ''), 'Component');
-		// OBJ = Extract.OBJ;
-		// OBJ = {};
+		ExtractHTML.runExtract(originalContentNoComment, originalFileName.replace('.component.ts', ''), 'Component');
+		OBJ = ExtractHTML.OBJ;
 
 		// TODO: need to extract info from template and typesciprt
 
 		// start creating the spec of this file/component
-		var html = new SpecTemplate(className, {});
+		var ts = new SpecComponent(className, TS_OBJ);
 		// add imports
-		// html.addImport('// add imports');
+		// ts.addImport('// add imports');
 		// // add constructor
-		// html.addConstructor('// add constructor');
+		// ts.addConstructor('// add constructor');
 		// // add providers
-		// html.addProviders('/* add providers */');
+		// ts.addProviders('/* add providers */');
 		// // add testbed
-		// html.addTestbed('// testbed');
+		// ts.addTestbed('// testbed');
 		// // add values
-		// html.addVariable('// add vars');
+		// ts.addVariable('// add vars');
 		// // add functions
-		// html.addFunction('// add functions');
+		// ts.addFunction('// add functions **');
 
+		var html = new SpecTemplate(className, OBJ);
+		html.addOriginal(originalContent);
+		// add data extras
+
+		// -----------------------------------------------------------
+		// update functions in ts file
+		// -----------------------------------------------------------
+		// ts.addFunction('// add functions ****');
+		if (OBJ.components.length >= 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for html components "${name}"');
+			ts.addFunction('// ${name}');
+			ts.addFunction('describe(\'${name} html components\', () => {');
+			// ts.addFunction('// OBJ.components.length: ${OBJ.components.length}\n');
+			for (i in 0...OBJ.components.length) {
+				// ts.addFunction('// ${OBJ.components[i]}');
+				var _obj:ComponentObject = OBJ.components[i];
+				ts.addFunction('\t// ${_obj.name}');
+				ts.addFunction(createComponentTest(_obj, '\t\t'));
+			}
+			ts.addFunction('});\n');
+		}
+		// try to fix imports
+		if (OBJ.components.length >= 0) {
+			for (i in 0...OBJ.components.length) {
+				var _obj:ComponentObject = OBJ.components[i];
+				ts.addImport('// not sure where the file comes from');
+				var _import = '// import { ${Strings.toUpperCamel(_obj.type)} } from \'../${_obj.type.toLowerCase().replace('component', '.component')}\';';
+				ts.addImport('${_import}\n');
+			}
+		}
+		ts.addImport('import { By } from \'@angular/platform-browser\';');
+
+		// -----------------------------------------------------------
+		// update the imports from ts files
+		// -----------------------------------------------------------
+		ts.addImport('// import directly from ${className}.component');
+		for (i in 0...TS_OBJ.imports.length) {
+			var _import = TS_OBJ.imports[i];
+			// There are some imports that are not needed, exclude them and show the rest
+			// ignore
+			if (_import.indexOf('HttpClient') != -1)
+				continue;
+			if (_import.indexOf('Observable') != -1)
+				continue;
+			if (_import.indexOf('Injectable') != -1)
+				continue;
+			// not ignored
+			ts.addImport('${_import}');
+		}
+
+		// -----------------------------------------------------------
+		// add data to tag for testing in html file
+		// -----------------------------------------------------------
+		html.addData('<!-- Adjustments to components: -->');
+		html.addData('<!-- ${Strings.toUpperCamel(className)}Component -->');
+		html.addData('<!--\ndata-testid="app-${className}"\n-->');
+		if (OBJ.components.length >= 0) {
+			mute('create data for test in comments');
+			for (i in 0...OBJ.components.length) {
+				var comp = OBJ.components[i];
+				// html.addData('<!-- ${comp} -->');
+				// html.addData('<!-- ${comp.name} -->');
+				// html.addData('<!-- data-testid="${comp.name}" -->');
+				var newContent = comp._content.replace(comp.name, '${comp.name} data-testid="${comp.name}"');
+				html.addData('<!--\n${newContent}\n-->');
+			}
+		}
 		// -----------------------------------------------------------
 		// create and save file
 		// -----------------------------------------------------------
 
 		// default typescript template
-		var content:String = //
+		var contentTS:String = //
+			GeneratedBy.message('ts') //
+			+ '\n\n' //
+			+ Copyright.init('ts') //
+			+ '\n\n' //
+			+ ts.create() //
+			+ '';
+
+		// default HTML template
+		var contentHTML:String = //
 			GeneratedBy.message('html') //
 			+ '\n\n' //
 			+ Copyright.init('html') //
 			+ '\n\n' //
-			+ originalContent //
-			// + html.create() //
+			+ html.create() //
 			+ '';
 
 		// + '/**\n\n${originalContentNoComment}\n\n*/';
 
 		// correct filename
-		var templatePath = '${parent}/${newFileName}';
-		var jsonPath = '${parent}/_${newFileName.replace('.spec.ts', '.json')}';
+		var htmlPath = '${parent}/${newFileName}';
+		var tsPath = '${parent}/${newFileName.replace('_gen_.html', '_gen_.html.speec.ts')}';
+		var jsonPath = '${parent}/${newFileName.replace('.html', '.html.json')}';
 		var json = Json.stringify(OBJ, null, '  ');
 
-		if (!Config.IS_OVERWRITE) {
-			// create a name that is destincable from orignal file
-			templatePath = '${parent}/${newFileName.replace('.spec', '_gen_.speec')}';
-		}
+		// log(htmlPath);
+		// log(jsonPath);
+		// log(tsPath);
+
+		// if (!Config.IS_OVERWRITE) {
+		// 	// create a name that is destincable from orignal file
+		// 	htmlPath = '${parent}/${newFileName.replace('.spec', '_gen_.speec')}';
+		// }
 
 		if (Config.IS_DRYRUN) {
-			info('DRYRUN: write ${templatePath.split('/src')[1]}', 2);
+			info('DRYRUN: write ${htmlPath.split('/src')[1]}', 2);
 		} else {
 			info('Open original file: ${path}', 2);
-			info('Open generated test file: ${templatePath}', 2);
+			info('Open generated test file: ${htmlPath}', 2);
 			info('Open generated json file: ${jsonPath}', 2);
 			// content = content.replace('\n\n\n', '\n\n');
 			// content = content.replace('\n\n', '\n');
 			// // content = content.replace('\n\n\n', '\n');
-			// // content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
-			sys.io.File.saveContent(templatePath, content);
-			// sys.io.File.saveContent(jsonPath, json);
+			// contentTS = contentTS.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
+			sys.io.File.saveContent(htmlPath, contentHTML);
+			sys.io.File.saveContent(tsPath, contentTS);
+			sys.io.File.saveContent(jsonPath, json);
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
+	}
+
+	// ____________________________________ tests ____________________________________
+
+	function createComponentTest(compObj:ComponentObject, ?tabs:String = '\t'):String {
+		var title = ShouldTitleTest.getShouldComponentTitle(compObj);
+		var out = '\n${tabs}';
+		out += 'it(\'${title}\', () => {
+${tabs}\t${convertComponentObj2Test(compObj, tabs)}
+${tabs}});
+';
+		return out;
+	}
+
+	function convertComponentObj2Test(compObj:ComponentObject, ?tabs:String = '\t'):String {
+		var out = '// Arrange
+${tabs}\tconst _${Strings.toLowerCamel(compObj.type)}: ${compObj.type} = fixture.debugElement.query(By.css(\'[data-testid="${compObj.name}"]\')).nativeElement;
+${tabs}\t// Act
+${tabs}\tfixture.detectChanges();
+${tabs}\t// Assert
+${tabs}\texpect(_${Strings.toLowerCamel(compObj.type)}).toBeTruthy();
+';
+		for (i in 0...compObj.inputs.length) {
+			var _compObjInputs:InputObj = compObj.inputs[i];
+			trace(_compObjInputs);
+			// out += '${tabs}\t// ${_compObjInputs.name}\n';
+			out += '${tabs}\texpect(_${Strings.toLowerCamel(compObj.type)}.${_compObjInputs.name}).toBeTruthy();\n';
+		}
+
+		// ${tabs}\t// expect(_${Strings.toLowerCamel(compObj.type)}.title).toBeTruthy();
+		return out;
 	}
 
 	/**

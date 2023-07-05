@@ -18,6 +18,26 @@ typedef TypeScriptClassObject = {
 	var subscribes:Array<SubScribeObj>;
 }
 
+typedef HTMLClassObject = {
+	var isFinished:Bool; // false,
+	var components:Array<ComponentObject>;
+}
+
+typedef ComponentObject = {
+	var name:String; //  app-icons
+	var type:String; // IconsComponent
+	var className:String; // IconsComponent
+	var _content:String; // the original value
+	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var functions:Array<FuncObj>;
+	var inputs:Array<InputObj>; //  icon="{{getIcon()}}"
+}
+
+typedef InputObj = {
+	var name:String; //  icon="{{getIcon()}}"
+	@:optional var _test:String; //  icon="{{getIcon()}}"
+}
+
 typedef TypeScriptConstructorObject = {
 	var params:Array<TypedObj>;
 }

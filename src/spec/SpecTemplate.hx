@@ -6,14 +6,17 @@ class SpecTemplate {
 	public var type:String;
 	public var obj:Dynamic;
 
-	@:isVar public var variablesArray(get, set):Array<String> = [];
-	@:isVar public var functionsArray(get, set):Array<String> = [];
-	@:isVar public var servicesArray(get, set):Array<String> = [];
-	@:isVar public var importArray(get, set):Array<String> = [];
-	@:isVar public var constructorArray(get, set):Array<String> = [];
-	@:isVar public var testBedArray(get, set):Array<String> = [];
-	@:isVar public var providerArray(get, set):Array<String> = [];
-	@:isVar public var subscribesArray(get, set):Array<String> = [];
+	// @:isVar public var variablesArray(get, set):Array<String> = [];
+	// @:isVar public var functionsArray(get, set):Array<String> = [];
+	// @:isVar public var servicesArray(get, set):Array<String> = [];
+	// @:isVar public var importArray(get, set):Array<String> = [];
+	// @:isVar public var constructorArray(get, set):Array<String> = [];
+	// @:isVar public var testBedArray(get, set):Array<String> = [];
+	// @:isVar public var providerArray(get, set):Array<String> = [];
+	// @:isVar public var subscribesArray(get, set):Array<String> = [];
+	@:isVar public var dataArray(get, set):Array<String> = [];
+
+	var original:String;
 
 	public function new(type:String, obj:Dynamic) {
 		this.type = type;
@@ -118,15 +121,24 @@ class SpecTemplate {
 		// 	}
 		// }
 
-		var vars = '';
-		var funcs = '';
-		var imp = '';
-		var _constructor = '';
-		var _testBed = '';
-		var _provider = '';
-		var _subscribes = '';
+		// var vars = '';
+		// var funcs = '';
+		// var imp = '';
+		// var _constructor = '';
+		// var _testBed = '';
+		// var _provider = '';
+		// var _subscribes = '';
 
-		return typescript(this.type, vars, funcs, imp, _constructor, _testBed, _provider, _subscribes);
+		var _data = '';
+		for (i in 0...dataArray.length) {
+			var _dataArray = dataArray[i];
+			_data += _dataArray;
+			if (i < dataArray.length - 1) {
+				_data += '\n';
+			}
+		}
+
+		return typescript(this.type, _data);
 	}
 
 	/**
@@ -141,28 +153,12 @@ class SpecTemplate {
 	 */
 	public function typescript( //
 		name:String, //
-		vars:String = '', //
-		funcs:String = '', //
-		imports:String = '', //
-		constructor:String = '', //
-		testBed:String = '', //
-			providers:String = '', //
-		subscribes:String = '' //
+		data:String, //
 	):String {
-		var _isTranslateService = providers.indexOf('TranslateService') != -1;
-		var _hasSpecHelper = true; // [mck] what should I check
-		var _hasRouter = imports.indexOf('Router') != -1;
-		var _hasRouterTest = false;
-		var _hasNav = false;
-		var _hasHttpClient = this.obj.hasHttpClient;
-		var _hasHttpClientTest = this.obj.hasHttpClient;
-		var _hasTranslate = providers.indexOf('TranslateService') != -1;
-		var _hasTest:String = (true) ? "true" : "false";
-		var _useTemplate:Bool = false;
-		// warn(isTranslateService);
-
 		var template = '
-${this.type}
+${this.original}
+
+${data}
 		';
 
 		return template;
@@ -170,97 +166,90 @@ ${this.type}
 
 	// ____________________________________ add ____________________________________
 
-	public function addConstructor(arg0:String) {
-		this.constructorArray.push(arg0);
+	public function addData(arg0:String) {
+		this.dataArray.push(arg0);
 	}
 
-	public function addProviders(arg0:String) {
-		this.providerArray.push(arg0);
+	public function addOriginal(originalContent:String) {
+		this.original = originalContent;
 	}
 
-	public function addTestbed(arg0:String) {
-		this.testBedArray.push(arg0);
-	}
-
-	public function addVariable(arg0:String) {
-		this.variablesArray.push(arg0);
-	}
-
-	public function addImport(arg0:String) {
-		this.importArray.push(arg0);
-	}
-
-	public function addFunction(arg0:String) {
-		this.functionsArray.push(arg0);
-	}
-
-	public function addSubscribes(arg0:String) {
-		this.subscribesArray.push(arg0);
-	}
-
+	// public function addConstructor(arg0:String) {
+	// 	this.constructorArray.push(arg0);
+	// }
+	// public function addProviders(arg0:String) {
+	// 	this.providerArray.push(arg0);
+	// }
+	// public function addTestbed(arg0:String) {
+	// 	this.testBedArray.push(arg0);
+	// }
+	// public function addVariable(arg0:String) {
+	// 	this.variablesArray.push(arg0);
+	// }
+	// public function addImport(arg0:String) {
+	// 	this.importArray.push(arg0);
+	// }
+	// public function addFunction(arg0:String) {
+	// 	this.functionsArray.push(arg0);
+	// }
+	// public function addSubscribes(arg0:String) {
+	// 	this.subscribesArray.push(arg0);
+	// }
 	// ____________________________________ getter/setter ____________________________________
+	// function get_variablesArray():Array<String> {
+	// 	return variablesArray;
+	// }
+	// function set_variablesArray(value:Array<String>):Array<String> {
+	// 	return variablesArray = value;
+	// }
+	// function get_functionsArray():Array<String> {
+	// 	return functionsArray;
+	// }
+	// function set_functionsArray(value:Array<String>):Array<String> {
+	// 	return functionsArray = value;
+	// }
+	// function get_servicesArray():Array<String> {
+	// 	return servicesArray;
+	// }
+	// function set_servicesArray(value:Array<String>):Array<String> {
+	// 	return servicesArray = value;
+	// }
+	// function get_importArray():Array<String> {
+	// 	return importArray;
+	// }
+	// function set_importArray(value:Array<String>):Array<String> {
+	// 	return importArray = value;
+	// }
+	// function get_constructorArray():Array<String> {
+	// 	return constructorArray;
+	// }
+	// function set_constructorArray(value:Array<String>):Array<String> {
+	// 	return constructorArray = value;
+	// }
+	// function get_testBedArray():Array<String> {
+	// 	return testBedArray;
+	// }
+	// function set_testBedArray(value:Array<String>):Array<String> {
+	// 	return testBedArray = value;
+	// }
+	// function get_providerArray():Array<String> {
+	// 	return providerArray;
+	// }
+	// function set_providerArray(value:Array<String>):Array<String> {
+	// 	return providerArray = value;
+	// }
+	// function get_subscribesArray():Array<String> {
+	// 	return subscribesArray;
+	// }
+	// function set_subscribesArray(value:Array<String>):Array<String> {
+	// 	return subscribesArray = value;
+	// }
 
-	function get_variablesArray():Array<String> {
-		return variablesArray;
+	function get_dataArray():Array<String> {
+		return dataArray;
 	}
 
-	function set_variablesArray(value:Array<String>):Array<String> {
-		return variablesArray = value;
-	}
-
-	function get_functionsArray():Array<String> {
-		return functionsArray;
-	}
-
-	function set_functionsArray(value:Array<String>):Array<String> {
-		return functionsArray = value;
-	}
-
-	function get_servicesArray():Array<String> {
-		return servicesArray;
-	}
-
-	function set_servicesArray(value:Array<String>):Array<String> {
-		return servicesArray = value;
-	}
-
-	function get_importArray():Array<String> {
-		return importArray;
-	}
-
-	function set_importArray(value:Array<String>):Array<String> {
-		return importArray = value;
-	}
-
-	function get_constructorArray():Array<String> {
-		return constructorArray;
-	}
-
-	function set_constructorArray(value:Array<String>):Array<String> {
-		return constructorArray = value;
-	}
-
-	function get_testBedArray():Array<String> {
-		return testBedArray;
-	}
-
-	function set_testBedArray(value:Array<String>):Array<String> {
-		return testBedArray = value;
-	}
-
-	function get_providerArray():Array<String> {
-		return providerArray;
-	}
-
-	function set_providerArray(value:Array<String>):Array<String> {
-		return providerArray = value;
-	}
-
-	function get_subscribesArray():Array<String> {
-		return subscribesArray;
-	}
-
-	function set_subscribesArray(value:Array<String>):Array<String> {
-		return subscribesArray = value;
+	function set_dataArray(value:Array<String>):Array<String> {
+		return dataArray = value;
 	}
 }
