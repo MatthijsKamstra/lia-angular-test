@@ -19,8 +19,11 @@ typedef TypeScriptClassObject = {
 }
 
 typedef HTMLClassObject = {
+	var name:String; // "ddd",
+	var fileName:String; // "ddd",
 	var isFinished:Bool; // false,
 	var components:Array<ComponentObject>;
+	var ngif:Array<NgIfObject>;
 }
 
 typedef ComponentObject = {
@@ -31,6 +34,12 @@ typedef ComponentObject = {
 	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
 	var functions:Array<FuncObj>;
 	var inputs:Array<InputObj>; //  icon="{{getIcon()}}"
+}
+
+typedef NgIfObject = {
+	@:optional var _id:String;
+	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var _content:String; // the original value
 }
 
 typedef InputObj = {

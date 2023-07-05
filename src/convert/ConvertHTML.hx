@@ -60,6 +60,17 @@ class ConvertHTML {
 		// add data extras
 
 		// -----------------------------------------------------------
+		// use a empty test to work from
+		// -----------------------------------------------------------
+		var name = '${Strings.toUpperCamel(className)}Component';
+		mute('use test for html components "${name}"');
+		ts.addFunction('// ${name}');
+		ts.addFunction('describe(\'${name} html components\', () => {');
+		ts.addFunction('\t// ');
+		ts.addFunction(createEmptyTest(name, '\t\t'));
+		ts.addFunction('});\n');
+
+		// -----------------------------------------------------------
 		// update functions in ts file
 		// -----------------------------------------------------------
 		// ts.addFunction('// add functions ****');
@@ -109,20 +120,40 @@ class ConvertHTML {
 		// -----------------------------------------------------------
 		// add data to tag for testing in html file
 		// -----------------------------------------------------------
-		html.addData('<!-- Adjustments to components: -->');
 		html.addData('<!-- ${Strings.toUpperCamel(className)}Component -->');
+		html.addData('<!-- Adjustments to components: -->');
 		html.addData('<!--\ndata-testid="app-${className}"\n-->');
 		if (OBJ.components.length >= 0) {
-			mute('create data for test in comments');
+			mute('create data into the components');
 			for (i in 0...OBJ.components.length) {
-				var comp = OBJ.components[i];
-				// html.addData('<!-- ${comp} -->');
-				// html.addData('<!-- ${comp.name} -->');
-				// html.addData('<!-- data-testid="${comp.name}" -->');
-				var newContent = comp._content.replace(comp.name, '${comp.name} data-testid="${comp.name}"');
-				html.addData('<!--\n${newContent}\n-->');
+				var _comp = OBJ.components[i];
+				if (!_comp.hasDataElement) {
+					// html.addData('<!-- ${_comp} -->');
+					// html.addData('<!-- ${_comp.name} -->');
+					// html.addData('<!-- data-testid="${_comp.name}" -->');
+					var newContent = _comp._content.replace(_comp.name, '${_comp.name} data-testid="${_comp.name}"');
+					html.addData('<!--\n${newContent}\n-->');
+				}
 			}
 		}
+		html.addData('<!-- Adjustments for `*ngIf` -->');
+		if (OBJ.ngif.length >= 0) {
+			mute('create data for test with ngIf');
+			for (i in 0...OBJ.ngif.length) {
+				var _ngif = OBJ.ngif[i];
+				if (!_ngif.hasDataElement) {
+					html.addData('<!-- ${OBJ.name} -->');
+					// html.addData('<!-- ${_ngif} -->');
+					// // html.addData('<!-- ${_ngif._id} -->');
+					// // html.addData('<!-- data-testid="${_ngif._id}" -->');
+					var newContent = _ngif._content.replace(_ngif._id, '${_ngif._id} data-testid="${_ngif._id}"');
+					html.addData('<!--\n${newContent}\n-->');
+				}
+			}
+		}
+
+		warn(OBJ);
+
 		// -----------------------------------------------------------
 		// create and save file
 		// -----------------------------------------------------------
@@ -181,6 +212,22 @@ class ConvertHTML {
 	}
 
 	// ____________________________________ tests ____________________________________
+
+	function createEmptyTest(name:String, ?tabs:String = '\t'):String {
+		var title = name;
+		var out = '\n${tabs}/*\n${tabs}';
+		out += 'it(\'${title}\', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _el: HTMLElement = fixture.debugElement.query(By.css(\'[data-testid="foo"]\')).nativeElement;
+${tabs}\t// Act
+${tabs}\tfixture.detectChanges();
+${tabs}\t// Assert
+${tabs}\texpect(_el).toBeTruthy();
+${tabs}});
+${tabs}*/;
+';
+		return out;
+	}
 
 	function createComponentTest(compObj:ComponentObject, ?tabs:String = '\t'):String {
 		var title = ShouldTitleTest.getShouldComponentTitle(compObj);

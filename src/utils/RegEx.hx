@@ -5,6 +5,9 @@ package utils;
 class RegEx {
 	// ____________________________________ html ____________________________________
 	//
+	//
+	public static var htmlAngularIfElse = ~/<.*\*ngIf.*>/g;
+
 	// angular default components name
 	public static var htmlAngularComponent = ~/<app-.*<\/app-.*>/g;
 

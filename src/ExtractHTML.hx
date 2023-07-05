@@ -1,5 +1,6 @@
 package;
 
+import AST.NgIfObject;
 import AST.InputObj;
 import AST.ComponentObject;
 import AST.FuncObj;
@@ -9,12 +10,18 @@ import haxe.Json;
 
 class ExtractHTML {
 	public static final OBJ_DEFAULT:HTMLClassObject = {
+		name: '',
+		fileName: '',
 		isFinished: false,
-		components: []
+		components: [],
+		ngif: []
 	};
 	public static var OBJ:HTMLClassObject = {
+		name: '',
+		fileName: '',
 		isFinished: false,
-		components: []
+		components: [],
+		ngif: []
 	};
 
 	/**
@@ -24,12 +31,15 @@ class ExtractHTML {
 	 * @param name		name of the class/name of the file (example: `Foobar` or `Barfoo`)
 	 * @param type		type of class (example: `Service` or `Component`)
 	 */
-	public static function runExtract(content:String, name:String, type:String = 'Service') {
+	public static function runExtract(content:String, name:String, type:String = 'html') {
 		// restart OBJ every time it runs
 		OBJ = Json.parse(Json.stringify(OBJ_DEFAULT));
 
 		// create filename/class name
 		var fileName = '${Strings.toUpperCamel(name)}${type}';
+
+		OBJ.fileName = name;
+		OBJ.name = 'app-' + name.replace('.component.html', '');
 
 		// -----------------------------------------------------------------
 		// Find angular components
@@ -107,9 +117,33 @@ class ExtractHTML {
 		}
 
 		// -----------------------------------------------------------------
-		// Find angular components
+		// Find angular *ngIf
 		// -----------------------------------------------------------------
+		// `<app-icons icon="{{getIcon()}}"></app-icons>`
+		var matches = RegEx.getMatches(RegEx.htmlAngularIfElse, content);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var ngIf = matches[i];
+				log(ngIf);
 
+				var _hasDataElement:Bool = ngIf.indexOf('data-testid=') != -1;
+
+				var __id2 = '';
+				if (_hasDataElement) {
+					var __id = ngIf.split('data-testid=')[1];
+					__id2 = __id.split(' ')[0].replace("\"", '');
+				}
+
+				var _ngif:NgIfObject = {
+					_id: __id2,
+					hasDataElement: _hasDataElement,
+					_content: ngIf
+				};
+
+				OBJ.ngif.push(_ngif);
+			}
+		}
 		// -----------------------------------------------------------------
 		// Find angular components
 		// -----------------------------------------------------------------
