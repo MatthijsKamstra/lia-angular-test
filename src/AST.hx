@@ -23,11 +23,32 @@ typedef HTMLClassObject = {
 	var name:String; //  app-icons
 	var type:String; // IconsComponent
 	var className:String; // IconsComponent
-	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var dataTestID:String; //  app-icons
+	var hasDataTestID:Bool; //  <app-icons data-testid="app-icons" data-testid
 	var _content:String; // the original value
 	var components:Array<ComponentObject>;
+	var interpolations:Array<BasicObject>;
+	var inputs:Array<BasicObject>;
+	var outputs:Array<BasicObject>;
 	var ngif:Array<NgIfObject>;
 	var isFinished:Bool; // false,
+}
+
+typedef BasicObject = {
+	var dataTestID:String; //  app-icons
+	var _value:String; //  {{this.shape}}
+	var value:String; //  {{this.shape}}
+	@:optional var valueFunction:BasicFunctionObject; //
+	@:optional var property:String; //
+	@:optional var _property:String; //
+	var hasDataTestID:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var _content:String; // the original value
+}
+
+typedef BasicFunctionObject = {
+	var name:String;
+	@:optional var param:String;
+	@:optional var params:Array<String>;
 }
 
 typedef ComponentObject = {
@@ -35,14 +56,14 @@ typedef ComponentObject = {
 	var type:String; // IconsComponent
 	var className:String; // IconsComponent
 	var _content:String; // the original value
-	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var hasDataTestID:Bool; //  <app-icons data-testid="app-icons" data-testid
 	var functions:Array<FuncObj>;
 	var inputs:Array<InputObj>; //  icon="{{getIcon()}}"
 }
 
 typedef NgIfObject = {
 	@:optional var _id:String;
-	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var hasDataTestID:Bool; //  <app-icons data-testid="app-icons" data-testid
 	var _content:String; // the original value
 }
 

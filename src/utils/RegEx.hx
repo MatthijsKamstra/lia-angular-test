@@ -4,7 +4,12 @@ package utils;
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
 	// ____________________________________ html ____________________________________
-	//
+	// `[checked]="isChecked" >`
+	public static var htmlAngularInput = ~/<.*\[.*\].*>/g;
+	// `(change)="onChangeHandler(!isChecked)">`
+	public static var htmlAngularOutput = ~/<.*\(.*\).*>/g;
+	// `{{this.shape}}`
+	public static var htmlAngularReactive = ~/<.*\{\{.*\}\}.*>/g;
 	//
 	public static var htmlAngularIfElse = ~/<.*\*ngIf.*>/g;
 

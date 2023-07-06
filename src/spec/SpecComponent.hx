@@ -156,6 +156,7 @@ class SpecComponent {
 
 		var template = '
 import { ComponentFixture, TestBed } from \'@angular/core/testing\';
+import { By } from \'@angular/platform-browser\';
 
 ${_hasHttpClientTest ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
 ${_hasHttpClientTest ? "import { of, throwError } from 'rxjs';" : ""}

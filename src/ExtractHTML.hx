@@ -1,5 +1,6 @@
 package;
 
+import AST.BasicObject;
 import AST.NgIfObject;
 import AST.InputObj;
 import AST.ComponentObject;
@@ -15,9 +16,13 @@ class ExtractHTML {
 		type: '',
 		className: '',
 		_content: '',
-		hasDataElement: false,
+		dataTestID: '',
+		hasDataTestID: false,
 		isFinished: false,
 		components: [],
+		interpolations: [],
+		inputs: [],
+		outputs: [],
 		ngif: []
 	};
 	public static var OBJ:HTMLClassObject;
@@ -40,7 +45,8 @@ class ExtractHTML {
 		OBJ.name = 'app-' + name.replace('.component.html', '');
 		OBJ.className = '${Strings.toUpperCamel(OBJ.name.replace('app-', ''))}Component';
 		OBJ.type = OBJ.className;
-		OBJ.hasDataElement = content.indexOf('data-testid=${OBJ.name}') != -1;
+		OBJ.dataTestID = OBJ.name;
+		OBJ.hasDataTestID = content.indexOf('data-testid="${OBJ.name}"') != -1;
 		OBJ._content = content;
 
 		// -----------------------------------------------------------------
@@ -84,11 +90,11 @@ class ExtractHTML {
 				var _inputArr:Array<InputObj> = [];
 				var _inputMatchArr = match.replace('<', '').replace('>', '').split(' ');
 				for (j in 0..._inputMatchArr.length) {
-					trace(_inputMatchArr[j]);
+					// trace(_inputMatchArr[j]);
 					var _input = _inputMatchArr[j].split('=')[0];
 					var _input2 = _inputMatchArr[j].split('=')[1];
-					trace(_input);
-					trace(_input2);
+					// trace(_input);
+					// trace(_input2);
 					if (_input.indexOf('data-testid') != -1) {
 						// that is the only one we don't need to test
 						continue;
@@ -101,19 +107,19 @@ class ExtractHTML {
 						_inputArr.push(__input);
 				}
 
-				var _hasDataElement:Bool = match.indexOf('data-testid=') != -1;
+				var _hasDataTestID:Bool = match.indexOf('data-testid=') != -1;
 
 				var _componentObj:ComponentObject = {
 					name: _name,
 					className: '${Strings.toUpperCamel(_cleanName)}Component',
 					type: '${Strings.toUpperCamel(_cleanName)}Component',
 					_content: match,
-					hasDataElement: _hasDataElement,
+					hasDataTestID: _hasDataTestID,
 					functions: _functionsArr,
 					inputs: _inputArr,
 				};
 
-				trace(_componentObj);
+				// trace(_componentObj);
 				OBJ.components.push(_componentObj);
 			}
 		}
@@ -127,23 +133,134 @@ class ExtractHTML {
 			// log(matches);
 			for (i in 0...matches.length) {
 				var ngIf = matches[i];
-				log(ngIf);
+				// log(ngIf);
 
-				var _hasDataElement:Bool = ngIf.indexOf('data-testid=') != -1;
+				var _hasDataTestID:Bool = ngIf.indexOf('data-testid=') != -1;
 
 				var __id2 = '';
-				if (_hasDataElement) {
+				if (_hasDataTestID) {
 					var __id = ngIf.split('data-testid=')[1];
 					__id2 = __id.split(' ')[0].replace("\"", '');
 				}
 
 				var _ngif:NgIfObject = {
 					_id: __id2,
-					hasDataElement: _hasDataElement,
+					hasDataTestID: _hasDataTestID,
 					_content: ngIf
 				};
 
 				OBJ.ngif.push(_ngif);
+			}
+		}
+
+		// -----------------------------------------------------------------
+		// Find angular {{xxx}}
+		// -----------------------------------------------------------------
+		// `<span class="slider {{this.shape}}"></span>`
+		var matches = RegEx.getMatches(RegEx.htmlAngularReactive, content);
+		if (matches.length > 0) {
+			log(matches);
+			for (i in 0...matches.length) {
+				var _match = matches[i];
+				log(_match);
+
+				var _value = _match.split('{{')[1].split('}}')[0];
+				var _valueClean = _value.replace('this.', '');
+
+				var _obj:BasicObject = {
+					dataTestID: '${OBJ.name}-${_valueClean}',
+					value: _valueClean,
+					_value: _value,
+					hasDataTestID: _match.indexOf('data-testid=') != -1,
+					_content: _match,
+				}
+
+				OBJ.interpolations.push(_obj);
+			}
+		}
+		// -----------------------------------------------------------------
+		// Find angular ()
+		// -----------------------------------------------------------------
+		// `<input type="checkbox" [checked]="isChecked" (change)="onChangeHandler(!isChecked)">`
+		var matches = RegEx.getMatches(RegEx.htmlAngularOutput, content);
+		if (matches.length > 0) {
+			log(matches);
+			for (i in 0...matches.length) {
+				var _match = matches[i];
+				log(_match);
+				var _property = _match.split('(')[1].split(')')[0];
+				var _propertyClean = _property.replace('this.', '');
+
+				var _value = _match.split(')=')[1].split(' ')[0];
+				var _valueClean = _value.replace('"', '').replace('\'', '').replace('>', '');
+
+				var _obj:BasicObject = {
+					dataTestID: '${OBJ.name}-${_propertyClean}'.toLowerCase(),
+					value: _valueClean,
+					_value: _value,
+					property: _propertyClean,
+					_property: _property,
+					hasDataTestID: _match.indexOf('data-testid=') != -1,
+					_content: _match,
+				}
+
+				if (_value.indexOf('(') != -1) {
+					var _funcName = _valueClean.split('(')[0];
+
+					var _param = _valueClean.split('(')[1].replace(')', '');
+					var _params = _param.split(',');
+
+					_obj.valueFunction = {
+						name: _funcName,
+						param: _param,
+						params: _params,
+					}
+				}
+
+				OBJ.outputs.push(_obj);
+			}
+		}
+		// -----------------------------------------------------------------
+		// Find angular []
+		// -----------------------------------------------------------------
+		// `<input type="checkbox" [checked]="isChecked" (change)="onChangeHandler(!isChecked)">	`
+		var matches = RegEx.getMatches(RegEx.htmlAngularInput, content);
+		if (matches.length > 0) {
+			log(matches);
+			for (i in 0...matches.length) {
+				var _match = matches[i];
+				log(_match);
+
+				var _property = _match.split('[')[1].split(']')[0];
+				var _propertyClean = _property.replace('this.', '');
+
+				var _value = _match.split(']=')[1].split(' ')[0];
+				var _valueClean = _value.replace('"', '').replace('\'', '');
+
+				var _obj:BasicObject = {
+					dataTestID: '${OBJ.name}-${_propertyClean}'.toLowerCase(),
+					value: _valueClean,
+					_value: _value,
+					property: _propertyClean,
+					_property: _property,
+					hasDataTestID: _match.indexOf('data-testid=') != -1,
+					_content: _match,
+				}
+
+				if (_value.indexOf('(') != -1) {
+					var _funcName = _valueClean.split('(')[0];
+
+					var _param = _valueClean.split('(')[1].replace(')', '');
+					var _params = _param.split(',');
+
+					_obj.valueFunction = {
+						name: _funcName,
+						param: _param,
+						params: _params,
+					}
+				}
+
+				OBJ.inputs.push(_obj);
 			}
 		}
 		// -----------------------------------------------------------------

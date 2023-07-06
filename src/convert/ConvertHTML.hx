@@ -56,7 +56,7 @@ class ConvertHTML {
 		// ts.addFunction('// add functions **');
 
 		var html = new SpecTemplate(className, OBJ);
-		html.addOriginal(originalContentNoComment);
+		html.addOriginal(originalContentNoComment.replace('\n\n', ''));
 
 		// TypeScript (ts)
 		// add data extras
@@ -109,7 +109,7 @@ class ConvertHTML {
 				ts.addImport('${_import}\n');
 			}
 		}
-		ts.addImport('import { By } from \'@angular/platform-browser\';');
+		// ts.addImport('import { By } from \'@angular/platform-browser\';');
 
 		// -----------------------------------------------------------
 		// update the imports from ts files
@@ -130,17 +130,19 @@ class ConvertHTML {
 		}
 
 		// HTML test
-		html.addData('<!-- ${Strings.toUpperCamel(className)}Component -->');
-		html.addData('<!-- Adjustments to components: -->');
-		html.addData('<!--\ndata-testid="app-${className}"\n-->');
+		// html.addData('<!-- ${Strings.toUpperCamel(className)}Component -->');
+		if (!OBJ.hasDataTestID) {
+			html.addData('<!-- Adjustments to components: -->');
+			html.addData('<!--\ndata-testid="app-${className}"\n-->');
+		}
 		// -----------------------------------------------------------
 		// add data to tag for testing in html file
 		// -----------------------------------------------------------
-		if (OBJ.components.length >= 0) {
+		if (OBJ.components.length > 0) {
 			mute('create data into the components');
 			for (i in 0...OBJ.components.length) {
 				var _comp = OBJ.components[i];
-				if (!_comp.hasDataElement) {
+				if (!_comp.hasDataTestID) {
 					// html.addData('<!-- ${_comp} -->');
 					// html.addData('<!-- ${_comp.name} -->');
 					// html.addData('<!-- data-testid="${_comp.name}" -->');
@@ -149,12 +151,13 @@ class ConvertHTML {
 				}
 			}
 		}
-		html.addData('<!-- Adjustments for `*ngIf` -->');
-		if (OBJ.ngif.length >= 0) {
+
+		if (OBJ.ngif.length > 0) {
+			html.addData('<!-- Adjustments for `*ngIf` -->');
 			mute('create data for test with ngIf');
 			for (i in 0...OBJ.ngif.length) {
 				var _ngif = OBJ.ngif[i];
-				if (!_ngif.hasDataElement) {
+				if (!_ngif.hasDataTestID) {
 					html.addData('<!-- ${OBJ.name} -->');
 					// html.addData('<!-- ${_ngif} -->');
 					// // html.addData('<!-- ${_ngif._id} -->');
@@ -165,7 +168,7 @@ class ConvertHTML {
 			}
 		}
 
-		warn(OBJ);
+		// warn(OBJ);
 
 		// -----------------------------------------------------------
 		// create and save file
