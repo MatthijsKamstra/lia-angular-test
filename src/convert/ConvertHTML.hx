@@ -76,17 +76,53 @@ class ConvertHTML {
 		// -----------------------------------------------------------
 		var name = '${Strings.toUpperCamel(className)}Component';
 		mute('use test for html components "${name}"');
-		ts.addFunction('// ${name}');
 		ts.addFunction('describe(\'${name} html components\', () => {');
-		ts.addFunction('\t// ');
 		ts.addFunction(createEmptyTest(name, '\t\t'));
 		ts.addFunction('});\n');
+
+		// -----------------------------------------------------------
+		// use input/output/interpolation
+		// -----------------------------------------------------------
+		ts.addFunction('// add test from input/output/interpolation\n');
+		ts.addFunction('// @Output()');
+		if (OBJ.outputs.length > 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for html @Output() "${name}"');
+			ts.addFunction('describe(\'${name} html @Output()\', () => {');
+			for (i in 0...OBJ.outputs.length) {
+				var _obj:BasicObject = OBJ.outputs[i];
+				ts.addFunction(createBasicTest(_obj, '\t\t'));
+			}
+			ts.addFunction('});\n');
+		}
+		ts.addFunction('// @Input()');
+		if (OBJ.inputs.length > 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for html @Output() "${name}"');
+			ts.addFunction('describe(\'${name} html @Output()\', () => {');
+			for (i in 0...OBJ.inputs.length) {
+				var _obj:BasicObject = OBJ.inputs[i];
+				ts.addFunction(createBasicTest(_obj, '\t\t'));
+			}
+			ts.addFunction('});\n');
+		}
+		ts.addFunction('// interpolation {{ foobar }}');
+		if (OBJ.interpolations.length > 0) {
+			var name = '${Strings.toUpperCamel(className)}Component';
+			mute('use test for html {{ foobar }} "${name}"');
+			ts.addFunction('describe(\'${name} html {{ foobar }}\', () => {');
+			for (i in 0...OBJ.interpolations.length) {
+				var _obj:BasicObject = OBJ.interpolations[i];
+				ts.addFunction(createBasicTest(_obj, '\t\t'));
+			}
+			ts.addFunction('});\n');
+		}
 
 		// -----------------------------------------------------------
 		// update functions in ts file
 		// -----------------------------------------------------------
 		// ts.addFunction('// add functions ****');
-		if (OBJ.components.length >= 0) {
+		if (OBJ.components.length > 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
 			mute('use test for html components "${name}"');
 			ts.addFunction('// ${name}');
@@ -168,6 +204,43 @@ class ConvertHTML {
 			}
 		}
 
+		if (OBJ.inputs.length > 0) {
+			html.addData('<!-- @Input() -->');
+			mute('create data for test with @Input()');
+			for (i in 0...OBJ.inputs.length) {
+				var _inputs = OBJ.inputs[i];
+				if (!_inputs.hasDataTestID) {
+					var _end = _inputs._content.indexOf('/>') != -1 ? '/>' : '>';
+					var newContent = _inputs._content.replace(_end, ' data-testid="${_inputs.dataTestID}">');
+					html.addData('<!--\n${newContent}\n-->');
+				}
+			}
+		}
+		if (OBJ.outputs.length > 0) {
+			html.addData('<!-- @Output() -->');
+			mute('create data for test with @Output()');
+			for (i in 0...OBJ.outputs.length) {
+				var _outputs = OBJ.outputs[i];
+				if (!_outputs.hasDataTestID) {
+					var _end = _outputs._content.indexOf('/>') != -1 ? '/>' : '>';
+					var newContent = _outputs._content.replace(_end, ' data-testid="${_outputs.dataTestID}">');
+					html.addData('<!--\n${newContent}\n-->');
+				}
+			}
+		}
+		if (OBJ.interpolations.length > 0) {
+			html.addData('<!-- {{ }} -->');
+			mute('create data for test with {{ }}');
+			for (i in 0...OBJ.interpolations.length) {
+				var _interpolations = OBJ.interpolations[i];
+				if (!_interpolations.hasDataTestID) {
+					var _end = _interpolations._content.indexOf('/>') != -1 ? '/>' : '>';
+					var newContent = _interpolations._content.replace(_end, ' data-testid="${_interpolations.dataTestID}">');
+					html.addData('<!--\n${newContent}\n-->');
+				}
+			}
+		}
+
 		// warn(OBJ);
 
 		// -----------------------------------------------------------
@@ -228,9 +301,26 @@ class ConvertHTML {
 	}
 
 	// ____________________________________ tests ____________________________________
+	function createBasicTest(obj:BasicObject, ?tabs:String = '\t'):String {
+		var title = '#should use `data-testid="${obj.dataTestID}"` and change "${obj.value}"';
+		var out = '\n${tabs}';
+		out += 'it(\'${title}\', () => {
+${tabs}\t// Arrange
+${tabs}\t// ${obj}
+${tabs}\tconst _return${Strings.toUpperCamel(obj.value)}: any = component.${obj.value};
+${tabs}\tconst _el: HTMLElement = fixture.debugElement.query(By.css(\'[data-testid="${OBJ.name}"]\')).nativeElement;
+${tabs}\t// Act
+${tabs}\tfixture.detectChanges();
+${tabs}\t// Assert
+${tabs}\texpect(_return${Strings.toUpperCamel(obj.value)}).toBeTruthy();
+${tabs}\texpect(_el).toBeTruthy();
+${tabs}});
+';
+		return out;
+	}
 
 	function createDefaultTest(OBJ:HTMLClassObject, ?tabs:String = '\t'):String {
-		var title = '#should be create with correct `data-testid=${OBJ.name}`';
+		var title = '#should be create with correct `data-testid="${OBJ.name}"`';
 		var out = '\n${tabs}';
 		out += 'it(\'${title}\', () => {
 ${tabs}\t// Arrange

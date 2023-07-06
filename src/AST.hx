@@ -36,8 +36,8 @@ typedef HTMLClassObject = {
 
 typedef BasicObject = {
 	var dataTestID:String; //  app-icons
-	var _value:String; //  {{this.shape}}
-	var value:String; //  {{this.shape}}
+	var _value:String; //  this.shape
+	var value:String; //  shape
 	@:optional var valueFunction:BasicFunctionObject; //
 	@:optional var property:String; //
 	@:optional var _property:String; //
@@ -45,6 +45,7 @@ typedef BasicObject = {
 	var _content:String; // the original value
 }
 
+// @see FuncObj
 typedef BasicFunctionObject = {
 	var name:String;
 	@:optional var param:String;

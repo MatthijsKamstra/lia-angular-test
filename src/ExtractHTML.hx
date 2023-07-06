@@ -154,10 +154,10 @@ class ExtractHTML {
 		}
 
 		// -----------------------------------------------------------------
-		// Find angular {{xxx}}
+		// Find angular {{ xxx }}
 		// -----------------------------------------------------------------
 		// `<span class="slider {{this.shape}}"></span>`
-		var matches = RegEx.getMatches(RegEx.htmlAngularReactive, content);
+		var matches = RegEx.getMatches(RegEx.htmlAngularReactive, content.replace('\n', ' '));
 		if (matches.length > 0) {
 			log(matches);
 			for (i in 0...matches.length) {
@@ -182,7 +182,7 @@ class ExtractHTML {
 		// Find angular ()
 		// -----------------------------------------------------------------
 		// `<input type="checkbox" [checked]="isChecked" (change)="onChangeHandler(!isChecked)">`
-		var matches = RegEx.getMatches(RegEx.htmlAngularOutput, content);
+		var matches = RegEx.getMatches(RegEx.htmlAngularOutput, content.replace('\n', ' '));
 		if (matches.length > 0) {
 			log(matches);
 			for (i in 0...matches.length) {
@@ -224,7 +224,7 @@ class ExtractHTML {
 		// Find angular []
 		// -----------------------------------------------------------------
 		// `<input type="checkbox" [checked]="isChecked" (change)="onChangeHandler(!isChecked)">	`
-		var matches = RegEx.getMatches(RegEx.htmlAngularInput, content);
+		var matches = RegEx.getMatches(RegEx.htmlAngularInput, content.replace('\n', ' '));
 		if (matches.length > 0) {
 			log(matches);
 			for (i in 0...matches.length) {
