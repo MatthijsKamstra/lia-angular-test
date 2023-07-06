@@ -19,11 +19,15 @@ typedef TypeScriptClassObject = {
 }
 
 typedef HTMLClassObject = {
-	var name:String; // "ddd",
 	var fileName:String; // "ddd",
-	var isFinished:Bool; // false,
+	var name:String; //  app-icons
+	var type:String; // IconsComponent
+	var className:String; // IconsComponent
+	var hasDataElement:Bool; //  <app-icons data-testid="app-icons" data-testid
+	var _content:String; // the original value
 	var components:Array<ComponentObject>;
 	var ngif:Array<NgIfObject>;
+	var isFinished:Bool; // false,
 }
 
 typedef ComponentObject = {

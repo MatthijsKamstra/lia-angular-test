@@ -12,17 +12,15 @@ class ExtractHTML {
 	public static final OBJ_DEFAULT:HTMLClassObject = {
 		name: '',
 		fileName: '',
+		type: '',
+		className: '',
+		_content: '',
+		hasDataElement: false,
 		isFinished: false,
 		components: [],
 		ngif: []
 	};
-	public static var OBJ:HTMLClassObject = {
-		name: '',
-		fileName: '',
-		isFinished: false,
-		components: [],
-		ngif: []
-	};
+	public static var OBJ:HTMLClassObject;
 
 	/**
 	 * extract data from file
@@ -40,6 +38,10 @@ class ExtractHTML {
 
 		OBJ.fileName = name;
 		OBJ.name = 'app-' + name.replace('.component.html', '');
+		OBJ.className = '${Strings.toUpperCamel(OBJ.name.replace('app-', ''))}Component';
+		OBJ.type = OBJ.className;
+		OBJ.hasDataElement = content.indexOf('data-testid=${OBJ.name}') != -1;
+		OBJ._content = content;
 
 		// -----------------------------------------------------------------
 		// Find angular components

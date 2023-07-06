@@ -56,8 +56,20 @@ class ConvertHTML {
 		// ts.addFunction('// add functions **');
 
 		var html = new SpecTemplate(className, OBJ);
-		html.addOriginal(originalContent);
+		html.addOriginal(originalContentNoComment);
+
+		// TypeScript (ts)
 		// add data extras
+		ts.addFunction('// ----------------- ${OBJ.type} tests html template ----------------\n');
+
+		// -----------------------------------------------------------
+		// Create the test for html current page
+		// -----------------------------------------------------------
+		var name = '${Strings.toUpperCamel(className)}Component';
+		mute('use test for html components "${name}"');
+		ts.addFunction('describe(\'${name} default html test\', () => {');
+		ts.addFunction(createDefaultTest(OBJ, '\t\t'));
+		ts.addFunction('});\n');
 
 		// -----------------------------------------------------------
 		// use a empty test to work from
@@ -117,12 +129,13 @@ class ConvertHTML {
 			ts.addImport('${_import}');
 		}
 
-		// -----------------------------------------------------------
-		// add data to tag for testing in html file
-		// -----------------------------------------------------------
+		// HTML test
 		html.addData('<!-- ${Strings.toUpperCamel(className)}Component -->');
 		html.addData('<!-- Adjustments to components: -->');
 		html.addData('<!--\ndata-testid="app-${className}"\n-->');
+		// -----------------------------------------------------------
+		// add data to tag for testing in html file
+		// -----------------------------------------------------------
 		if (OBJ.components.length >= 0) {
 			mute('create data into the components');
 			for (i in 0...OBJ.components.length) {
@@ -212,6 +225,21 @@ class ConvertHTML {
 	}
 
 	// ____________________________________ tests ____________________________________
+
+	function createDefaultTest(OBJ:HTMLClassObject, ?tabs:String = '\t'):String {
+		var title = '#should be create with correct `data-testid=${OBJ.name}`';
+		var out = '\n${tabs}';
+		out += 'it(\'${title}\', () => {
+${tabs}\t// Arrange
+${tabs}\tconst _el: HTMLElement = fixture.debugElement.query(By.css(\'[data-testid="${OBJ.name}"]\')).nativeElement;
+${tabs}\t// Act
+${tabs}\tfixture.detectChanges();
+${tabs}\t// Assert
+${tabs}\texpect(_el).toBeTruthy();
+${tabs}});
+';
+		return out;
+	}
 
 	function createEmptyTest(name:String, ?tabs:String = '\t'):String {
 		var title = name;
