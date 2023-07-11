@@ -84,7 +84,7 @@ class ConvertHTML {
 		// use input/output/interpolation
 		// -----------------------------------------------------------
 		ts.addFunction('// add test from input/output/interpolation\n');
-		ts.addFunction('// @Output()');
+		ts.addFunction('// Test for @Output()');
 		if (OBJ.outputs.length > 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
 			mute('use test for html @Output() "${name}"');
@@ -95,43 +95,45 @@ class ConvertHTML {
 			}
 			ts.addFunction('});\n');
 		}
-		ts.addFunction('// @Input()');
+		ts.addFunction('// Test for @Input()');
 		if (OBJ.inputs.length > 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
 			mute('use test for html @Output() "${name}"');
-			ts.addFunction('describe(\'${name} html @Output()\', () => {');
+			ts.addFunction('describe(\'${name} html @Input()\', () => {');
 			for (i in 0...OBJ.inputs.length) {
 				var _obj:BasicObject = OBJ.inputs[i];
 				ts.addFunction(createBasicTest(_obj, '\t\t'));
 			}
 			ts.addFunction('});\n');
 		}
-		ts.addFunction('// interpolation {{ foobar }}');
+		ts.addFunction('// Test for interpolation {{  }}');
+		// ts.addFunction('// xxxxxxxx');
 		if (OBJ.interpolations.length > 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
-			mute('use test for html {{ foobar }} "${name}"');
-			ts.addFunction('describe(\'${name} html {{ foobar }}\', () => {');
+			mute('use test for html {{  }} "${name}"');
+			ts.addFunction('describe(\'${name} html {{  }}\', () => {');
 			for (i in 0...OBJ.interpolations.length) {
 				var _obj:BasicObject = OBJ.interpolations[i];
 				ts.addFunction(createBasicTest(_obj, '\t\t'));
 			}
 			ts.addFunction('});\n');
 		}
+		// ts.addFunction('// yyyyyyy');
 
 		// -----------------------------------------------------------
 		// update functions in ts file
 		// -----------------------------------------------------------
-		// ts.addFunction('// add functions ****');
+		ts.addFunction('// Test for components');
 		if (OBJ.components.length > 0) {
 			var name = '${Strings.toUpperCamel(className)}Component';
 			mute('use test for html components "${name}"');
-			ts.addFunction('// ${name}');
+			// ts.addFunction('// ${name}');
 			ts.addFunction('describe(\'${name} html components\', () => {');
 			// ts.addFunction('// OBJ.components.length: ${OBJ.components.length}\n');
 			for (i in 0...OBJ.components.length) {
 				// ts.addFunction('// ${OBJ.components[i]}');
 				var _obj:ComponentObject = OBJ.components[i];
-				ts.addFunction('\t// ${_obj.name}');
+				// ts.addFunction('\t// ${_obj.name}');
 				ts.addFunction(createComponentTest(_obj, '\t\t'));
 			}
 			ts.addFunction('});\n');
@@ -303,12 +305,13 @@ class ConvertHTML {
 	// ____________________________________ tests ____________________________________
 	function createBasicTest(obj:BasicObject, ?tabs:String = '\t'):String {
 		var title = '#should use `data-testid="${obj.dataTestID}"` and change "${obj.value}"';
+		// ${tabs}\t// ${obj}
+
 		var out = '\n${tabs}';
 		out += 'it(\'${title}\', () => {
 ${tabs}\t// Arrange
-${tabs}\t// ${obj}
 ${tabs}\tconst _return${Strings.toUpperCamel(obj.value)}: any = component.${obj.value};
-${tabs}\tconst _el: HTMLElement = fixture.debugElement.query(By.css(\'[data-testid="${OBJ.name}"]\')).nativeElement;
+${tabs}\tconst _el: HTMLElement = fixture.debugElement.query(By.css(\'[data-testid="${obj.dataTestID}"]\')).nativeElement;
 ${tabs}\t// Act
 ${tabs}\tfixture.detectChanges();
 ${tabs}\t// Assert
@@ -316,6 +319,7 @@ ${tabs}\texpect(_return${Strings.toUpperCamel(obj.value)}).toBeTruthy();
 ${tabs}\texpect(_el).toBeTruthy();
 ${tabs}});
 ';
+
 		return out;
 	}
 
@@ -352,7 +356,9 @@ ${tabs}*/;
 
 	function createComponentTest(compObj:ComponentObject, ?tabs:String = '\t'):String {
 		var title = ShouldTitleTest.getShouldComponentTitle(compObj);
-		var out = '\n${tabs}';
+		var out = '';
+		// out += '/*\n${compObj._content}\n*/';
+		out += '\n${tabs}';
 		out += 'it(\'${title}\', () => {
 ${tabs}\t${convertComponentObj2Test(compObj, tabs)}
 ${tabs}});
@@ -361,6 +367,7 @@ ${tabs}});
 	}
 
 	function convertComponentObj2Test(compObj:ComponentObject, ?tabs:String = '\t'):String {
+		// ${tabs}\t// name: ${compObj}
 		var out = '// Arrange
 ${tabs}\tconst _${Strings.toLowerCamel(compObj.type)}: ${compObj.type} = fixture.debugElement.query(By.css(\'[data-testid="${compObj.name}"]\')).nativeElement;
 ${tabs}\t// Act
@@ -368,6 +375,7 @@ ${tabs}\tfixture.detectChanges();
 ${tabs}\t// Assert
 ${tabs}\texpect(_${Strings.toLowerCamel(compObj.type)}).toBeTruthy();
 ';
+
 		for (i in 0...compObj.inputs.length) {
 			var _compObjInputs:InputObj = compObj.inputs[i];
 			trace(_compObjInputs);

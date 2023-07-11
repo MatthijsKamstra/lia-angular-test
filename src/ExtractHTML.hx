@@ -50,7 +50,7 @@ class ExtractHTML {
 		OBJ._content = content;
 
 		// -----------------------------------------------------------------
-		// Find angular components
+		// Find angular components : `<app-foobar [t]='xx' ></app-foobar>`
 		// -----------------------------------------------------------------
 		// `<app-icons icon="{{getIcon()}}"></app-icons>`
 		var matches = RegEx.getMatches(RegEx.htmlAngularComponent, content);
@@ -60,8 +60,8 @@ class ExtractHTML {
 				var match = matches[i];
 				// log(match);
 
-				var _name = match.split(' ')[0].replace('<', '');
-				var _cleanName = _name.replace('app-', '');
+				var _name = match.split(' ')[0].replace('<', ''); // app-foobar
+				var _cleanName = _name.replace('app-', ''); // foobar
 
 				// get functions within component
 				var _functionsArr:Array<FuncObj> = [];
@@ -80,7 +80,7 @@ class ExtractHTML {
 								_content: '',
 							},
 							params: [],
-							_content: _value,
+							_content: _value.replace('\n', ''),
 						}
 						_functionsArr.push(_funcObj);
 					}
@@ -100,7 +100,7 @@ class ExtractHTML {
 						continue;
 					}
 					var __input:InputObj = {
-						name: _input,
+						name: _input.replace('[', '').replace(']', ''),
 						_test: _input2,
 					};
 					if (_input2 != null)
@@ -113,7 +113,7 @@ class ExtractHTML {
 					name: _name,
 					className: '${Strings.toUpperCamel(_cleanName)}Component',
 					type: '${Strings.toUpperCamel(_cleanName)}Component',
-					_content: match,
+					_content: match.replace('\n', ''),
 					hasDataTestID: _hasDataTestID,
 					functions: _functionsArr,
 					inputs: _inputArr,
@@ -146,7 +146,7 @@ class ExtractHTML {
 				var _ngif:NgIfObject = {
 					_id: __id2,
 					hasDataTestID: _hasDataTestID,
-					_content: ngIf
+					_content: ngIf.replace('\n', '')
 				};
 
 				OBJ.ngif.push(_ngif);
@@ -172,7 +172,7 @@ class ExtractHTML {
 					value: _valueClean,
 					_value: _value,
 					hasDataTestID: _match.indexOf('data-testid=') != -1,
-					_content: _match,
+					_content: _match.replace('\n', ''),
 				}
 
 				OBJ.interpolations.push(_obj);
@@ -196,12 +196,12 @@ class ExtractHTML {
 
 				var _obj:BasicObject = {
 					dataTestID: '${OBJ.name}-${_propertyClean}'.toLowerCase(),
-					value: _valueClean,
+					value: _valueClean.replace('(', '').replace(')', ''),
 					_value: _value,
 					property: _propertyClean,
 					_property: _property,
 					hasDataTestID: _match.indexOf('data-testid=') != -1,
-					_content: _match,
+					_content: _match.replace('\n', ''),
 				}
 
 				if (_value.indexOf('(') != -1) {
@@ -239,12 +239,12 @@ class ExtractHTML {
 
 				var _obj:BasicObject = {
 					dataTestID: '${OBJ.name}-${_propertyClean}'.toLowerCase(),
-					value: _valueClean,
+					value: _valueClean.replace('(', '').replace(')', ''),
 					_value: _value,
 					property: _propertyClean,
 					_property: _property,
 					hasDataTestID: _match.indexOf('data-testid=') != -1,
-					_content: _match,
+					_content: _match.replace('\n', ''),
 				}
 
 				if (_value.indexOf('(') != -1) {

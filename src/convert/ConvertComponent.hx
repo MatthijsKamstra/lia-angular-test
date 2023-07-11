@@ -217,7 +217,7 @@ class ConvertComponent {
 
 		// correct filename
 		var templatePath = '${parent}/${newFileName}';
-		var jsonPath = '${parent}/_${newFileName.replace('.spec.ts', '.json')}';
+		var jsonPath = '${parent}/${newFileName.replace('.spec.ts', '_gen_.json')}';
 		var json = Json.stringify(OBJ, null, '  ');
 
 		if (!Config.IS_OVERWRITE) {
@@ -230,12 +230,11 @@ class ConvertComponent {
 		} else {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
-			info('Open generated json file: ${jsonPath}', 2);
 			// content = content.replace('\n\n\n', '\n\n');
 			// content = content.replace('\n\n', '\n');
-			// // content = content.replace('\n\n\n', '\n');
-			// // content = content.replace('\n\n\n', '\n\n').replace('\n\n', '\n');
 			sys.io.File.saveContent(templatePath, content);
+
+			// info('Open generated json file: ${jsonPath}', 2);
 			// sys.io.File.saveContent(jsonPath, json);
 		}
 
