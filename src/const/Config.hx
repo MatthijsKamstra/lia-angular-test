@@ -33,8 +33,9 @@ class Config {
 	 * 0.2.9 - add environment data to test if needed
 	 * 0.3.0 - check for html default test
 	 * 0.3.1 - fixing minor bugs in output
+	 * 0.3.2 - minor adjustments, check data-testid
 	 */
-	public static final VERSION:String = '0.3.1';
+	public static final VERSION:String = '0.3.2';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;

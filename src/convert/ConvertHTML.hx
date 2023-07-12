@@ -56,7 +56,8 @@ class ConvertHTML {
 		// ts.addFunction('// add functions **');
 
 		var html = new SpecTemplate(className, OBJ);
-		html.addOriginal(originalContentNoComment.replace('\n\n', ''));
+		// html.addOriginal(originalContentNoComment.replace('\n\n', '')); // not sure this is usefull
+		html.addOriginal(originalContentNoComment);
 
 		// TypeScript (ts)
 		// add data extras
