@@ -182,7 +182,7 @@ class ExtractHTML {
 		// Find angular ()
 		// -----------------------------------------------------------------
 		// `<input type="checkbox" [checked]="isChecked" (change)="onChangeHandler(!isChecked)">`
-		var matches = RegEx.getMatches(RegEx.htmlAngularOutput, content.replace('\n', ' '));
+		var matches = RegEx.getMatches(RegEx.htmlAngularOutput, content); // content.replace('\n', ' '));
 		if (matches.length > 0) {
 			log(matches);
 			for (i in 0...matches.length) {
@@ -190,6 +190,8 @@ class ExtractHTML {
 				log(_match);
 				var _property = _match.split('(')[1].split(')')[0];
 				var _propertyClean = _property.replace('this.', '');
+
+				// warn(_match);
 
 				var _value = _match.split(')=')[1].split(' ')[0];
 				var _valueClean = _value.replace('"', '').replace('\'', '').replace('>', '');

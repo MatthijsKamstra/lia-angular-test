@@ -97,7 +97,7 @@ ${tabs}\n${tabs}';
 				// ${tabs}\t// ${func.params}
 				// trace('boolean');
 				// out += 'it(\'${getSubTitle(func)}\', () => {
-				out += '// TEST';
+				out += '// TEST\n';
 				out += 'it(\'#should return boolean true\', () => {
 ${tabs}\t// Arrange
 ${tabs}\t${(func.params.length > 0) ? 'const _param${Strings.toUpperCamel(func.params[0].name)}: ${func.params[0].type} = ${Type2Value.convertFuncParams2Value(func)};' : '// '}
