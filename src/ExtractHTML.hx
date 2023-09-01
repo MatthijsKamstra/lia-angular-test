@@ -187,13 +187,19 @@ class ExtractHTML {
 			log(matches);
 			for (i in 0...matches.length) {
 				var _match = matches[i];
-				log(_match);
+				// log(_match);
 				var _property = _match.split('(')[1].split(')')[0];
 				var _propertyClean = _property.replace('this.', '');
 
-				// warn(_match);
+				// warn(_match, 5);
+				if (_match.indexOf(')=') == -1) {
+					break;
+				}
 
 				var _value = _match.split(')=')[1].split(' ')[0];
+
+				// trace(_value);
+
 				var _valueClean = _value.replace('"', '').replace('\'', '').replace('>', '');
 
 				var _obj:BasicObject = {
