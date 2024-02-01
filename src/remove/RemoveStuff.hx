@@ -8,6 +8,9 @@ class RemoveStuff {
 	static public function all(content:String, templateType:String):String {
 		content = RemoveComment.all(content, templateType);
 
+		// replace other enter character with
+		content = content.replace('\r\n', '\n').replace('\n\r', '\n');
+
 		// {}
 		info('[START] import - search and replace curly brackets');
 		var _reg = RegEx.modifyImportCurlyBrackets;

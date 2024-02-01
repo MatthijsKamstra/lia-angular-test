@@ -1,9 +1,9 @@
 package;
 
-import sys.FileSystem;
-import haxe.Json;
-import utils.RegEx;
 import AST;
+import haxe.Json;
+import sys.FileSystem;
+import utils.RegEx;
 
 class Extract {
 	public static final OBJ_DEFAULT:TypeScriptClassObject = {
@@ -207,6 +207,13 @@ class Extract {
 		// Find functions
 		// -----------------------------------------------------------------
 		// TODO: this is probably a bad idea, to use `\n\n` to split files into an array
+
+		var enter_n = cleandedStr.split('\n');
+		var enter_r = cleandedStr.split('\r');
+
+		// warn('enter_n.length: ' + enter_n.length);
+		// warn('enter_r.length: ' + enter_r.length);
+
 		var arr = cleandedStr.split('\n\n');
 		// trace(arr);
 		// trace(arr.length);
@@ -234,7 +241,7 @@ class Extract {
 				var _access = (_str.indexOf('private') != -1) ? 'private' : 'public';
 
 				// get function name
-				var _name = _str.replace('public', '').replace('public', '').split('(')[0].trim();
+				var _name = _str.replace('public', '').replace('private', '').split('(')[0].trim();
 
 				// get return value
 				// check for sort return type
