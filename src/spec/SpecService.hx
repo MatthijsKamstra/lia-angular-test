@@ -175,7 +175,8 @@ class SpecService {
 
 		// warn(isTranslateService);
 
-		var template = '
+		var template = '${(Constants.HAS_CONSTRUCTOR ? '' : '// [mck] NOTE: I DONT SEE A CONSTRUCTOR, NEED THAT !!!')}
+
 import { TestBed } from \'@angular/core/testing\';
 import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from \'@angular/core\';
 
@@ -190,6 +191,7 @@ import { environment } from \'src/environments/environment\';
 import { Environment } from \'src/app/shared/interfaces/i-environment\';
 
 import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.service\';
+
 
 ${imports}
 

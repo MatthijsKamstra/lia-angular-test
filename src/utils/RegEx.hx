@@ -4,11 +4,12 @@ package utils;
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
 	// ____________________________________ from {} ____________________________________
-	public static final curlyBrackets = ~/({)+([\n\t\w\d\s,])+(})/g;
-	public static final importCurlyBrackets = ~/(import)(.)({)+([\n\t\w\d\s,])+(})/g;
-	public static final objectCurlyBrackets = ~/(=.{)([\n\s\w:'",.])*(})/g;
-	public static final returnCurlyBrackets = ~/(return.{)([\n\s\w:'",.])*(})/g;
-	public static final functionCurlyBrackets = ~/\(([\n\s\w:'",.])*\)/g;
+	public static final modifyCurlyBrackets = ~/({)+([\n\t\w\d\s,])+(})/g;
+	public static final modifyImportCurlyBrackets = ~/(import)(.)({)+([\n\t\w\d\s,])+(})/g;
+	// public static final objectCurlyBrackets = ~/(=.{)([\n\s\w:'",.])*(})/g;
+	public static final modifyObject = ~/({)([\n\s\w:'",.])*(})/g;
+	public static final modifyReturnValue = ~/(return.{)([\n\s\w:'",.])*(})/g;
+	public static final modifyFunctionParams = ~/\(([\n\s\w:'",.])*\)/g;
 
 	// ____________________________________ html ____________________________________
 	// `[checked]="isChecked" >`

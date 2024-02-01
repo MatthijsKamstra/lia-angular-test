@@ -8,43 +8,9 @@ class RemoveStuff {
 	static public function all(content:String, templateType:String):String {
 		content = RemoveComment.all(content, templateType);
 
-		// TODO
-		// remove enters, spaces "  ", tabs, returns
-		/**
-			```ts
-			import {
-				IAsyncRequest,
-				IDeviceORequest,
-				IRequest,
-				IRequestDevice,
-			} from '../shared/interfaces/i-device-o-request';
-			```
-
-			and remove
-			```ts
-			defaultDevicesODataFilter: IDevicesODataFilter = {
-				deviceIdentifications: '',
-				type: DeviceOTypeEnum.ALL,
-				manufacturer: '',
-				devicemodel: '',
-				activated: DeviceActivatedFilterType.ACTIVE,
-				owner: '',
-				moduleVersion: '',
-				moduleType: '',
-			};
-			```
-
-			```ts
-			getFilteredDevices(
-				filter: IDevicesODataFilter,
-				pagination: IPagination
-			): Observable<IPage<IDeviceO>> {
-			```
-		 */
-
 		// {}
 		info('[START] import - search and replace curly brackets');
-		var _reg = RegEx.importCurlyBrackets;
+		var _reg = RegEx.modifyImportCurlyBrackets;
 		var matches = RegEx.getMatches(_reg, content);
 		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
@@ -60,7 +26,7 @@ class RemoveStuff {
 		info('[END] import - search and replace curly brackets');
 
 		info('[START] object - search and replace curly brackets');
-		var _reg = RegEx.objectCurlyBrackets;
+		var _reg = RegEx.modifyObject;
 		var matches = RegEx.getMatches(_reg, content);
 		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
@@ -76,7 +42,7 @@ class RemoveStuff {
 		info('[END] object - search and replace curly brackets');
 
 		info('[START] return  - search and replace curly brackets');
-		var _reg = RegEx.returnCurlyBrackets;
+		var _reg = RegEx.modifyReturnValue;
 		var matches = RegEx.getMatches(_reg, content);
 		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
@@ -92,7 +58,7 @@ class RemoveStuff {
 		info('[END] return - search and replace curly brackets');
 
 		info('[START] function()  - search and replace curly brackets');
-		var _reg = RegEx.functionCurlyBrackets;
+		var _reg = RegEx.modifyFunctionParams;
 		var matches = RegEx.getMatches(_reg, content);
 		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
