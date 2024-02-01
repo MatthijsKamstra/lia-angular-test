@@ -231,6 +231,18 @@ class Extract {
 			if (_str.indexOf('constructor') != -1)
 				continue;
 
+			// ignore if for now
+			if (_str.indexOf('if (') != -1)
+				continue;
+
+			// ignore switch for now
+			if (_str.indexOf('switch (') != -1)
+				continue;
+
+			// ignore switch for now
+			if (_str.indexOf('for (') != -1)
+				continue;
+
 			if (_str.indexOf(') {') != -1) {
 				// trace('might be a function without a return type or void');
 			}

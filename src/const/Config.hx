@@ -34,8 +34,10 @@ class Config {
 	 * 0.3.0 - check for html default test
 	 * 0.3.1 - fixing minor bugs in output
 	 * 0.3.2 - minor adjustments, check data-testid
+	 * 0.4.0 - cleaning up document, getting objects etc on online
+	 * 0.4.1 - for, if, switch don't need a test... function fuckup
 	 */
-	public static final VERSION:String = '0.3.2';
+	public static final VERSION:String = '0.4.1';
 
 	public static var PATH = ''; // file or folder
 	public static var IS_OVERWRITE = false;
