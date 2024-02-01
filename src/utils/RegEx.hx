@@ -3,6 +3,13 @@ package utils;
 // - https://regexr.com/
 // - https://haxe.org/manual/std-regex.html
 class RegEx {
+	// ____________________________________ from {} ____________________________________
+	public static final curlyBrackets = ~/({)+([\n\t\w\d\s,])+(})/g;
+	public static final importCurlyBrackets = ~/(import)(.)({)+([\n\t\w\d\s,])+(})/g;
+	public static final objectCurlyBrackets = ~/(=.{)([\n\s\w:'",.])*(})/g;
+	public static final returnCurlyBrackets = ~/(return.{)([\n\s\w:'",.])*(})/g;
+	public static final functionCurlyBrackets = ~/\(([\n\s\w:'",.])*\)/g;
+
 	// ____________________________________ html ____________________________________
 	// `[checked]="isChecked" >`
 	public static var htmlAngularInput = ~/<.*\[.*\].*>/g;
@@ -51,11 +58,6 @@ class RegEx {
 	public static final commentJSLine = ~/(\/\/)[\S\s]*?/g;
 	public static final commentJSLine3 = ~/(\/\/).*/g;
 	public static final commentJSLine2 = ~/\/\*[\s\S]*?\*\/|\/\/.*/g;
-
-	// ____________________________________ from {} ____________________________________
-	public static final curlyBrackets = ~/({)+([\n\t\w\d\s,])+(})/g;
-	public static final importCurlyBrackets = ~/(import)(.)({)+([\n\t\w\d\s,])+(})/g;
-	public static final objectCurlyBrackets = ~/(=.{)([\n\s\w:'",.])*(})/g;
 
 	/**
 		* search for specific regex

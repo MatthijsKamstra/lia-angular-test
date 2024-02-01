@@ -43,37 +43,69 @@ class RemoveStuff {
 		 */
 
 		// {}
-		info('search and replace curly brackets for import');
+		info('[START] import - search and replace curly brackets');
 		var _reg = RegEx.importCurlyBrackets;
 		var matches = RegEx.getMatches(_reg, content);
-		log('total: ' + matches.length);
+		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
 			// log(matches);
 			for (i in 0...matches.length) {
 				var match = matches[i];
 				// warn(match, 2, Yellow);
 				var clean = match.replace('\n', '').replace('\t', '').replace('__________', '').replace('  ', ' ').replace('\r', '');
-				warn(clean, 1);
+				// warn(clean, 1);
 				content = content.replace(match, clean);
 			}
 		}
-		info('DONE search and replace curly brackets for import');
+		info('[END] import - search and replace curly brackets');
 
-		info('search and replace curly brackets for object');
+		info('[START] object - search and replace curly brackets');
 		var _reg = RegEx.objectCurlyBrackets;
 		var matches = RegEx.getMatches(_reg, content);
-		log('total: ' + matches.length);
+		log('total: ' + matches.length, 1);
 		if (matches.length > 0) {
 			// log(matches);
 			for (i in 0...matches.length) {
 				var match = matches[i];
 				// warn(match, 2, Yellow);
 				var clean = match.replace('\n', '').replace('\t', '').replace('__________', '').replace('    ', ' ').replace('  ', ' ').replace('\r', '');
-				warn(clean, 1);
+				// warn(clean, 1);
 				content = content.replace(match, clean);
 			}
 		}
-		info('DONE search and replace curly brackets for object');
+		info('[END] object - search and replace curly brackets');
+
+		info('[START] return  - search and replace curly brackets');
+		var _reg = RegEx.returnCurlyBrackets;
+		var matches = RegEx.getMatches(_reg, content);
+		log('total: ' + matches.length, 1);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var match = matches[i];
+				// warn(match, 2, Yellow);
+				var clean = match.replace('\n', '').replace('\t', '').replace('__________', '').replace('    ', ' ').replace('  ', ' ').replace('\r', '');
+				// warn(clean, 1);
+				content = content.replace(match, clean);
+			}
+		}
+		info('[END] return - search and replace curly brackets');
+
+		info('[START] function()  - search and replace curly brackets');
+		var _reg = RegEx.functionCurlyBrackets;
+		var matches = RegEx.getMatches(_reg, content);
+		log('total: ' + matches.length, 1);
+		if (matches.length > 0) {
+			// log(matches);
+			for (i in 0...matches.length) {
+				var match = matches[i];
+				// warn(match, 2, Yellow);
+				var clean = match.replace('\n', '').replace('\t', '').replace('__________', '').replace('    ', ' ').replace('  ', ' ').replace('\r', '');
+				// warn(clean, 1);
+				content = content.replace(match, clean);
+			}
+		}
+		info('[END] function() - search and replace curly brackets');
 
 		return content;
 	}
