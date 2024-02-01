@@ -4,11 +4,13 @@ import AST;
 import const.Config;
 import haxe.Json;
 import remove.RemoveComment;
+import remove.RemoveStuff;
 import utils.Copyright;
 import utils.GeneratedBy;
 
 class ConvertService {
-	private var OBJ:TypeScriptClassObject;
+	// private var OBJ:TypeScriptClassObject;
+	@:isVar public var OBJ(get, set):TypeScriptClassObject;
 
 	/**
 	 * constructor
@@ -17,7 +19,8 @@ class ConvertService {
 	public function new(path:String) {
 		// read the content of the file
 		var originalContent = sys.io.File.getContent(path);
-		var originalContentNoComment = RemoveComment.all(originalContent, 'ts');
+		var _originalContentNoComment = RemoveComment.all(originalContent, 'ts');
+		var originalContentCleaned = RemoveStuff.all(originalContent, 'ts');
 
 		// filename
 		var originalFileName = Path.withoutDirectory(path);
@@ -28,7 +31,7 @@ class ConvertService {
 		var parent = Path.directory(path);
 
 		// first try for new extract
-		Extract.runExtract(originalContentNoComment, originalFileName.replace('.service.ts', ''));
+		Extract.runExtract(originalContentCleaned, originalFileName.replace('.service.ts', ''));
 		OBJ = Extract.OBJ;
 
 		// start creating the spec of this file/service
@@ -51,7 +54,7 @@ class ConvertService {
 		// -----------------------------------------------------------
 		// ts.addVariable('// vars');
 		if (OBJ.vars.length >= 0) {
-			var name = '${Strings.toUpperCamel(className)}Component';
+			var name = '${Strings.toUpperCamel(className)}Service';
 			mute('use test for class vars "${name}"');
 			ts.addFunction('// ${name}');
 			ts.addFunction('describe(\'${name} class vars\', () => {');
@@ -73,7 +76,7 @@ class ConvertService {
 			ts.addImport('import { HttpEventType, HttpHeaders } from \'@angular/common/http\';');
 			ts.addImport('import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';');
 
-			var name = '${Strings.toUpperCamel(className)}Component';
+			var name = '${Strings.toUpperCamel(className)}Service';
 			mute('use subscribes in class "${name}"');
 			for (i in 0...OBJ.subscribes.length) {
 				var _sub:SubScribeObj = OBJ.subscribes[i];
@@ -234,7 +237,8 @@ class ConvertService {
 
 		// correct filename
 		var templatePath = '${parent}/${newFileName}';
-		var jsonPath = '${parent}/_${newFileName.replace('.spec.ts', '.json')}';
+		var jsonPath = '${parent}/${newFileName.replace('.spec.ts', '_gen_.json')}';
+		var bacPath = '${parent}/${newFileName.replace('.spec.ts', '_gen_.ts.bac')}';
 		var json = Json.stringify(OBJ, null, '  ');
 
 		// var templatePath = '${parent}/${newFileName}';
@@ -248,10 +252,11 @@ class ConvertService {
 		} else {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
-			info('Open generated json file: ${jsonPath}', 2);
-			// sys.io.File.saveContent(templatePath, content.replace('\n\t\n', '\n'));
 			sys.io.File.saveContent(templatePath, content);
-			// sys.io.File.saveContent(jsonPath, json);
+			info('Open generated json file: ${jsonPath}', 2);
+			sys.io.File.saveContent(jsonPath, json);
+			info('Open original file (cleaned): ${bacPath}', 2);
+			sys.io.File.saveContent(bacPath, originalContentCleaned);
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
@@ -873,4 +878,13 @@ class ConvertService {
 	// function getTitle(obj:FuncObj) {
 	// 	return '#${obj.name} should return ${obj.returnValue._content}';
 	// }
+	// ____________________________________ getter/setter ____________________________________
+
+	function get_OBJ():TypeScriptClassObject {
+		return OBJ;
+	}
+
+	function set_OBJ(value:TypeScriptClassObject):TypeScriptClassObject {
+		return OBJ = value;
+	}
 }

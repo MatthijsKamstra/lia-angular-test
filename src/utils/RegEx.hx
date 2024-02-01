@@ -52,6 +52,11 @@ class RegEx {
 	public static final commentJSLine3 = ~/(\/\/).*/g;
 	public static final commentJSLine2 = ~/\/\*[\s\S]*?\*\/|\/\/.*/g;
 
+	// ____________________________________ from {} ____________________________________
+	public static final curlyBrackets = ~/({)+([\n\t\w\d\s,])+(})/g;
+	public static final importCurlyBrackets = ~/(import)(.)({)+([\n\t\w\d\s,])+(})/g;
+	public static final objectCurlyBrackets = ~/(=.{)([\n\s\w:'",.])*(})/g;
+
 	/**
 		* search for specific regex
 		*

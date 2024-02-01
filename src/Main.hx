@@ -1,10 +1,10 @@
 import AST.TypeScriptClassObject;
-import convert.ConvertHTML;
-import logger.Logger;
-import convert.ConvertComponent;
-import convert.ConvertService;
 import const.Config;
+import convert.ConvertComponent;
+import convert.ConvertHTML;
+import convert.ConvertService;
 import haxe.io.Path;
+import logger.Logger;
 import sys.io.Process;
 
 using StringTools;
@@ -121,7 +121,6 @@ class Main {
 			// do this first
 			if (file.indexOf('.service.ts') != -1) {
 				mute('Convert Service: `${file.split('/src')[1]}`', 1);
-				// var convertService = new ConvertComponent(file);
 				var convertService = new ConvertService(file);
 				arr.push(file);
 				Progress.update(file);

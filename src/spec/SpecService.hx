@@ -153,7 +153,7 @@ class SpecService {
 		funcs:String = '', //
 		imports:String = '', //
 		constructor:String = '', //
-		testBed:String = '',
+		testBed:String = '', //
 			providers:String = '', //
 		subscribes:String = '' //
 	):String {
@@ -177,13 +177,17 @@ class SpecService {
 
 		var template = '
 import { TestBed } from \'@angular/core/testing\';
+import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from \'@angular/core\';
 
 ${_hasHttpClientTest ? "import { HttpClientTestingModule, HttpTestingController } from \'@angular/common/http/testing\';" : ""}
 ${_hasHttpClientTest ? "import { of, throwError } from 'rxjs';" : ""}
 ${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/common/http\';" : ""}
-${_hasHttpClient ? "import { NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
+// ${_hasHttpClient ? "import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from \'@angular/core\';" : ""}
 
 ${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';" : ""}
+
+import { environment } from \'src/environments/environment\';
+import { Environment } from \'src/app/shared/interfaces/i-environment\';
 
 import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.service\';
 
@@ -197,6 +201,8 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
 
+	const environmentCopy: Environment = Object.assign({}, environment);
+
 ${constructor}
 
 ${vars}
@@ -207,7 +213,8 @@ ${vars}
 				// TranslateModule.forRoot(),
 ${_hasHttpClientTest ? "				HttpClientTestingModule," : ""}
 			],
-			providers: [${Strings.toUpperCamel(name)}Service, ${providers}]
+			providers: [${Strings.toUpperCamel(name)}Service, ${providers}],
+			schemas: [NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA]
 		});
 		service = TestBed.inject(${Strings.toUpperCamel(name)}Service);
 		// ${Strings.toLowerCamel(name)}Service = TestBed.inject(${Strings.toUpperCamel(name)}Service); // [mck] might be removed in the future
@@ -216,11 +223,19 @@ ${testBed}
 ${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
 ${_hasHttpClientTest ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
 
+		environment.apiEnabled = true;
+
 	});
 
 ${_hasHttpClientTest ? "	afterEach(() => {
 		httpTestingController.verify();
 	});" : ""}
+
+
+	afterAll(() => {
+		environment.apiEnabled = environmentCopy.apiEnabled;
+		environment.production = environmentCopy.production;
+	});
 
 	it(\'should be created\', () => {
 		expect(service).toBeTruthy();

@@ -4,6 +4,7 @@ import AST;
 import const.Config;
 import haxe.Json;
 import remove.RemoveComment;
+import remove.RemoveStuff;
 import spec.SpecComponent;
 import utils.Copyright;
 import utils.GenValues;
@@ -20,7 +21,8 @@ class ConvertComponent {
 	public function new(path:String) {
 		// read the content of the file
 		var originalContent = sys.io.File.getContent(path);
-		var originalContentNoComment = RemoveComment.all(originalContent, 'ts');
+		var _originalContentNoComment = RemoveComment.all(originalContent, 'ts');
+		var originalContentCleaned = RemoveStuff.all(originalContent, 'ts');
 
 		// filename
 		var originalFileName = Path.withoutDirectory(path);
@@ -31,7 +33,7 @@ class ConvertComponent {
 		var parent = Path.directory(path);
 
 		// first try for new extract
-		Extract.runExtract(originalContentNoComment, originalFileName.replace('.component.ts', ''), 'Component');
+		Extract.runExtract(originalContentCleaned, originalFileName.replace('.component.ts', ''), 'Component');
 		OBJ = Extract.OBJ;
 
 		// start creating the spec of this file/component
@@ -230,12 +232,9 @@ class ConvertComponent {
 		} else {
 			info('Open original file: ${path}', 2);
 			info('Open generated test file: ${templatePath}', 2);
-			// content = content.replace('\n\n\n', '\n\n');
-			// content = content.replace('\n\n', '\n');
 			sys.io.File.saveContent(templatePath, content);
-
-			// info('Open generated json file: ${jsonPath}', 2);
-			// sys.io.File.saveContent(jsonPath, json);
+			info('Open generated json file: ${jsonPath}', 2);
+			sys.io.File.saveContent(jsonPath, json);
 		}
 
 		// warn('${Emoji.x} ${Type.getClassName(ConvertService)} ${path}');
