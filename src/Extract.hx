@@ -231,21 +231,27 @@ class Extract {
 			if (_str.indexOf('constructor') != -1)
 				continue;
 
-			// ignore if for now
-			if (_str.indexOf('if (') != -1)
-				continue;
+			// warn('${i}: not a constructor');
 
-			// ignore switch for now
-			if (_str.indexOf('switch (') != -1)
-				continue;
+			// // ignore if for now
+			// if (_str.indexOf('if (') != -1)
+			// 	continue;
 
-			// ignore switch for now
-			if (_str.indexOf('for (') != -1)
-				continue;
+			// warn('${i}: not a if ( ) statement ');
+			// // ignore switch for now
+			// if (_str.indexOf('switch (') != -1)
+			// 	continue;
 
-			if (_str.indexOf(') {') != -1) {
-				// trace('might be a function without a return type or void');
-			}
+			// warn('${i}: not a switch ( ) statement ');
+			// // ignore switch for now
+			// if (_str.indexOf('for (') != -1)
+			// 	continue;
+
+			// warn('${i}: not a for ( ) statement ');
+			// if (_str.indexOf(') {') != -1) {
+			// 	// trace('might be a function without a return type or void');
+			// }
+			// warn('${i}: still here');
 			if (_str.indexOf('):') != -1 || _str.indexOf(') {') != -1) {
 				// info('${i}. looks like a function');
 
@@ -288,6 +294,9 @@ class Extract {
 				}
 				if (_str.indexOf('http.delete') != -1) {
 					_requestType = 'DELETE';
+				}
+				if (_str.indexOf('http.put') != -1) {
+					_requestType = 'PUT';
 				}
 
 				var _funcObj:FuncObj = {

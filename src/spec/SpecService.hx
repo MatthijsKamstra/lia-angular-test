@@ -187,9 +187,6 @@ ${_hasHttpClient ? "import { HttpClient, HttpErrorResponse } from \'@angular/com
 
 ${_hasSpecHelper ? "import { SPEC_CONST } from \'src/app/shared/test/spec-helpers/constants.spec-helper\';" : ""}
 
-import { environment } from \'src/environments/environment\';
-import { Environment } from \'src/app/shared/interfaces/i-environment\';
-
 import { ${Strings.toUpperCamel(name)}Service } from \'./${name.toLowerCase()}.service\';
 
 
@@ -202,8 +199,6 @@ fdescribe(\'${Strings.toUpperCamel(name)}Service (Generated)\', () => {
 	//
 ${_hasHttpClient ? "	let httpClient: HttpClient;" : ""}
 ${_hasHttpClientTest ? "	let httpTestingController: HttpTestingController;" : ""}
-
-	const environmentCopy: Environment = Object.assign({}, environment);
 
 ${constructor}
 
@@ -225,19 +220,11 @@ ${testBed}
 ${_hasHttpClient ? "		httpClient = TestBed.inject(HttpClient);" : ""}
 ${_hasHttpClientTest ? "		httpTestingController = TestBed.inject(HttpTestingController);" : ""}
 
-		environment.apiEnabled = true;
-
 	});
 
 ${_hasHttpClientTest ? "	afterEach(() => {
 		httpTestingController.verify();
 	});" : ""}
-
-
-	afterAll(() => {
-		environment.apiEnabled = environmentCopy.apiEnabled;
-		environment.production = environmentCopy.production;
-	});
 
 	it(\'should be created\', () => {
 		expect(service).toBeTruthy();
@@ -249,35 +236,6 @@ ${_hasHttpClientTest ? "	afterEach(() => {
 
 });
 ';
-
-		/*
-			it(\'#getObservableValue should return value from observable\', (done: DoneFn) => {
-				service.getObservableValue().subscribe(value => {
-					expect(value).toBe(\'observable value\');
-					done();
-				});
-			});
-		 */
-		/*
-			it(\'should get users\', () => {
-				const mockUsers = [
-					{ name: \'Bob\', website: \'www.yessss.com\' },
-					{ name: \'Juliette\', website: \'nope.com\' }
-				];
-
-				service.getData().subscribe((event: HttpEvent<any>) => {
-					switch (event.type) {
-						case HttpEventType.Response:
-							expect(event.body).toEqual(mockUsers);
-					}
-				});
-
-				const mockReq = httpTestingController.expectOne(service.url);
-				expect(mockReq.cancelled).toBeFalsy();
-				expect(mockReq.request.responseType).toEqual(\'json\');
-				mockReq.flush(mockUsers);
-			});
-		 */
 
 		return template;
 	}

@@ -170,54 +170,6 @@ class ConvertService {
 				ts.addFunction(ComboTest.services(_func, '\t\t'));
 				ts.addFunction('});\n');
 			}
-
-			// if ((isGetter || isSetter) && !isObservable) {
-			// 	// warn('getter/setter');
-			// 	if (isGetter) {
-			// 		mute('use getter test with return value "${_func.returnValue.type}"');
-			// 		ts.addFunction('// check if this deprecated getter is better then the test based upon return value');
-			// 		ts.addFunction('/**');
-			// 		ts.addFunction(createTestGetter(_func));
-			// 		ts.addFunction('*/');
-			// 	}
-			// 	if (isSetter) {
-			// 		mute('use setter test with return value "${_func.returnValue.type}"');
-			// 		ts.addFunction('// check if this deprecated setter is better then the test based upon return value');
-			// 		ts.addFunction('/**');
-			// 		ts.addFunction(createTestSetter(_func));
-			// 		ts.addFunction('*/');
-			// 	}
-			// }
-			// if (isReturnArray) {
-			// 	// warn('array');
-			// 	mute('use test with return value "${_func.returnValue.type}"');
-			// 	ts.addFunction(createTestArray(_func));
-			// } else {
-			// 	// warn('return type');
-			// 	// warn(_func.returnValue);
-			// 	// trace(_func.returnValue.type, _func.name);
-			// 	switch (_func.returnValue.type) {
-			// 		case 'void':
-			// 			mute('use test with return value "void"');
-			// 			ts.addFunction(createTestvoid(_func));
-			// 		case 'string', 'string | undefined':
-			// 			mute('use test with return value "string"');
-			// 			ts.addFunction(createTestString(_func));
-			// 		case 'Observable':
-			// 			mute('use test with return value "Observable"');
-			// 			ts.addFunction(createTestObservable(_func));
-			// 		case 'boolean', 'Boolean':
-			// 			mute('use test with return value "boolean"');
-			// 			ts.addFunction(createTestboolean(_func));
-			// 		case 'number':
-			// 			mute('use test with return value "number"');
-			// 			ts.addFunction(createTestNumber(_func));
-			// 		default:
-			// 			warn("case '" + _func.returnValue.type + "': mute('use test with return value \"" + _func.returnValue.type
-			// 				+ "\"'); ts.addFunction(createTest" + _func.returnValue.type + "(_func));");
-			// 			ts.addFunction(createTestUnknown(_func));
-			// 	}
-			// }
 		}
 
 		// -----------------------------------------------------------

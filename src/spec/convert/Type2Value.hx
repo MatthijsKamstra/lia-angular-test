@@ -1,7 +1,7 @@
 package spec.convert;
 
-import AST.VarObj;
 import AST.FuncObj;
+import AST.VarObj;
 import utils.GenValues;
 
 class Type2Value {
@@ -61,7 +61,7 @@ class Type2Value {
 			default:
 				// SPEC_CONST.getValue(IHELP)
 				out = 'SPEC_CONST.getValue(${type.toUpperCase()}); // {}';
-				trace("case '" + type + "': trace ('" + type + "');");
+				// trace("case '" + type + "': trace ('" + type + "');");
 		}
 		return out;
 	}
